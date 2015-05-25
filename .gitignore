@@ -1,8 +1,2 @@
-bin/*
-build/*
-deploy/*
-obj/*
-tmp/*
-sandbox/*
-dump/*
-*.hxproj
+/*
+!src/

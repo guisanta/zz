@@ -1,100 +1,158 @@
 /*
- *                            _/                                                    _/
- *       _/_/_/      _/_/    _/  _/    _/    _/_/_/    _/_/    _/_/_/      _/_/_/  _/
- *      _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *     _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *    _/_/_/      _/_/    _/    _/_/_/    _/_/_/    _/_/    _/    _/    _/_/_/  _/
- *   _/                            _/        _/
- *  _/                        _/_/      _/_/
- *
- * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
- * Copyright (c) 2012 Michael Baczynski, http://www.polygonal.de
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 package de.polygonal.zz.scene;
 
+import de.polygonal.core.math.Aabb2;
+import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Rect;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.motor.geom.inside.PointInsideAABB;
-import de.polygonal.zz.scene.Geometry.VertexFormat;
+import de.polygonal.motor.geom.containment.PointInsideAabb2;
+import de.polygonal.zz.scene.BoxBv;
+import de.polygonal.zz.scene.Bv.BvType;
 
 /**
- * A quad face.
- */
-class Quad extends TriMesh
-{
-	var _scratchVec3:Vec3;
+	A Quad represents a rectangle made of two triangles.
 	
-	public function new(w = 1., h = 1., offset = 0.)
+	By default, vertices are in the range [0,1].
+	<pre>
+	0      1
+	+------+
+	|013  /|
+	|    / |
+	| /    |
+	|/  123|
+	+------+
+	3      2
+	</pre>
+**/
+class Quad extends Visual
+{
+	inline public static var TYPE = 1;
+	
+	public static var mScratchCoord = new Coord2f();
+	
+	public static var getBvTypeFunc:Void->BvType = null;
+	
+	public function new(?name:String)
 	{
-		// 0      1
-		// +------+
-		// |013  /|
-		// |    / |
-		// |   /  |
-		// |  /   |
-		// | /    |
-		// |/  123|
-		// +------+
-		// 3      2
-		
-		//TODO shared vertices and indices
-		//var key = Printf.format('%s.%s.%s', [offset, w, h]);
-		var vertices =
-		[
-			new Vec3(0 + offset, 0 + offset),
-			new Vec3(w + offset, 0 + offset),
-			new Vec3(w + offset, h + offset),
-			new Vec3(0 + offset, h + offset)
-		];
-		
-		var indices = [0, 1, 3, 1, 2, 3];
-		
-		super(vertices, indices, false);
-		
-		type = GeometryType.QUAD;
-		vertexFormat = VertexFormat.FLOAT2;
-		
-		_scratchVec3 = new Vec3();
-		
-		updateModelBound();
+		super(name);
+		type = TYPE;
 	}
 	
-	override public function pick(origin:Vec3, result:PickResult):Int
+	/**
+		Note: only returns valid results if world bound is up-to-date.
+	**/
+	override public function pick(point:Coord2f, ?result:PickResult):Int
 	{
-		if (worldBound.contains(origin))
-		{
-			var model = _scratchVec3;
-			world.applyInverse2(origin, model);
-			if (PointInsideAABB.test6(model.x, model.y, 0, 0, 1, 1)) //TODO take w and h into account
-			{
-				result.add(this);
-				return 1;
-			}
-		}
+		if (!worldBound.contains(point)) return 0;
 		
+		var model = mScratchCoord;
+		model.set(0, 0);
+		world.applyInverse2(point, model);
+		if (PointInsideAabb2.test6(model.x, model.y, 0, 0, 1, 1))
+		{
+			if (result != null) result.add(this);
+			return 1;
+		}
 		return 0;
 	}
 	
-	//TODO optimize?
-	//override function updateModelBound():Void
-	//{
-		//compute model bounding volume from vertices
-		//modelBound.computeFromData(vertices);
-	//}
+	override public function getBoundingBox(targetSpace:Spatial, output:Aabb2):Aabb2
+	{
+		if (this == targetSpace)
+		{
+			output.x = 0;
+			output.y = 0;
+			output.w = 1;
+			output.h = 1;
+			return output;
+		}
+		
+		var c = mScratchCoord;
+		
+		var w0 = world;
+		var w1 = targetSpace.world;
+		
+		c.set(0, 0);
+		w0.applyForward2(c, c);
+		w1.applyInverse2(c, c);
+		
+		var minX = c.x;
+		var minY = c.y;
+		var maxX = c.x;
+		var maxY = c.y;
+		
+		inline function minMax(c)
+		{
+			if (c.x < minX) minX = c.x;
+			else
+			if (c.x > maxX) maxX = c.x;
+			
+			if (c.y < minY) minY = c.y;
+			else
+			if (c.y > maxY) maxY = c.y;
+		}
+		
+		c.set(1, 0);
+		w0.applyForward2(c, c);
+		w1.applyInverse2(c, c);
+		minMax(c);
+		
+		c.set(1, 1);
+		w0.applyForward2(c, c);
+		w1.applyInverse2(c, c);
+		minMax(c);
+		
+		c.set(0, 1);
+		w0.applyForward2(c, c);
+		w1.applyInverse2(c, c);
+		minMax(c);
+		
+		output.x = minX;
+		output.y = minY;
+		output.w = maxX - minX;
+		output.h = maxY - minY;
+		
+		return output;
+	}
+	
+	override function updateModelBound()
+	{
+		modelBound.center.x = .5;
+		modelBound.center.y = .5;
+		modelBound.radius = Math.sqrt(.5);
+		switch (modelBound.type)
+		{
+			case BvType.Box:
+				var o:BoxBv = cast modelBound;
+				o.minX = 0;
+				o.minY = 0;
+				o.maxX = 1;
+				o.maxY = 1;
+			
+			case _:
+		}
+	}
+	
+	override function getBvType():BvType
+	{
+		if (getBvTypeFunc != null) return getBvTypeFunc();
+		return super.getBvType();
+	}
 }

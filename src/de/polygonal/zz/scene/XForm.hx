@@ -1,480 +1,560 @@
 /*
- *                            _/                                                    _/
- *       _/_/_/      _/_/    _/  _/    _/    _/_/_/    _/_/    _/_/_/      _/_/_/  _/
- *      _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *     _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *    _/_/_/      _/_/    _/    _/_/_/    _/_/_/    _/_/    _/    _/    _/_/_/  _/
- *   _/                            _/        _/
- *  _/                        _/_/      _/_/
- *
- * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
- * Copyright (c) 2012 Michael Baczynski, http://www.polygonal.de
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * 
- * Based on Wm3Transformation class from the Wild Magic Library (WM3)
- * Geometric Tools, Inc.
- * http://www.geometrictools.com
- * Copyright (c) 1998-2006.  All Rights Reserved
- * 
- * The Wild Magic Library (WM3) source code is supplied under the terms of
- * the license agreement
- *     http://www.geometrictools.com/License/WildMagic3License.pdf
- * and may not be copied or disclosed except in accordance with the terms
- * of that agreement. 
- */
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Geometric Tools, LLC
+Copyright (c) 1998-2012
+Distributed under the Boost Software License, Version 1.0.
+http://www.boost.org/LICENSE_1_0.txt
+http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
+*/
 package de.polygonal.zz.scene;
 
+import de.polygonal.core.math.Coord2;
 import de.polygonal.core.math.Mat33;
+import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.ds.Bits;
-import de.polygonal.core.util.Assert;
-
-using de.polygonal.ds.BitFlags;
+import de.polygonal.core.util.Assert.assert;
+import haxe.ds.Vector;
 
 /**
- * <p>Represents an affine transformation Y = M*X+T where M is a 3x3 matrix and T is a translation vector.</p>
- * <ul>
- * <li>The vector X is transformed in the "forward" direction to Y.</li>
- * <li>The "inverse" direction transforms Y to X (X = M^{-1}*(Y-T) in the general case).</li>
- * <li>When M = R*S, the inverse direction is X = S^{-1}*R^t*(Y-T).</li>
- * <li>In most cases, M = R, a rotation matrix, or M = R*S where R is a rotation matrix and S is a diagonal matrix whose diagonal entries are positive scales.</li>
- * </p>
- */
-@:build(de.polygonal.core.util.IntEnum.build(
-[
-	BIT_HINT_IDENTITY,
-	BIT_HINT_RS_MATRIX,
-	BIT_HINT_UNIFORM_SCALE,
-	BIT_HINT_UNIT_SCALE
-], true))
-class XForm
-{
-	static var _sharedScratchMatrix1:Mat33 = null;
-	static var _sharedScratchMatrix2:Mat33 = null;
+	Represents an affine transformation Y = M*X+T where M is a 3x3 matrix and T is a translation vector.
 	
-	var _scale:Vec3;
-	var _translate:Vec3;
-	var _matrix:Mat33;
-	var _scratchMatrix1:Mat33;
-	var _scratchMatrix2:Mat33;
-	var _bits:Int;
+	- to support general affine transforms, M can be any invertible 3x3 matrix.
+	- the vector X is transformed in the "forward" direction to Y.
+	- the "inverse" direction transforms Y to X (X = M^{-1}*(Y-T) in the general case.
+	- when M = R*S, the inverse direction is X = S^{-1}*R^{T}*(Y-T).
+	- in most cases, M = R, a rotation matrix, or M = R*S where R is a rotation matrix and S is a diagonal matrix whose diagonal entries are positive scales.
+	- all set* functions set the is-identity hint to false.
+	- setRotate() sets the is-rsmatrix hint to true. If false, getRotate() fires an "assert" in debug mode.
+	- setMatrix() sets the is-rsmatrix and is-uniform-scale hints to false.
+	- setScale() sets the is-uniform-scale hint to false.
+	- setUniformScale() sets the is-uniform-scale hint to true. If false, getUniformScale() fires an "assert" in debug mode.
+**/
+@:build(de.polygonal.core.macro.IntConsts.build(
+[
+	HINT_IDENTITY, HINT_RS_MATRIX, HINT_UNIFORM_SCALE, HINT_IDENTITY_ROTATION, HINT_HMATRIX_DIRTY, HINT_INVERSE_DIRTY
+], true, false))
+@:access(de.polygonal.zz.scene.Node)
+class Xform
+{
+	static var mTmpMat1 = new Mat33();
+	static var mTmpMat2 = new Mat33();
+	
+	var mScale:Vec3;
+	var mMatrix:Mat33;
+	var mTranslate:Vec3;
+	var mHints:Int;
 	
 	public function new()
 	{
-		_scale = new Vec3();
-		_translate = new Vec3();
-		_matrix = new Mat33();
-		
-		if (_sharedScratchMatrix1 == null)
-		{
-			_sharedScratchMatrix1 = new Mat33();
-			_sharedScratchMatrix2 = new Mat33();
-		}
-		
-		_scratchMatrix1 = _sharedScratchMatrix1;
-		_scratchMatrix2 = _sharedScratchMatrix2;
-		
+		mScale = new Vec3(1, 1, 1);
+		mTranslate = new Vec3(0, 0, 0);
+		mMatrix = new Mat33();
+		mHints = HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE;
 		setIdentity();
 	}
 	
-	public function free():Void
+	public function free()
 	{
-		_scale = null;
-		_translate = null;
-		_matrix = null;
-		_scratchMatrix1 = null;
-		_scratchMatrix2 = null;
+		mScale = null;
+		mTranslate = null;
+		mMatrix = null;
 	}
 	
-	inline public function isIdentity():Bool
-	{
-		return hasf(BIT_HINT_IDENTITY);
-	}
+	/**
+		Hint about the structure of the transformation.
+		Returns true if transformation defines I.
+	**/
+	inline public function isIdentity():Bool return mHints & HINT_IDENTITY > 0;
 	
-	inline public function isRSMatrix():Bool
-	{
-		return hasf(BIT_HINT_RS_MATRIX);
-	}
+	/**
+		Hint about the structure of the transformation.
+		Returns true if transformation defines R*S.
+	**/
+	inline public function isRSMatrix():Bool return mHints & HINT_RS_MATRIX > 0;
 	
-	inline public function isUniformScale():Bool
-	{
-		return hasf(BIT_HINT_UNIFORM_SCALE);
-	}
+	/**
+		Hint about the structure of the transformation.
+		Returns true if transformation defines R*S, S = c*I.
+	**/
+	inline public function isUniformScale():Bool return mHints & HINT_UNIFORM_SCALE > 0;
 	
-	inline public function isUnitScale():Bool
-	{
-		return hasf(BIT_HINT_UNIT_SCALE);
-	}
+	/**
+		Hint about the structure of the transformation.
+		Returns true if R = I.
+	**/
+	inline public function isIdentityRotation():Bool return mHints & HINT_IDENTITY_ROTATION > 0;
 	
 	inline public function getScale():Vec3
 	{
-		#if debug
-		D.assert(isRSMatrix());
-		#end
-		
-		return _scale;
+		assert(isRSMatrix(), "matrix is not a rotation-scale");
+		return mScale;
 	}
 	
-	inline public function getTranslate():Vec3
+	inline public function setScale(x:Float, y:Float, z:Float)
 	{
-		return _translate;
+		assert(isRSMatrix(), "matrix is not a rotation");
+		assert(x != 0 && y != 0 && z != 0, "scales must be non-zero");
+		mScale.x = x;
+		mScale.y = y;
+		mScale.z = z;
+		mHints &= ~(HINT_IDENTITY | HINT_UNIFORM_SCALE);
+		mHints |= HINT_HMATRIX_DIRTY;
 	}
 	
-	inline public function getRotate():Mat33
+	inline public function setScale2(x:Float, y:Float)
 	{
-		#if debug
-		D.assert(isRSMatrix());
-		#end
-		
-		return _matrix;
-	}
-	
-	inline public function getMatrix():Mat33
-	{
-		return _matrix;
+		assert(isRSMatrix(), "matrix is not a rotation");
+		assert(x != 0 && y != 0, "scales must be non-zero");
+		mScale.x = x;
+		mScale.y = y;
+		mHints &= ~(HINT_IDENTITY | HINT_UNIFORM_SCALE);
+		mHints |= HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function getUniformScale():Float
 	{
-		#if debug
-		D.assert(incf(BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE));
-		#end
+		assert(isRSMatrix(), "matrix is not a rotation-scale");
+		assert(isUniformScale(), "scales are not uniform");
+		return mScale.x;
+	}
+	
+	inline public function setUniformScale(scale:Float)
+	{
+		assert(isRSMatrix(), "matrix is not a rotation");
+		assert(scale != 0, "scale must be non-zero");
+		mScale.x = mScale.y = mScale.z = scale;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+	}
+	
+	inline public function setUniformScale2(scale:Float)
+	{
+		assert(isRSMatrix(), "matrix is not a rotation");
+		assert(scale != 0, "scale must be non-zero");
+		mScale.x = mScale.y = scale;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+	}
+	
+	inline public function getRotate():Mat33
+	{
+		assert(isRSMatrix(), "matrix is not a rotation");
+		return mMatrix;
+	}
+	
+	inline public function setRotate(rotate:Mat33)
+	{
+		if (mMatrix != rotate) mMatrix.of(rotate);
+		mHints &= ~(HINT_IDENTITY | HINT_IDENTITY_ROTATION);
+		mHints |= (HINT_RS_MATRIX | HINT_HMATRIX_DIRTY);
+	}
+	
+	inline public function setIdentityRotation()
+	{
+		mMatrix.setIdentity();
+		mHints |= (HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_HMATRIX_DIRTY);
+	}
+	
+	inline public function getMatrix():Mat33
+	{
+		return mMatrix;
+	}
+	
+	inline public function setMatrix(matrix:Mat33)
+	{
+		mMatrix.of(matrix);
+		mHints &= ~(HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIFORM_SCALE);
+		mHints |= HINT_HMATRIX_DIRTY;
+	}
+	
+	inline public function getTranslate():Vec3
+	{
+		return mTranslate;
+	}
+	
+	inline public function setTranslate(x:Float, y:Float, z:Float)
+	{
+		mTranslate.x = x;
+		mTranslate.y = y;
+		mTranslate.z = z;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= HINT_HMATRIX_DIRTY;
+	}
+	
+	inline public function setTranslate2(x:Float, y:Float)
+	{
+		mTranslate.x = x;
+		mTranslate.y = y;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= HINT_HMATRIX_DIRTY;
+	}
+	
+	inline public function of(other:Xform):Xform
+	{
+		mTranslate.of(other.mTranslate);
+		mScale.of(other.mScale);
+		mMatrix.of(other.mMatrix);
+		mHints = other.mHints | HINT_HMATRIX_DIRTY;
+		return this;
+	}
+	
+	inline public function of2(other:Xform):Xform
+	{
+		mTranslate.x = other.mTranslate.x;
+		mTranslate.y = other.mTranslate.y;
 		
-		return _scale.x;
+		mScale.x = other.mScale.x;
+		mScale.y = other.mScale.y;
+		
+		var m = mMatrix;
+		var o = other.mMatrix;
+		m.m11 = o.m11; m.m12 = o.m12;
+		m.m21 = o.m21; m.m22 = o.m22;
+		
+		mHints = other.mHints | HINT_HMATRIX_DIRTY;
+		return this;
 	}
 	
-	inline public function setIdentity():Void
+	inline public function setIdentity()
 	{
-		_matrix.setIdentity();
-		_translate.zero();
-		_scale.x = 1;
-		_scale.y = 1;
-		_scale.z = 1;
-		setf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
+		mMatrix.setIdentity();
+		mTranslate.zero();
+		mScale.x = 1;
+		mScale.y = 1;
+		mScale.z = 1;
+		mHints |= (HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
 	}
-	
-	inline public function setIdentity2():Void
+	inline public function setIdentity2()
 	{
-		var m = _matrix;
+		var m = mMatrix;
 		m.m11 = 1; m.m12 = 0;
 		m.m21 = 0; m.m22 = 1;
-		_translate.x = 0;
-		_translate.y = 0;
-		_scale.x = 1;
-		_scale.y = 1;
-		setf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
+		mTranslate.x = 0;
+		mTranslate.y = 0;
+		mScale.x = 1;
+		mScale.y = 1;
+		mHints |= (HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
 	}
 	
-	inline public function setScale(x:Float, y:Float, z:Float):XForm
+	inline public function setUnitScale()
 	{
-		#if debug
-		D.assert(isRSMatrix());
-		D.assert(x != 0 && y != 0 && z != 0);
-		#end
+		assert(mHints & HINT_RS_MATRIX > 0, "matrix is not a rotation");
+		mScale.x = 1;
+		mScale.y = 1;
+		mScale.z = 1;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+	}
+	
+	inline public function setUnitScale2()
+	{
+		assert(mHints & HINT_RS_MATRIX > 0, "matrix is not a rotation");
+		mScale.x = 1;
+		mScale.y = 1;
+		mHints &= ~HINT_IDENTITY;
+		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+	}
+	
+	/**
+		 Matrix-matrix multiplication; returns this = `a` * `b`.
+	**/
+	public function setProduct(a:Xform, b:Xform):Xform
+	{
+		if (a.isIdentity())
+		{
+			of(b);
+			return this;
+		}
+		if (b.isIdentity())
+		{
+			of(a);
+			return this;
+		}
 		
-		_scale.x = x;
-		_scale.y = y;
-		_scale.z = z;
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	inline public function setScale2(x:Float, y:Float):XForm
-	{
-		#if debug
-		D.assert(isRSMatrix());
-		D.assert(x != 0 && y != 0);
-		#end
+		mHints = HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 		
-		_scale.x = x;
-		_scale.y = y;
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	inline public function setUniformScale(x:Float):XForm
-	{
-		#if debug
-		D.assert(x != 0);
-		D.assert(isRSMatrix());
-		#end
+		//both transformations are M = R*S, so matrix can be written as R*S*X + T
+		if (a.isRSMatrix() && b.isRSMatrix())
+		{
+			if (a.isUniformScale())
+			{
+				//R: rA * rB
+				if (a.isIdentityRotation())
+					mMatrix.of(b.mMatrix);
+				else
+				if (b.isIdentityRotation())
+					mMatrix.of(a.mMatrix);
+				else
+					Mat33.matrixProduct(a.mMatrix, b.mMatrix, mMatrix);
+				
+				//T: sA * (rA * tB) + tA
+				var t = mTranslate;
+				var ta = a.mTranslate;
+				if (a.isIdentityRotation())
+					t.of(b.mTranslate);
+				else
+					a.mMatrix.timesVectorConst(b.mTranslate, t);
+				var sa = a.getUniformScale();
+				t.x = t.x * sa + ta.x;
+				t.y = t.y * sa + ta.y;
+				t.z = t.z * sa + ta.z;
+				
+				//S: sA * sB
+				if (b.isUniformScale())
+					setUniformScale(sa * b.getUniformScale());
+				else
+				{
+					var sb = b.getScale();
+					setScale(sa * sb.x, sa * sb.y, sa * sb.z);
+				}
+				return this;
+			}
+		}
 		
-		_scale.x = x;
-		_scale.y = x;
-		_scale.z = x;
-		clrf(BIT_HINT_IDENTITY);
-		setf(BIT_HINT_UNIFORM_SCALE);
-		setfif(BIT_HINT_UNIT_SCALE, x == 1);
-		return this;
-	}
-	
-	inline public function setUniformScale2(x:Float):XForm
-	{
-		#if debug
-		D.assert(x != 0);
-		D.assert(isRSMatrix());
-		#end
+		//the matrix cannot be written as R*S*X+T.
 		
-		_scale.x = x;
-		_scale.y = x;
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_UNIT_SCALE);
-		setf(BIT_HINT_UNIFORM_SCALE);
-		setfif(BIT_HINT_UNIT_SCALE, x == 1);
-		return this;
-	}
-	
-	inline public function setUnitScale():XForm
-	{
-		#if debug
-		D.assert(hasf(BIT_HINT_RS_MATRIX));
-		#end
+		//TODO check if a or b is R=I
+		if (a.isRSMatrix() && a.isIdentityRotation())
+		{
+			trace("A: R=I");
+		}
 		
-		_scale.x = 1;
-		_scale.y = 1;
-		_scale.z = 1;
-		clrf(BIT_HINT_IDENTITY);
-		setf(BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	inline public function setUnitScale2():XForm
-	{
-		#if debug
-		D.assert(hasf(BIT_HINT_RS_MATRIX));
-		#end
+		if (b.isRSMatrix() && b.isIdentityRotation())
+		{
+			trace("B: R=I");
+		}
 		
-		_scale.x = 1;
-		_scale.y = 1;
-		clrf(BIT_HINT_IDENTITY);
-		setf(BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
+		//M: mA * mB
+		var ma = (a.isRSMatrix()) ? (a.mMatrix.timesDiagonalConst(a.mScale, mTmpMat1)) : a.mMatrix;
+		var mb = (b.isRSMatrix()) ? (b.mMatrix.timesDiagonalConst(b.mScale, mTmpMat2)) : b.mMatrix;
+		Mat33.matrixProduct(ma, mb, mMatrix);
+		
+		//T: mA * tB + tA
+		var t = mTranslate;
+		ma.timesVectorConst(b.mTranslate, t);
+		var ta = a.mTranslate;
+		t.x += ta.x;
+		t.y += ta.y;
+		t.z += ta.z;
+		
+		//set hints manually as we skip calling setMatrix() or setTranslate()
+		mHints &= ~(HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE);
 		return this;
 	}
 	
-	inline public function setTranslate(x:Float, y:Float, z:Float):XForm
+	public function setProduct2(a:Xform, b:Xform):Xform
 	{
-		_translate.x = x;
-		_translate.y = y;
-		_translate.z = z;
-		clrf(BIT_HINT_IDENTITY);
-		return this;
-	}
-	
-	inline public function setTranslate2(x:Float, y:Float):XForm
-	{
-		_translate.x = x;
-		_translate.y = y;
-		clrf(BIT_HINT_IDENTITY);
-		return this;
-	}
-	
-	inline public function setRotate(x:Mat33):XForm
-	{
-		_matrix.set(x);
-		clrf(BIT_HINT_IDENTITY);
-		setf(BIT_HINT_RS_MATRIX);
-		return this;
-	}
-	
-	inline public function setRotate2(x:Mat33):XForm
-	{
-		var m = _matrix;
-		m.m11 = x.m11; m.m12 = x.m12;
-		m.m21 = x.m21; m.m22 = x.m22;
-		clrf(BIT_HINT_IDENTITY);
-		setf(BIT_HINT_RS_MATRIX);
-		return this;
-	}
-	
-	inline public function setMatrix(x:Mat33):XForm
-	{
-		_matrix.set(x);
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	inline public function setMatrix2(x:Mat33):XForm
-	{
-		var m = _matrix;
-		m.m11 = x.m11; m.m12 = x.m12;
-		m.m21 = x.m21; m.m22 = x.m22;
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	inline public function set(other:XForm):XForm
-	{
-		_translate.set(other._translate);
-		_scale.set(other._scale);
-		_matrix.set(other._matrix);
-		cpyf(other);
-		return this;
-	}
-	
-	inline public function set2(other:XForm):XForm
-	{
-		var t = other._translate;
-		_translate.x = t.x;
-		_translate.y = t.y;
-		t = other._scale;
-		_scale.x = t.x;
-		_scale.y = t.y;
-		var t = other._matrix;
-		var m = _matrix;
-		m.m11 = t.m11; m.m12 = t.m12;
-		m.m21 = t.m21; m.m22 = t.m22;
-		cpyf(other);
+		if (a.isIdentity())
+		{
+			of2(b);
+			return this;
+		}
+		if (b.isIdentity())
+		{
+			of2(a);
+			return this;
+		}
+		
+		mHints = HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
+		
+		var m, ma, mb, x, y, t, t1, t2, ta, sa, sb;
+		var b11, b12;
+		var b21, b22;
+		
+		//both transformations are M = R*S, so matrix can be written as R*S*X + T
+		if (a.isRSMatrix() && b.isRSMatrix())
+		{
+			if (a.isUniformScale())
+			{
+				m = mMatrix;
+				
+				//R: rA * rB
+				if (a.isIdentityRotation())
+				{
+					mb = b.mMatrix;
+					m.m11 = mb.m11; m.m12 = mb.m12;
+					m.m21 = mb.m21; m.m22 = mb.m22;
+					
+					if (b.isIdentityRotation()) mHints |= HINT_IDENTITY_ROTATION;
+				}
+				else
+				if (b.isIdentityRotation())
+				{
+					ma = a.mMatrix;
+					m.m11 = ma.m11; m.m12 = ma.m12;
+					m.m21 = ma.m21; m.m22 = ma.m22;
+					
+					setRotate(m);
+				}
+				else
+				{
+					ma = a.mMatrix;
+					mb = b.mMatrix;
+					
+					b11 = mb.m11; b12 = mb.m12;
+					b21 = mb.m21; b22 = mb.m22;
+					t1 = ma.m11;
+					t2 = ma.m12;
+					m.m11 = t1 * b11 + t2 * b21;
+					m.m12 = t1 * b12 + t2 * b22;
+					t1 = ma.m21;
+					t2 = ma.m22;
+					m.m21 = t1 * b11 + t2 * b21;
+					m.m22 = t1 * b12 + t2 * b22;
+					
+					setRotate(m);
+				}
+				
+				//T: sA * (rA * tB) + tA
+				t = mTranslate;
+				ta = a.mTranslate;
+				if (a.isIdentityRotation())
+				{
+					t.x = b.mTranslate.x;
+					t.y = b.mTranslate.y;
+				}
+				else
+				{
+					x = b.mTranslate.x;
+					y = b.mTranslate.y;
+					m = a.mMatrix;
+					t.x = m.m11 * x + m.m12 * y;
+					t.y = m.m21 * x + m.m22 * y;
+				}
+				
+				sa = a.getUniformScale();
+				t.x = t.x * sa + ta.x;
+				t.y = t.y * sa + ta.y;
+				
+				//S: sA * sB
+				if (b.isUniformScale())
+					setUniformScale2(sa * b.getUniformScale());
+				else
+				{
+					sb = b.getScale();
+					setScale2(sa * sb.x, sa * sb.y);
+				}
+				return this;
+			}
+		}
+		
+		//the matrix cannot be written as R*S*X+T.
+		
+		//M: mA * mB
+		ma = a.mMatrix;
+		if (a.isRSMatrix())
+		{
+			ma = mTmpMat1;
+			x = a.mScale.x;
+			y = a.mScale.y;
+			m = a.mMatrix;
+			ma.m11 = m.m11 * x; ma.m12 = m.m12 * y;
+			ma.m21 = m.m21 * x; ma.m22 = m.m22 * y;
+		}
+		
+		mb = b.mMatrix;
+		if (b.isRSMatrix())
+		{
+			ma = mTmpMat2;
+			x = b.mScale.x;
+			y = b.mScale.y;
+			m = b.mMatrix;
+			mb.m11 = m.m11 * x; mb.m12 = m.m12 * y;
+			mb.m21 = m.m21 * x; mb.m22 = m.m22 * y;
+		}
+		
+		m = mMatrix;
+		b11 = mb.m11; b12 = mb.m12;
+		b21 = mb.m21; b22 = mb.m22;
+		t1 = ma.m11;
+		t2 = ma.m12;
+		m.m11 = t1 * b11 + t2 * b21;
+		m.m12 = t1 * b12 + t2 * b22;
+		t1 = ma.m21;
+		t2 = ma.m22;
+		m.m21 = t1 * b11 + t2 * b21;
+		m.m22 = t1 * b12 + t2 * b22;
+		
+		//T: mA * tB + tA
+		t = mTranslate;
+		x = b.mTranslate.x;
+		y = b.mTranslate.y;
+		t.x = ma.m11 * x + ma.m12 * y;
+		t.y = ma.m21 * x + ma.m22 * y;
+		
+		ta = a.mTranslate;
+		t.x += ta.x;
+		t.y += ta.y;
+		
+		//set hints manually as we skip calling setMatrix() or setTranslate()
+		mHints &= ~(HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE);
+		
+		mHints |= HINT_HMATRIX_DIRTY;
+		
 		return this;
 	}
 	
 	/**
-	 * Computes Y = M*X+T where X is = <code>input</code> and Y = <code>output</code>.
-	 */
+		Computes Y = RSX + T where X equals `input` and Y `equals` output.
+		
+		_Note: `input` and `output` can point to the same object._
+	**/
 	public function applyForward(input:Vec3, output:Vec3):Vec3
 	{
 		if (isIdentity())
 		{
 			//Y = X
-			output.set(input);
+			output.of(input);
 		}
 		else
 		if (isRSMatrix())
 		{
-			if (isUnitScale())
-			{
-				//Y = R*X + T
-				output.x = input.x;
-				output.y = input.y;
-				output.z = input.z;
-			}
-			else
-			{
-				//Y = R*S*X + T
-				var t = _scale;
-				output.x = input.x * t.x;
-				output.y = input.y * t.y;
-				output.z = input.z * t.z;
-			}
+			//Y = R*S*X + T
+			output.x = input.x * mScale.x;
+			output.y = input.y * mScale.y;
+			output.z = input.z * mScale.z;
 			
-			_matrix.timesVector(output);
-			var t = _translate;
-			output.x += t.x;
-			output.y += t.y;
-			output.z += t.z;
+			if (!isIdentityRotation())
+				mMatrix.timesVector(output);
 			
+			output.x += mTranslate.x;
+			output.y += mTranslate.y;
+			output.z += mTranslate.z;
 		}
 		else
 		{
 			//Y = M*X + T
-			output.set(input);
-			_matrix.timesVector(output);
-			var t = _translate;
-			output.x += t.x;
-			output.y += t.y;
-			output.z += t.z;
-		}
-		
-		return output;
-	}
-	
-	public function applyForwardArr(input:Array<Vec3>, output:Array<Vec3>, count:Int):Array<Vec3>
-	{
-		if (isIdentity())
-		{
-			//Y = X
-			for (i in 0...count)
-				output[i].set(input[i]);
-		}
-		else
-		if (isRSMatrix())
-		{
-			var inp:Vec3, out:Vec3, t:Vec3, tx:Float, ty:Float, tz:Float;
-			if (isUnitScale())
-			{
-				//Y = R*X + T
-				for (i in 0...count)
-				{
-					out = output[i];
-					inp = input[i];
-					out.x = inp.x;
-					out.y = inp.y;
-					out.z = inp.z;
-				}
-			}
-			else
-			{
-				//Y = R*S*X + T
-				t = _scale;
-				tx = t.x;
-				ty = t.y;
-				tz = t.z;
-				for (i in 0...count)
-				{
-					out = output[i];
-					inp = input[i];
-					out.x = inp.x * tx;
-					out.y = inp.y * ty;
-					out.z = inp.z * tz;
-				}
-			}
-			
-			t = _translate;
-			tx = t.x;
-			ty = t.y;
-			tz = t.z;
-			for (i in 0...count)
-			{
-				out = output[i];
-				_matrix.timesVector(out);
-				out.x += tx;
-				out.y += ty;
-				out.z += tz;
-			}
-		}
-		else
-		{
-			//Y = M*X + T
-			var out:Vec3, tmp:Vec3, tx:Float, ty:Float, tz:Float;
-			var t = _translate;
-			tx = t.x;
-			ty = t.y;
-			tz = t.z;
-			for (i in 0...count)
-			{
-				out = output[i];
-				out.set(input[i]);
-				_matrix.timesVector(out);
-				out.x += tx;
-				out.y += ty;
-				out.z += tz;
-			}
+			output.of(input);
+			mMatrix.timesVector(output);
+			output.x += mTranslate.x;
+			output.y += mTranslate.y;
+			output.z += mTranslate.z;
 		}
 		
 		return output;
 	}
 	
 	/**
-	 * Computes Y = M*X+T where X is = <code>input</code> and Y = <code>output</code>.<br/>
-	 * <warn>In constrast to <em>applyForward()</em>, this method operates in 2d space and ignores <code>input</code>.z.</warn>
-	 */
-	public function applyForward2(input:Vec3, output:Vec3):Vec3
+		Note: `input` and `output` can point to the same object.
+	**/
+	public function applyForward2(input:Coord2f, output:Coord2f):Coord2f
 	{
 		if (isIdentity())
 		{
@@ -485,96 +565,349 @@ class XForm
 		else
 		if (isRSMatrix())
 		{
-			if (isUnitScale())
+			//Y = R*S*X + T
+			var x = input.x * mScale.x;
+			var y = input.y * mScale.y;
+			
+			if (!isIdentityRotation())
 			{
-				//Y = R*X + T
-				var m = _matrix;
-				var x = input.x;
-				var y = input.y;
-				output.x = (m.m11 * x + m.m12 * y) + _translate.x;
-				output.y = (m.m21 * x + m.m22 * y) + _translate.y;
+				var t = x;
+				var m = mMatrix;
+				x = m.m11 * x + m.m12 * y;
+				y = m.m21 * t + m.m22 * y;
 			}
-			else
-			{
-				//Y = R*S*X + T
-				var x = input.x * _scale.x;
-				var y = input.y * _scale.y;
-				var m = _matrix;
-				output.x = (m.m11 * x + m.m12 * y) + _translate.x;
-				output.y = (m.m21 * x + m.m22 * y) + _translate.y;
-			}
+			
+			output.x = x + mTranslate.x;
+			output.y = y + mTranslate.y;
 		}
 		else
 		{
 			//Y = M*X + T
 			var x = input.x;
 			var y = input.y;
-			var m = _matrix;
-			output.x = (m.m11 * x + m.m12 * y) + _translate.x;
-			output.y = (m.m21 * x + m.m22 * y) + _translate.y;
+			var t = x;
+			var m = mMatrix;
+			x = m.m11 * x + m.m12 * y;
+			y = m.m21 * t + m.m22 * y;
+			output.x = x + mTranslate.x;
+			output.y = y + mTranslate.y;
 		}
-		
 		return output;
 	}
 	
-	public function applyForwardArr2(input:Array<Vec3>, output:Array<Vec3>, count:Int):Array<Vec3>
+	/**
+		Same as `applyForward()`, but operates on `numPoints` `input` vectors.
+	**/
+	public function applyForwardBatch(input:Vector<Vec3>, output:Vector<Vec3>, numPoints:Int):Vector<Vec3>
 	{
 		if (isIdentity())
 		{
 			//Y = X
-			for (i in 0...count)
-			{
-				output[i].x = input[i].x;
-				output[i].y = input[i].y;
-			}
+			for (i in 0...numPoints)
+				output[i].of(input[i]);
 		}
 		else
 		if (isRSMatrix())
 		{
-			var m = _matrix;
-			var m11 = m.m11; var m12 = m.m12;
-			var m21 = m.m21; var m22 = m.m22;
-			var tx = _translate.x;
-			var ty = _translate.y;
-			if (isUnitScale())
+			var inp:Vec3, out:Vec3;
+			
+			//Y = R*S*X + T
+			var sx = mScale.x;
+			var sy = mScale.y;
+			var sz = mScale.z;
+			for (i in 0...numPoints)
 			{
-				//Y = R*X + T
-				for (i in 0...count)
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x * sx;
+				out.y = inp.y * sy;
+				out.z = inp.z * sz;
+			}
+			
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var tz = mTranslate.z;
+			
+			if (isIdentityRotation())
+			{
+				for (i in 0...numPoints)
 				{
-					var x = input[i].x;
-					var y = input[i].y;
-					output[i].x = (m11 * x + m12 * y) + tx;
-					output[i].y = (m21 * x + m22 * y) + ty;
+					out = output[i];
+					out.x += tx;
+					out.y += ty;
+					out.z += tz;
 				}
 			}
 			else
 			{
-				var sx = _scale.x;
-				var sy = _scale.y;
-				for (i in 0...count)
+				var m = mMatrix;
+				for (i in 0...numPoints)
 				{
-					//Y = R*S*X + T
-					var x = input[i].x * sx;
-					var y = input[i].y * sy;
-					output[i].x = (m11 * x + m12 * y) + tx;
-					output[i].y = (m21 * x + m22 * y) + ty;
+					out = output[i];
+					m.timesVector(out);
+					out.x += tx;
+					out.y += ty;
+					out.z += tz;
 				}
 			}
 		}
 		else
 		{
 			//Y = M*X + T
-			var m = _matrix;
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var tz = mTranslate.z;
+			var m = mMatrix;
+			for (i in 0...numPoints)
+			{
+				var out = output[i];
+				out.of(input[i]);
+				m.timesVector(out);
+				out.x += tx;
+				out.y += ty;
+				out.z += tz;
+			}
+		}
+		
+		return output;
+	}
+	
+	public function applyForwardBatch2(input:Vector<Vec3>, output:Vector<Vec3>, numPoints:Int):Vector<Vec3>
+	{
+		if (isIdentity())
+		{
+			//Y = X
+			var inp:Vec3, out:Vec3;
+			for (i in 0...numPoints)
+			{
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x;
+				out.y = inp.y;
+			}
+		}
+		else
+		if (isRSMatrix())
+		{
+			var inp:Vec3, out:Vec3;
+			
+			//Y = R*S*X + T
+			var sx = mScale.x;
+			var sy = mScale.y;
+			for (i in 0...numPoints)
+			{
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x * sx;
+				out.y = inp.y * sy;
+			}
+			
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			
+			if (isIdentityRotation())
+			{
+				for (i in 0...numPoints)
+				{
+					out = output[i];
+					out.x += tx;
+					out.y += ty;
+				}
+			}
+			else
+			{
+				var m = mMatrix, t;
+				var m11 = m.m11; var m12 = m.m12;
+				var m21 = m.m21; var m22 = m.m22;
+				
+				for (i in 0...numPoints)
+				{
+					out = output[i];
+					t = out.x;
+					out.x = (m11 * out.x + m12 * out.y) + ty;
+					out.y = (m21 * t     + m22 * out.y) + ty;
+				}
+			}
+		}
+		else
+		{
+			//Y = M*X + T
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var m = mMatrix, t;
 			var m11 = m.m11; var m12 = m.m12;
 			var m21 = m.m21; var m22 = m.m22;
-			var tx = _translate.x;
-			var ty = _translate.y;
-			for (i in 0...count)
+			for (i in 0...numPoints)
 			{
-				var x = input[i].x;
-				var y = input[i].y;
-				output[i].x = (m11 * x + m12 * y) + tx;
-				output[i].y = (m21 * x + m22 * y) + ty;
+				var out = output[i];
+				var inp = input[i];
+				t = inp.x;
+				out.x = (m11 * inp.x + m12 * inp.y) + ty;
+				out.y = (m21 * t     + m22 * inp.y) + ty;
+			}
+		}
+		
+		return output;
+	}
+	
+	public function applyForwardBatchf(input:Vector<Float>, output:Vector<Float>, numPoints:Int):Vector<Float>
+	{
+		if (isIdentity())
+		{
+			//Y = X
+			for (i in 0...numPoints)
+			{
+				var j = i * 3;
+				output[j + 0] = input[j + 0];
+				output[j + 1] = input[j + 1];
+				output[j + 2] = input[j + 2];
+			}
+		}
+		else
+		if (isRSMatrix())
+		{
+			var inp:Vec3, out:Vec3;
+			
+			//Y = R*S*X + T
+			var sx = mScale.x;
+			var sy = mScale.y;
+			var sz = mScale.z;
+			
+			for (i in 0...numPoints)
+			{
+				var j = i * 3;
+				output[j + 0] = input[j + 0] * sx;
+				output[j + 1] = input[j + 1] * sy;
+				output[j + 2] = input[j + 2] * sy;
+			}
+			
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var tz = mTranslate.z;
+			
+			if (isIdentityRotation())
+			{
+				for (i in 0...numPoints)
+				{
+					var j = i * 3;
+					output[j + 0] += tx;
+					output[j + 1] += ty;
+					output[j + 2] += tz;
+				}
+			}
+			else
+			{
+				var m = mMatrix;
+				var m11 = m.m11; var m12 = m.m12; var m13 = m.m13;
+				var m21 = m.m21; var m22 = m.m22; var m23 = m.m23;
+				var m31 = m.m31; var m32 = m.m32; var m33 = m.m33;
+				for (i in 0...numPoints)
+				{
+					var j = i * 3;
+					var x = output[j + 0];
+					var y = output[j + 1];
+					var z = output[j + 2];
+					output[j + 0] = (m11 * x + m12 * y + m13 * z) + tx;
+					output[j + 1] = (m21 * x + m22 * y + m23 * z) + ty;
+					output[j + 2] = (m31 * x + m32 * y + m33 * z) + tz;
+				}
+			}
+		}
+		else
+		{
+			//Y = M*X + T
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var tz = mTranslate.z;
+			var m = mMatrix;
+			var m11 = m.m11; var m12 = m.m12; var m13 = m.m13;
+			var m21 = m.m21; var m22 = m.m22; var m23 = m.m23;
+			var m31 = m.m31; var m32 = m.m32; var m33 = m.m33;
+			for (i in 0...numPoints)
+			{
+				var j = i * 3;
+				var x = input[j + 0];
+				var y = input[j + 1];
+				var z = input[j + 2];
+				output[j + 0] = (m11 * x + m12 * y + m13 * z) + tx;
+				output[j + 1] = (m21 * x + m22 * y + m23 * z) + ty;
+				output[j + 2] = (m31 * x + m32 * y + m33 * z) + tz;
+			}
+		}
+		
+		return output;
+	}
+	
+	public function applyForwardBatchf2(input:Vector<Float>, output:Vector<Float>, offset:Int, numPoints:Int):Vector<Float>
+	{
+		if (isIdentity())
+		{
+			//Y = X
+			for (i in 0...numPoints)
+			{
+				var j = i << 1;
+				output[j + 0] = input[offset + j + 0];
+				output[j + 1] = input[offset + j + 1];
+			}
+		}
+		else
+		if (isRSMatrix())
+		{
+			var inp:Vec3, out:Vec3;
+			
+			//Y = R*S*X + T
+			var sx = mScale.x;
+			var sy = mScale.y;
+			
+			for (i in 0...numPoints)
+			{
+				var j = i << 1;
+				output[j + 0] = input[offset + j + 0] * sx;
+				output[j + 1] = input[offset + j + 1] * sy;
+			}
+			
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			
+			if (isIdentityRotation())
+			{
+				for (i in 0...numPoints)
+				{
+					var j = i << 1;
+					output[j + 0] += tx;
+					output[j + 1] += ty;
+				}
+			}
+			else
+			{
+				var m = mMatrix;
+				var m11 = m.m11; var m12 = m.m12;
+				var m21 = m.m21; var m22 = m.m22;
+				for (i in 0...numPoints)
+				{
+					var j = i << 1;
+					var x = output[j + 0];
+					var y = output[j + 1];
+					output[j + 0] = (m11 * x + m12 * y) + tx;
+					output[j + 1] = (m21 * x + m22 * y) + ty;
+				}
+			}
+		}
+		else
+		{
+			//Y = M*X + T
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var m = mMatrix;
+			var m11 = m.m11; var m12 = m.m12;
+			var m21 = m.m21; var m22 = m.m22;
+			for (i in 0...numPoints)
+			{
+				var j = i << 1;
+				var x = input[offset + j + 0];
+				var y = input[offset + j + 1];
+				output[j + 0] = (m11 * x + m12 * y) + tx;
+				output[j + 1] = (m21 * x + m22 * y) + ty;
 			}
 		}
 		
@@ -582,42 +915,41 @@ class XForm
 	}
 	
 	/**
-	 * Computes X = M^{-1}*(Y-T) where Y = <code>input</code> and X = <code>output</code>.<br/>
-	 * The parameters <code>input</code> and <code>output</code> can point to the same object.
-	 */
+		Compute `X = S^{-1}*R^{T}*(Y - T)` or `X = M^{-1}*(Y - T)` where Y equals input and X equals output.
+	**/
 	public function applyInverse(input:Vec3, output:Vec3):Vec3
 	{
 		if (isIdentity())
 		{
 			//X = Y
-			output.set(input);
+			output.of(input);
 		}
 		else
 		{
-			var t = _translate;
-			output.x = input.x - t.x;
-			output.y = input.y - t.y;
-			output.z = input.z - t.z;
+			output.x = input.x - mTranslate.x;
+			output.y = input.y - mTranslate.y;
+			output.z = input.z - mTranslate.z;
 			
 			if (isRSMatrix())
 			{
-				//X = S^{-1}*R^t*(Y - T)
-				_matrix.vectorTimes(output);
+				//X = S^{-1}*R^{T}*(Y - T)
+				if (!isIdentityRotation())
+					mMatrix.vectorTimes(output);
+				
 				if (isUniformScale())
 					output.scale(1 / getUniformScale());
 				else
 				{
-					t = _scale;
-					output.x /= t.x;
-					output.y /= t.y;
-					output.z /= t.z;
+					output.x /= mScale.x;
+					output.y /= mScale.y;
+					output.z /= mScale.z;
 				}
 			}
 			else
 			{
 				//X = M^{-1}*(Y - T)
-				_matrix.inverseConst(_scratchMatrix1);
-				_scratchMatrix1.timesVector(output);
+				mMatrix.inverseConst(mTmpMat1);
+				mTmpMat1.timesVector(output);
 			}
 		}
 		
@@ -625,11 +957,9 @@ class XForm
 	}
 	
 	/**
-	 * Computes X = M^{-1}*(Y-T) where Y = <code>input</code> and X = <code>output</code>.<br/>
-	 * The parameters <code>input</code> and <code>output</code> can point to the same object.<br/>
-	 * <warn>In contrast to <em>applyInverse()</em>, this method operates in 2d space and ignores <code>input</code>.z.</warn>
-	 */
-	public function applyInverse2(input:Vec3, output:Vec3):Vec3
+		Note: `input` and `output` can point to the same object.
+	**/
+	public function applyInverse2(input:Coord2f, output:Coord2f):Coord2f
 	{
 		if (isIdentity())
 		{
@@ -639,35 +969,187 @@ class XForm
 		}
 		else
 		{
-			var t = _translate;
-			var x = input.x - t.x;
-			var y = input.y - t.y;
+			var x = input.x - mTranslate.x;
+			var y = input.y - mTranslate.y;
 			
 			if (isRSMatrix())
 			{
-				//X = S^{-1}*R^t*(Y - T)
-				//_matrix.vectorTimes(output);
-				var m = _matrix;
-				output.x = (x * m.m11 + y * m.m21) / _scale.x;
-				output.y = (x * m.m12 + y * m.m22) / _scale.y;
+				//X = S^{-1}*R^{T}*(Y - T)
+				if (!isIdentityRotation())
+				{
+					var t = x;
+					var m = mMatrix;
+					x = x * m.m11 + y * m.m21;
+					y = t * m.m12 + y * m.m22;
+				}
+				
+				output.x = x / mScale.x;
+				output.y = y / mScale.y;
 			}
 			else
 			{
 				//X = M^{-1}*(Y - T)
-				var m = _matrix;
-				var t11 = m.m11; var t12 = m.m12;
-				var t21 = m.m21; var t22 = m.m22;
-				var det = t11 * t22 - t12 * t21;
-				if (Mathematics.fabs(det) > Mathematics.ZERO_TOLERANCE)
+				var m = mMatrix;
+				var det = m.m11 * m.m22 - m.m12 * m.m21;
+				assert(!M.cmpZero(det, M.ZERO_TOLERANCE), "singular matrix");
+				var invDet = 1 / det;
+				output.x =  (m.m22 * invDet) * x - (m.m12 * invDet) * y;
+				output.y = -(m.m21 * invDet) * x + (m.m11 * invDet) * y;
+			}
+		}
+		return output;
+	}
+	
+	/**
+		Same as applyInverse(), but operates on numPoints vectors.
+	**/
+	public function applyInverseBatch(input:Vector<Vec3>, output:Vector<Vec3>, numPoints:Int):Vector<Vec3>
+	{
+		if (isIdentity())
+		{
+			for (i in 0...numPoints)
+				output[i].of(input[i]);
+		}
+		else
+		{
+			//X = S^{-1}*R^t*(Y - T)
+			var inp:Vec3, out:Vec3;
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			var tz = mTranslate.z;
+			for (i in 0...numPoints)
+			{
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x - mTranslate.x;
+				out.y = inp.y - mTranslate.y;
+				out.z = inp.z - mTranslate.z;
+			}
+			
+			if (isRSMatrix())
+			{
+				if (!isIdentityRotation())
 				{
-					var invDet = 1 / det;
-					var x = output.x;
-					var y = output.y;
-					output.x = ( t22 * invDet) * x + (-t12 * invDet) * y;
-					output.y = (-t21 * invDet) * x + ( t11 * invDet) * y;
+					for (i in 0...numPoints)
+						mMatrix.vectorTimes(output[i]);
+				}
+				
+				if (isUniformScale())
+				{
+					var invScale = 1 / getUniformScale();
+					for (i in 0...numPoints)
+						output[i].scale(invScale);
 				}
 				else
-					output.x = output.y = 0;
+				{
+					var invScaleX = 1 / mScale.x;
+					var invScaleY = 1 / mScale.y;
+					var invScaleZ = 1 / mScale.z;
+					for (i in 0...numPoints)
+					{
+						out = output[i];
+						out.x *= invScaleX;
+						out.y *= invScaleY;
+						out.z *= invScaleZ;
+					}
+				}
+			}
+			else
+			{
+				//X = M^{-1}*(Y - T)
+				var inv = mTmpMat1;
+				mMatrix.inverseConst(inv);
+				for (i in 0...numPoints)
+					inv.timesVector(output[i]);
+			}
+		}
+		
+		return output;
+	}
+	
+	public function applyInverseBatch2(input:Vector<Vec3>, output:Vector<Vec3>, numPoints:Int):Vector<Vec3>
+	{
+		if (isIdentity())
+		{
+			var inp:Vec3, out:Vec3;
+			for (i in 0...numPoints)
+			{
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x;
+				out.y = inp.y;
+			}
+		}
+		else
+		{
+			//X = S^{-1}*R^t*(Y - T)
+			var inp:Vec3, out:Vec3;
+			var tx = mTranslate.x;
+			var ty = mTranslate.y;
+			for (i in 0...numPoints)
+			{
+				inp = input[i];
+				out = output[i];
+				out.x = inp.x - mTranslate.x;
+				out.y = inp.y - mTranslate.y;
+			}
+			
+			if (isRSMatrix())
+			{
+				if (!isIdentityRotation())
+				{
+					var m = mMatrix;
+					var m11 = m.m11; var m12 = m.m12;
+					var m21 = m.m21; var m22 = m.m22;
+					for (i in 0...numPoints)
+					{
+						out = output[i];
+						var t = out.x;
+						out.x = out.x * m11 + out.y * m21;
+						out.y = t     * m12 + out.y * m22;
+					}
+				}
+				
+				if (isUniformScale())
+				{
+					var invScale = 1 / getUniformScale();
+					for (i in 0...numPoints)
+					{
+						out = output[i];
+						out.x *= invScale;
+						out.y *= invScale;
+					}
+				}
+				else
+				{
+					var invScaleX = 1 / mScale.x;
+					var invScaleY = 1 / mScale.y;
+					for (i in 0...numPoints)
+					{
+						out = output[i];
+						out.x *= invScaleX;
+						out.y *= invScaleY;
+					}
+				}
+			}
+			else
+			{
+				//X = M^{-1}*(Y - T)
+				var m = mMatrix;
+				var det = m.m11 * m.m22 - m.m12 * m.m21;
+				assert(!M.cmpZero(det, M.ZERO_TOLERANCE), "singular matrix");
+				var invDet = 1 / det;
+				var m11 =  m.m22 * invDet;
+				var m12 = -m.m12 * invDet;
+				var m21 = -m.m21 * invDet;
+				var m22 =  m.m11 * invDet;
+				for (i in 0...numPoints)
+				{
+					out = output[i];
+					var t = out.x;
+					out.x = m11 * out.x + m12 * out.y;
+					out.y = m21 * t     + m22 * out.y;
+				}
 			}
 		}
 		
@@ -675,227 +1157,29 @@ class XForm
 	}
 	
 	/**
-	 * Computes this = <code>a</code> * <code>b</code> and returns this.
-	 * @throws de.polygonal.AssertError <code>a</code> equals <code>b</code> (debug only).
-	 */
-	public function product(a:XForm, b:XForm):XForm
-	{
-		#if debug
-		D.assert(a != b, 'a != b');
-		#end
-		
-		//|rA*sA|tA|  |rB*sB|tB|  |rA*sA*rB*sB|rA*sA*tB+tA|
-		//|  0^t| 1|  |  0^t| 1|  |        0^t|          1|
-		if (a.isIdentity()) return set(b);
-		if (b.isIdentity()) return set(a);
-		
-		//both transformations are M = R*S, so matrix can be written as R*S*X + T
-		if (a.incf(BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE) && b.isRSMatrix())
-		{
-			//rotation: rA * rB
-			Mat33.matrixProduct(a._matrix, b._matrix, _matrix);
-			
-			//translation: sA * (rA*tB) + tA
-			var tc = _translate;
-			var ta = a._translate;
-			
-			var sa = a.getUniformScale();
-			
-			a._matrix.timesVectorConst(b._translate, tc);
-			
-			tc.x = tc.x * sa + ta.x;
-			tc.y = tc.y * sa + ta.y;
-			tc.z = tc.z * sa + ta.z;
-			
-			//scale: sA * sB
-			if (b.isUniformScale())
-			{
-				//setUniformScale(sa * b.getUniformScale());
-				sa *= b.getUniformScale();
-				_scale.x = sa;
-				_scale.y = sa;
-				_scale.z = sa;
-				clrf(BIT_HINT_IDENTITY);
-				setf(BIT_HINT_UNIFORM_SCALE | BIT_HINT_RS_MATRIX);
-				setfif(BIT_HINT_UNIT_SCALE, sa == 1);
-			}
-			else
-			{
-				//setScale(sa * sb.x, sa * sb.y, sa * sb.z);
-				var sb = b._scale;
-				_scale.x = sa * sb.x;
-				_scale.y = sa * sb.y;
-				_scale.z = sa * sb.z;
-				clrf(BIT_HINT_IDENTITY | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-				setf(BIT_HINT_RS_MATRIX);
-			}
-			
-			return this;
-		}
-		
-		var ma = (a.isRSMatrix()) ? (a._matrix.timesDiagonalConst(a._scale, _scratchMatrix1)) : a._matrix;
-		var mb = (b.isRSMatrix()) ? (b._matrix.timesDiagonalConst(b._scale, _scratchMatrix2)) : b._matrix;
-		
-		Mat33.matrixProduct(ma, mb, _matrix);
-		
-		var t = _translate;
-		var ta = a._translate;
-		ma.timesVectorConst(b._translate, t);
-		t.x += ta.x;
-		t.y += ta.y;
-		t.z += ta.z;
-		
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	/**
-	 * Computes <code>this</code> = <code>a</code> * <code>b</code> and returns this.
-	 * <warn>In contrast to <em>product()</em>, this method operates in 2d space.
-	 * @throws de.polygonal.AssertError <code>a</code> equals <code>b</code> (debug only).
-	 */
-	public function product2(a:XForm, b:XForm):XForm
-	{
-		#if debug
-		D.assert(a != b, 'a != b');
-		#end
-		
-		//|rA*sA|tA|  |rB*sB|tB|  |rA*sA*rB*sB|rA*sA*tB+tA|
-		//|  0^t| 1|  |  0^t| 1|  |        0^t|          1|
-		if (a.isIdentity()) return set(b);
-		if (b.isIdentity()) return set(a);
-		
-		//both transformations are M = R*S, so matrix can be written as R*S*X + T
-		if (a.incf(BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE) && b.isRSMatrix())
-		{
-			//rotation: rA * rB
-			var ma = a._matrix;
-			var mb = b._matrix;
-			var mc = _matrix;
-			var b11 = mb.m11; var b12 = mb.m12;
-			var b21 = mb.m21; var b22 = mb.m22;
-			var t1, t2;
-			t1 = ma.m11;
-			t2 = ma.m12;
-			mc.m11 = t1 * b11 + t2 * b21;
-			mc.m12 = t1 * b12 + t2 * b22;
-			t1 = ma.m21;
-			t2 = ma.m22;
-			mc.m21 = t1 * b11 + t2 * b21;
-			mc.m22 = t1 * b12 + t2 * b22;
-			t1 = ma.m31;
-			t2 = ma.m32;
-			mc.m31 = t1 * b11 + t2 * b21;
-			mc.m32 = t1 * b12 + t2 * b22;
-			
-			//translation: sA * (rA*tB) + tA
-			var ta = a._translate;
-			var tb = b._translate;
-			var tc = _translate;
-			var x = tb.x;
-			var y = tb.y;
-			tc.x = ma.m11 * x + ma.m12 * y;
-			tc.y = ma.m21 * x + ma.m22 * y;
-			
-			var sa = a.getUniformScale();
-			tc.x = tc.x * sa + ta.x;
-			tc.y = tc.y * sa + ta.y;
-			
-			//scale: sA * sB
-			if (b.isUniformScale())
-			{
-				//setUniformScale(sa * b.getUniformScale());
-				sa *= b.getUniformScale();
-				_scale.x = sa;
-				_scale.y = sa;
-				
-				clrf(BIT_HINT_IDENTITY);
-				setf(BIT_HINT_UNIFORM_SCALE | BIT_HINT_RS_MATRIX);
-				setfif(BIT_HINT_UNIT_SCALE, sa == 1);
-			}
-			else
-			{
-				//setScale(sa * sb.x, sa * sb.y, sa * sb.z);
-				var sb = b._scale;
-				_scale.x = sa * sb.x;
-				_scale.y = sa * sb.y;
-				clrf(BIT_HINT_IDENTITY | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-				setf(BIT_HINT_RS_MATRIX);
-			}
-			
-			return this;
-		}
-		
-		var ma = a._matrix;
-		var mb = b._matrix;
-		
-		if (a.isRSMatrix())
-		{
-			var sx = a._scale.x;
-			var sy = a._scale.y;
-			var m = _scratchMatrix1;
-			m.m11 = ma.m11 * sx; m.m12 = ma.m12 * sy;
-			m.m21 = ma.m21 * sx; m.m22 = ma.m22 * sy;
-			ma = m;
-		}
-		
-		if (b.isRSMatrix())
-		{
-			var sx = b._scale.x;
-			var sy = b._scale.y;
-			var m = _scratchMatrix2;
-			m.m11 = mb.m11 * sx; m.m12 = mb.m12 * sy;
-			m.m21 = mb.m21 * sx; m.m22 = mb.m22 * sy;
-			mb = m;
-		}
-		
-		var b11 = mb.m11; var b12 = mb.m12;
-		var b21 = mb.m21; var b22 = mb.m22;
-		var mc = _matrix;
-		var t1, t2;
-		t1 = ma.m11;
-		t2 = ma.m12;
-		mc.m11 = t1 * b11 + t2 * b21;
-		mc.m12 = t1 * b12 + t2 * b22;
-		t1 = ma.m21;
-		t2 = ma.m22;
-		mc.m21 = t1 * b11 + t2 * b21;
-		mc.m22 = t1 * b12 + t2 * b22;
-		
-		var t = _translate;
-		var ta = a._translate;
-		var tb = b._translate;
-		
-		var x = tb.x;
-		var y = tb.y;
-		t.x = (ma.m11 * x + ma.m12 * y) + ta.x;
-		t.y = (ma.m21 * x + ma.m22 * y) + ta.y;
-		
-		clrf(BIT_HINT_IDENTITY | BIT_HINT_RS_MATRIX | BIT_HINT_UNIFORM_SCALE | BIT_HINT_UNIT_SCALE);
-		return this;
-	}
-	
-	/**
-	 * Computes the inverse-transform of <code>input</code>, which is <code>output</code> = M^{-1}*<code>input</code>.<br/>
-	 * The parameters <code>input</code> and <code>output</code> can point to the same object.
-	 */
+		Inverse-transforms the `input` vector. The `output` vector is M^{-1}*input.
+	**/
 	public function invertVector(input:Vec3, output:Vec3):Vec3
 	{
 		if (isIdentity())
 		{
 			//X = Y
-			output.set(input);
+			output.of(input);
 		}
+		else
 		if (isRSMatrix())
 		{
-			//X = S^{-1}*R^t*Y
-			output.set(input);
-			_matrix.vectorTimes(output);
+			//X = S^{-1}*R^{T}*Y
+			output.of(input);
+			
+			if (!isIdentityRotation())
+				mMatrix.vectorTimes(output);
+			
 			if (isUniformScale())
 				output.scale(1 / getUniformScale());
 			else
 			{
-				var s = _scale;
+				var s = mScale;
 				output.x /= s.x;
 				output.y /= s.y;
 				output.z /= s.z;
@@ -904,153 +1188,225 @@ class XForm
 		else
 		{
 			//X = M^{-1}*Y
-			_matrix.inverseConst(_scratchMatrix1);
-			_scratchMatrix1.timesVector(output);
+			var inv = mTmpMat1;
+			mMatrix.inverseConst(inv);
+			inv.timesVector(output);
 		}
 		
 		return output;
 	}
 	
 	/**
-	 * Computes the inverse-transform of <code>input</code>, which is <code>output</code> = M^{-1}*<code>input</code>.<br/>
-	 * The parameters <code>input</code> and <code>output</code> can point to the same object.<br/>
-	 * <warn>In contrast to <em>invertVector<()/em>, this method operates in 2d space and ignores <code>input</code>.z</warn>
-	 */
-	public function invertVector2(input:Vec3, output:Vec3):Vec3
+		Computes the inverse transformation.
+		
+		- if Y = RSX + T, the inverse is X = S^{−1}R^{T}(Y − T).
+		- no test is performed to determine whether this transform is invertible.
+		- the inverse transformation has scale S^{−1}, rotation R^{T}, and translation −S^{−1}R^{T}T.
+	**/
+	public function inverseTransform(output:Xform):Xform
 	{
 		if (isIdentity())
 		{
-			//X = Y
-			output.x = input.x;
-			output.y = input.y;
+			output.of(this);
+			return output;
 		}
+		
 		if (isRSMatrix())
 		{
-			//X = S^{-1}*R^t*Y
-			var x = input.x;
-			var y = input.y;
-			var t = x;
-			var m = _matrix;
-			x = x * m.m11 + y * m.m21;
-			y = t * m.m12 + y * m.m22;
+			var invRot =
+			if (isIdentityRotation())
+				output.mMatrix.of(mMatrix);
+			else
+				mMatrix.transposeConst(output.mMatrix);
 			
 			if (isUniformScale())
 			{
-				var s = getUniformScale();
-				output.x = x / s;
-				output.y = y / s;
+				var invScale = 1 / mScale.x;
+				output.setUniformScale(invScale);
+				var invTrn = invRot.timesVectorConst(mTranslate, output.mTranslate);
+				invTrn.scale(-invScale);
+			}
+			else
+			{
+				var invScaleX = 1 / mScale.x;
+				var invScaleY = 1 / mScale.y;
+				var invScaleZ = 1 / mScale.z;
+				output.setScale(invScaleX, invScaleY, invScaleZ);
 				
-			}
-			else
-			{
-				var s = _scale;
-				output.x = x / s.x;
-				output.y = y / s.y;
+				var invTrn = invRot.timesVectorConst(mTranslate, output.mTranslate);
+				invTrn.x *= -invScaleX;
+				invTrn.y *= -invScaleY;
+				invTrn.z *= -invScaleZ;
 			}
 		}
 		else
 		{
-			//X = M^{-1}*Y
-			var m = _matrix;
-			var det = m.m11 * m.m22 - m.m12 * m.m21;
-			if (M.fabs(det) > M.ZERO_TOLERANCE)
-			{
-				var invDet = 1 / det;
-				output.x =  (m.m22 * invDet) * input.x + (-m.m12 * invDet) * input.y;
-				output.y = (-m.m21 * invDet) * input.x +  (m.m11 * invDet) * input.y;
-			}
-			else
-			{
-				output.x = 0;
-				output.y = 0;
-			}
+			output.mHints = HINT_HMATRIX_DIRTY;
+			var invMat = mMatrix.inverseConst(output.mMatrix);
+			var invTrn = invMat.timesVectorConst(mTranslate, output.mTranslate);
+			invTrn.flip();
 		}
 		
 		return output;
 	}
 	
 	/**
-	 * Computes the inverse transformation, stores the result in <code>output</code> and returns <code>output</code>.<br/>
-	 * If &lt;M,T&gt; is the matrix-translation pair, the inverse is &lt;M^{-1},-M^{-1}*T&gt;.
-	 */
-	public function inverse(output:XForm):XForm
-	{
-		if (isIdentity())
-			return output.set(this);
-		
-		if (isRSMatrix())
-		{
-			if (isUniformScale())
-			{
-				_matrix.transposeConst(output._matrix);
-				output._matrix.timesScalar(1 / getUniformScale());
-			}
-			else
-			{
-				_matrix.timesDiagonalConst(_scale, output._matrix);
-				output._matrix.inverse();
-			}
-		}
-		else
-			_matrix.inverseConst(output._matrix);
-		
-		output._matrix.timesVectorConst(_translate, output._translate);
-		output._translate.flip();
-		output.nulf();
-		return output;
-	}
-	
-	/**
-	 * For M = R*S, returns the largest absolute value of S.<br/>
-	 * For general M, the max-column-sum norm is returned and is guaranteed to be larger than or equal to the largest eigenvalue of S in absolute value.
-	 */
+		For M = R*S, returns the largest absolute value of S.
+		For general M, the max-column-sum norm is returned and is guaranteed to be larger than or equal to the largest eigenvalue of S in absolute value.
+	**/
 	public function getNorm():Float
 	{
 		if (isRSMatrix())
 		{
 			//return largest absolute value of S
-			var max = Mathematics.fabs(_scale.x);
-			if (Mathematics.fabs(_scale.y) > max) max = Mathematics.fabs(_scale.y);
-			if (Mathematics.fabs(_scale.z) > max) max = Mathematics.fabs(_scale.z);
+			var max = M.fabs(mScale.x);
+			if (M.fabs(mScale.y) > max) max = M.fabs(mScale.y);
+			if (M.fabs(mScale.z) > max) max = M.fabs(mScale.z);
 			return max;
 		}
 		else
 		{
-			//return max-column-sum norm (guaranteed to be >= than the largest absolute eigenvalue of S
-			return _matrix.norm();
+			//use the max-row-sum matrix norm for a general matrix;
+			var maxRowSum = M.fabs(mMatrix.m11) + M.fabs(mMatrix.m12) + M.fabs(mMatrix.m13);
+			var rowSum    = M.fabs(mMatrix.m21) + M.fabs(mMatrix.m22) + M.fabs(mMatrix.m23);
+			if (rowSum > maxRowSum) maxRowSum = rowSum;
+			rowSum        = M.fabs(mMatrix.m31) + M.fabs(mMatrix.m32) + M.fabs(mMatrix.m33);
+			if (rowSum > maxRowSum) maxRowSum = rowSum;
+			return maxRowSum;
 		}
 	}
 	
-	/**
-	 * Same as <em>getNorm()</em>, but operates in 2d space.
-	 */
 	public function getNorm2():Float
 	{
 		if (isRSMatrix())
 		{
-			//return largest absolute value of S
-			var max = Mathematics.fabs(_scale.x);
-			if (Mathematics.fabs(_scale.y) > max) max = Mathematics.fabs(_scale.y);
-			return max;
+			var maxX = M.fabs(mScale.x);
+			var maxY = M.fabs(mScale.y);
+			return M.fmax(maxX, maxY);
 		}
 		else
 		{
-			//return max-column-sum norm (guaranteed to be >= than the largest absolute eigenvalue of S
-			var m = _matrix;
-			var maxColSum = Mathematics.fabs(m.m11) + Mathematics.fabs(m.m21);
-			var colSum    = Mathematics.fabs(m.m12) + Mathematics.fabs(m.m22);
-			if (colSum > maxColSum) maxColSum = colSum;
-			return maxColSum;
+			var maxRow1 = M.fabs(mMatrix.m11) + M.fabs(mMatrix.m12);
+			var maxRow2 = M.fabs(mMatrix.m21) + M.fabs(mMatrix.m22);
+			return M.fmax(maxRow1, maxRow2);
 		}
 	}
 	
-	public function copy():XForm
+	//TODO only works if local copy is used!
+	//var hMatrix:Mat44 = new Mat44();
+	
+	/**
+		Sets `output` to the 4x4 homogeneous matrix.
+	**/
+	public function getHMatrix(output:Mat44):Mat44
 	{
-		var c = new XForm();
-		c._scale.set(_scale);
-		c._translate.set(_translate);
-		c._matrix.set(_matrix);
-		c._bits = _bits;
-		return c;
+		var h = output;
+		
+		//output.of(h);
+		
+		//TODO HINT_HMATRIX_DIRTY
+		//if (mHints & HINT_HMATRIX_DIRTY != 0)
+		//{
+			mHints &= ~HINT_HMATRIX_DIRTY;
+			mHints |= HINT_INVERSE_DIRTY;
+			
+			//R, T, or S has changed.
+			
+			if (isIdentity())
+			{
+				h.m11 = 1; h.m12 = 0; h.m13 = 0; h.m14 = 0;
+				h.m21 = 0; h.m22 = 1; h.m23 = 0; h.m24 = 0;
+				h.m31 = 0; h.m32 = 0; h.m33 = 1; h.m34 = 0;
+			}
+			else
+			{
+				var m = mMatrix;
+				
+				var sx = mScale.x;
+				var sy = mScale.y;
+				var sz = mScale.z;
+				
+				if (isRSMatrix())
+				{
+					h.m11 = m.m11 * sx;
+					h.m12 = m.m12 * sy;
+					h.m13 = m.m13 * sz;
+					h.m21 = m.m21 * sx;
+					h.m22 = m.m22 * sy;
+					h.m23 = m.m23 * sz;
+					h.m31 = m.m31 * sx;
+					h.m32 = m.m32 * sy;
+					h.m33 = m.m33 * sz;
+				}
+				else
+				{
+					h.m11 = m.m11;
+					h.m12 = m.m12;
+					h.m13 = m.m13;
+					h.m21 = m.m21;
+					h.m22 = m.m22;
+					h.m23 = m.m23;
+					h.m31 = m.m31;
+					h.m32 = m.m32;
+					h.m33 = m.m33;
+				}
+				
+				h.m14 = mTranslate.x;
+				h.m24 = mTranslate.y;
+				h.m34 = mTranslate.z;
+				
+				//the last row of mHMatrix is always (0,0,0,1) for an affine transformation.
+			}
+		//}
+		
+		return h;
+	}
+	
+	public function getHMatrix2(output:Mat44):Mat44
+	{
+		var h = output;
+		
+		//if (mHints & HINT_HMATRIX_DIRTY != 0)
+		//{
+			mHints &= ~HINT_HMATRIX_DIRTY;
+			mHints |= HINT_INVERSE_DIRTY;
+			
+			//R, T, or S has changed.
+			
+			if (isIdentity())
+			{
+				h.m11 = 1; h.m12 = 0; h.m13 = 0;
+				h.m21 = 0; h.m22 = 1; h.m23 = 0;
+			}
+			else
+			{
+				var m = mMatrix;
+				
+				var sx = mScale.x;
+				var sy = mScale.y;
+				
+				if (isRSMatrix())
+				{
+					h.m11 = m.m11 * sx;
+					h.m12 = m.m12 * sy;
+					h.m21 = m.m21 * sx;
+					h.m22 = m.m22 * sy;
+				}
+				else
+				{
+					h.m11 = m.m11;
+					h.m12 = m.m12;
+					h.m21 = m.m21;
+					h.m22 = m.m22;
+				}
+				
+				h.m14 = mTranslate.x;
+				h.m24 = mTranslate.y;
+				
+				//the last row of mHMatrix is always (0,0,0,1) for an affine transformation.
+			}
+		//}
+		
+		return h;
 	}
 }

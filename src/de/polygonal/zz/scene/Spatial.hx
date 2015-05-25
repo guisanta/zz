@@ -1,418 +1,399 @@
 /*
- *                            _/                                                    _/
- *       _/_/_/      _/_/    _/  _/    _/    _/_/_/    _/_/    _/_/_/      _/_/_/  _/
- *      _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *     _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *    _/_/_/      _/_/    _/    _/_/_/    _/_/_/    _/_/    _/    _/    _/_/_/  _/
- *   _/                            _/        _/
- *  _/                        _/_/      _/_/
- *
- * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
- * Copyright (c) 2012 Michael Baczynski, http://www.polygonal.de
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Geometric Tools, LLC
+Copyright (c) 1998-2012
+Distributed under the Boost Software License, Version 1.0.
+http://www.boost.org/LICENSE_1_0.txt
+http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
+*/
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.math.Mathematics;
-import de.polygonal.core.math.TrigApprox;
-import de.polygonal.core.math.Vec3;
-import de.polygonal.ds.Bits;
-import de.polygonal.ds.HashableItem;
-import de.polygonal.ds.TreeNode;
-import de.polygonal.ds.Visitable;
+import de.polygonal.core.math.Aabb2;
+import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.util.Assert.assert;
+import de.polygonal.core.util.ClassUtil;
+import de.polygonal.ds.Hashable;
+import de.polygonal.ds.HashKey;
+import de.polygonal.zz.controller.ControlledObject;
 import de.polygonal.zz.render.effect.Effect;
-import de.polygonal.zz.scene.GlobalState.GlobalStateStacks;
-import de.polygonal.core.util.Assert;
+import de.polygonal.zz.scene.*;
+import de.polygonal.zz.scene.Bv.BvType;
+import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 
-using de.polygonal.ds.BitFlags;
-
-@:build(de.polygonal.core.util.IntEnum.build(
+/**
+	Abstract base class of the scene graph hierarchy.
+**/
+@:build(de.polygonal.core.macro.IntConsts.build(
 [
-	BIT_UPDATE_WORLD_XFORM,
-	BIT_FORCE_CULL,
-	BIT_USE_3D_XFORM,
-	BIT_HAS_ROTATION,
-	BIT_MODEL_CHANGED,
-	BIT_UPDATE_WORLD_BOUND
-], true))
-class Spatial extends HashableItem
+	CULL_ALWAYS,
+	CULL_NEVER,
+	IS_WORLD_XFORM_CURRENT,
+	IS_WORLD_BOUND_CURRENT,
+	IS_WORLD_XFORM_DIRTY,
+	IS_WORLD_BOUND_DIRTY,
+	IS_RS_DIRTY,
+	IS_NODE,
+	IS_VISUAL,
+	IS_COMPOSITE_LOCKED,
+	GS_UPDATED,
+	IS_FREED
+], true, false))
+@:access(de.polygonal.zz.scene.Node)
+class Spatial extends ControlledObject implements Hashable
 {
-	/**
-	 * The id of this object.<br/>
-	 * Default is null.
-	 */
-	public var id:String;
+	public static var DEFAULT_BV_TYPE = BvType.Circle;
+	
+	public var name:String;
 	
 	/**
-	 * Custom application data.<br/>
-	 * Default is null.
-	 */
-	public var userData:Dynamic;
+		The parent node or null if this node has no parent.
+	**/
+	public var parent(default, null):Node;
 	
 	/**
-	 * Local transformation (relative to parent node).
-	 */
-	public var local(default, null):XForm;
+		Local transformation (relative to parent node).
+	**/
+	public var local(default, null):Xform;
 	
 	/**
-	 * World transformation (relative to root node).
-	 */
-	public var world(default, null):XForm;
+		World transformation (relative to root node).
+	**/
+	public var world(default, null):Xform;
 	
 	/**
-	 * World bounding volume.
-	 */
-	public var worldBound(default, null):BoundingVolume;
+		World bounding volume.
+	**/
+	public var worldBound(default, null):Bv;
 	
 	/**
-	 * Defines the visual appearance of this node.
-	 */
+		The visual appearance of this node.
+	**/
 	public var effect:Effect;
 	
 	/**
-	 * A pointer to the <em>TreeNode</em> object storing this node.
-	 */
-	public var treeNode(default, null):TreeNode<Spatial>;
+		An unique id that identifies this node.
+	**/
+	@:noCompletion public var key:Int;
 	
-	/**
-	 * Non-null if this object is of type <em>Geometry</em>.<br/>
-	 * Useful to avoid slow downcasts.<br/>
-	 * Example:<br/>
-	 * <pre class="prettyprint">
-	 * var geometry = myNode.getChildAt(0).__geometry;</pre>
-	 */
-	public var __geometry(default, null):Geometry;
+	var mSibling:Spatial;
+	var mFlags:Int;
+	var mGlobalState:GlobalStateNode;
+	var mArbiter:Dynamic;
 	
-	/**
-	 * Non-null if this object is of type <em>Node</em>.<br/>
-	 * Useful to avoid slow downcasts.<br/>
-	 * Example:<br/>
-	 * <pre class="prettyprint">
-	 * var node = myNode.getChildAt(0).__node;</pre>
-	 */
-	public var __node(default, null):Node;
-	
-	/**
-	 * Local translation, x-axis.<br/>
-	 * The default value is 0.
-	 */
-	public var x:Float;
-	
-	/**
-	 * Local translation, y-axis.<br/>
-	 * The default value is 0.
-	 */
-	public var y:Float;
-	
-	/**
-	 * Local rotation angle in radians.<br/>
-	 * The default value is 0.
-	 */
-	public var rotation:Float;
-	
-	/**
-	 * Local scale, x-axis.<br/>
-	 * The default value is 1.
-	 */
-	public var scaleX:Float;
-	
-	/**
-	 * Local scale, y-axis.<br/>
-	 * The default value is 1.
-	 */
-	public var scaleY:Float;
-	
-	/**
-	 * Local rotation anchor, x-axis.<br/>
-	 * The default value is 0.
-	 */
-	public var centerX:Float;
-	
-	/**
-	 * Local rotation anchor, y-axis.<br/>
-	 * The default value is 0.
-	 */
-	public var centerY:Float;
-	
-	/**
-	 * Uniform scale.
-	 */
-	public var scale(get_scale, set_scale):Float;
-	inline function get_scale():Float
-	{
-		D.assert(scaleX == scaleY, 'non-uniform scale');
-		return scaleX;
-	}
-	inline function set_scale(value:Float):Float
-	{
-		scaleX = scaleY = value;
-		return value;
-	}
-	
-	public var __next:Spatial;
-	
-	var _bits:Int;
-	var _globalStates:GlobalState;
-	
-	function new(id:String)
+	function new(?name:String)
 	{
 		super();
-
-		this.id = id;
-		treeNode = new TreeNode<Spatial>(this);
-		local = new XForm();
-		world = new XForm();
-		worldBound = new SphereBV();
-		effect = null;
-		userData = null;
 		
-		__geometry = null;
-		__node = null;
-		
-		_bits = BIT_UPDATE_WORLD_XFORM | BIT_UPDATE_WORLD_BOUND;
-		
-		x = 0;
-		y = 0;
-		rotation = 0;
-		scaleX = 1;
-		scaleY = 1;
-		centerX = 0;
-		centerY = 0;
+		this.name = name;
+		key = HashKey.next();
+		local = new Xform();
+		world = new Xform();
+		worldBound = createBoundingVolume();
+		mFlags = GS_UPDATED;
 	}
 	
 	/**
-	 * Destroys this object by explicitly nullifying all references for GC'ing used resources.
-	 */
-	public function free():Void
+		Destroys this object by explicitly nullifying all references for GC'ing used resources.
+	**/
+	override public function free()
 	{
-		if (treeNode == null) return;
+		super.free();
 		
-		treeNode.unlink();
-		treeNode.free();
-		treeNode = null;
-		
-		removeAllGlobalStates();
+		if (parent != null)
+			parent.removeChild(this);
+		parent = null;
+		mSibling = null;
 		local.free();
 		local = null;
-		
 		world.free();
 		world = null;
-		
-		worldBound.free();
 		worldBound = null;
-		
+		removeAllGlobalStates();
 		effect = null;
-		userData = null;
-		
-		__geometry = null;
-		__node = null;
-		__next = null;
+		mArbiter = null;
+		mFlags = IS_FREED;
 	}
 	
 	/**
-	 * Returns true if this object is of type <em>Node</em>.
-	 */
-	inline public function isNode():Bool
+		An optional, user-defined object that "owns" and modifies the state of this node by composition.
+		Useful when providing a high-level API.
+	**/
+	public var arbiter(get_arbiter, set_arbiter):Dynamic;
+	inline function get_arbiter():Dynamic return mArbiter;
+	inline function set_arbiter(value:Dynamic):Dynamic
 	{
-		return __node != null;
+		assert(mFlags & IS_COMPOSITE_LOCKED == 0, "arbiter must not be locked");
+		mArbiter = value;
+		return value;
 	}
 	
-	/**
-	 * Returns true if this object is of type <em>Geometry</em>.
-	 */
-	inline public function isGeometry():Bool
+	public var cullingMode(get_cullingMode, set_cullingMode):CullingMode;
+	function get_cullingMode():CullingMode
 	{
-		return __geometry != null;
+		return
+		if (mFlags & CULL_ALWAYS > 0)
+			CullAlways;
+		else
+		if (mFlags & CULL_NEVER > 0)
+			CullNever;
+		else
+			CullDynamic;
 	}
-	
-	/**
-	 * Returns the parent node or null if this node is a root node.
-	 */
-	inline public function getParent():Node
+	function set_cullingMode(value:CullingMode):CullingMode
 	{
-		return treeNode.hasParent() ? treeNode.parent.val.__node : null;
-	}
-	
-	/**
-	 * Removes this node from the scene graph and returns its parent.
-	 */
-	public function remove():Node
-	{
-		var parent = treeNode.parent;
-		if (parent != null)
+		switch (value)
 		{
-			treeNode.unlink();
-			return parent.val.__node;
+			case CullDynamic:
+				mFlags &= ~(CULL_ALWAYS | CULL_NEVER);
+			
+			case CullAlways:
+				mFlags &= ~CULL_NEVER;
+				mFlags |=  CULL_ALWAYS;
+			
+			case CullNever:
+				mFlags |=  CULL_NEVER;
+				mFlags &= ~CULL_ALWAYS;
 		}
-		return null;
-	}
-	
-	/**
-	 * Sets the rotation angle to <code>deg</code> in degrees.
-	 */
-	inline public function setAngle(deg:Float):Void
-	{
-		rotation = M.wrapToPI(deg * M.DEG_RAD);
-	}
-	
-	/**
-	 * If false, ignores the z-component to speed up computations.
-	 */
-	public var useZ(get_useZ, set_useZ):Bool;
-	inline function get_useZ():Bool
-	{
-		return hasf(BIT_USE_3D_XFORM);
-	}
-	inline function set_useZ(value:Bool):Bool
-	{
-		setfif(BIT_USE_3D_XFORM, value);
 		return value;
 	}
 	
-	public var forceCull(get_forceCull, set_forceCull):Bool;
-	inline function get_forceCull():Bool
-	{
-		return hasf(BIT_FORCE_CULL);
-	}
-	inline function set_forceCull(value:Bool):Bool
-	{
-		setfif(BIT_FORCE_CULL, value);
-		return value;
-	}
+	inline public function isNode():Bool return mFlags & IS_NODE > 0;
 	
-	public function cull(renderer:Renderer, noCull:Bool):Void
+	inline public function asNode():Node
 	{
-		if (hasf(BIT_FORCE_CULL)) return;
-		
-		var camera = renderer.getCamera();
-		
-		var planeCullState = camera.planeCullState;
-		if (noCull || !camera.isCulled(worldBound)) draw(renderer, noCull);
-		camera.planeCullState = planeCullState;
+		#if flash
+		return flash.Lib.as(this, Node);
+		#else
+		return cast this;
+		#end
 	}
 	
-	public function draw(renderer:Renderer, noCull:Bool):Void {}
+	inline public function isVisual():Bool return mFlags & IS_VISUAL > 0;
 	
-	public function pick(origin:Vec3, result:PickResult):Int
+	inline public function asVisual():Visual
 	{
-		return 0;
+		#if flash
+		return flash.Lib.as(this, Visual);
+		#else
+		return cast this;
+		#end
 	}
 	
 	/**
-	 * Recomputes world transformations and world bounding volumes.
-	 * @param intiator if true, the change in world bounding volume occuring at
-	 * this node is propagated to the root node.
-	 * @param updateBV if false, skips recomputing bounding volumes.
-	 */
-	public function updateGeometricState(initiator = true, updateBV = true):Void
+		In some situations you might need to set the world transform directly and bypass the updateWorldData() mechanism.
+		If set to true, the world transform isn't updated.
+	**/
+	public var worldTransformCurrent(get_worldTransformCurrent, set_worldTransformCurrent):Bool;
+	inline function get_worldTransformCurrent():Bool return mFlags & IS_WORLD_XFORM_CURRENT > 0;
+	inline function set_worldTransformCurrent(value:Bool):Bool
 	{
+		value ? mFlags |= IS_WORLD_XFORM_CURRENT : mFlags &= ~IS_WORLD_XFORM_CURRENT;
+		return value;
+	}
+	
+	/**
+		In some situations you might need to set the world bound directly and bypass the updateWordBound() mechanism.
+		If set to true, the world bound isn't updated.
+	**/
+	public var worldBoundCurrent(get_worldBoundCurrent, set_worldBoundCurrent):Bool;
+	inline function get_worldBoundCurrent():Bool return mFlags & IS_WORLD_BOUND_CURRENT > 0;
+	inline function set_worldBoundCurrent(value:Bool):Bool
+	{
+		value ? mFlags |= IS_WORLD_BOUND_CURRENT : mFlags &= ~IS_WORLD_BOUND_CURRENT;
+		return value;
+	}
+	
+	function onGetVisibleSet(culler:Culler, noCull:Bool)
+	{
+		if (mFlags & CULL_ALWAYS > 0) return;
+		if (mFlags & CULL_NEVER > 0) noCull = true;
+		
+		var savePlaneState = culler.getPlaneCullState();
+		if (noCull || culler.isVisible(worldBound))
+			getVisibleSet(culler, noCull);
+		culler.setPlaneCullState(savePlaneState);
+	}
+	
+	function getVisibleSet(culler:Culler, noCull:Bool)
+	{
+		throw 'override for implementation';
+	}
+	
+	/**
+		Returns all nodes intersecting the given `point` in world space coordinates.
+	**/
+	public function pick(point:Coord2f, ?result:PickResult):Int
+	{
+		return throw 'override for implementation';
+	}
+	
+	/**
+		Computes a bounding box of this node relative to the coordinate system of `targetSpace`.
+		Note: Before calling this method make sure world transformations are up-to-date.
+	**/
+	public function getBoundingBox(targetSpace:Spatial, output:Aabb2):Aabb2
+	{
+		return throw 'override for implementation';
+	}
+	
+	//{ geometric state
+	
+	/**
+		Recomputes world transformations and world bounding volumes.
+		if `intiator` is true, the change in world bounding volume occuring at this node is
+		propagated to the root node. Skips computing bounding volumes if `updateBound` is false.
+	**/
+	public function updateGeometricState(initiator = true, updateBound = true)
+	{
+		mFlags |= GS_UPDATED;
+		
 		//propagate transformations: parent => children
-		updateWorldData(updateBV);
+		updateWorldData(updateBound);
 		
 		//propagate world bounding volumes: children => parents
-		if (updateBV) updateWorldBound(); //hook; implement in subclass
-		
-		if (initiator && updateBV) propagateBoundToRoot();
+		if (updateBound) updateWorldBound();
+		if (initiator && updateBound) propagateBoundToRoot();
 	}
 	
 	/**
-	 * Updates the world bounding volumes on an upward pass without recomputing transformations.<br/>
-	 * Useful if just the model data changes.
-	 */
-	public function updateBoundState(propagateToRoot = true):Void
+		Updates world bounding volumes on an upward pass without recomputing transformations.
+		Useful if just the model data changes.
+	**/
+	public function updateBoundState(propagateToRoot = true)
 	{
 		updateWorldBound();
 		if (propagateToRoot) propagateBoundToRoot();
 	}
 	
+	function updateWorldData(updateBound:Bool)
+	{
+		mFlags &= ~IS_WORLD_XFORM_DIRTY;
+		
+		//updateBound ? (mFlags |= BOUND_UPDATED) : (mFlags &= ~BOUND_UPDATED);
+		
+		if (!worldTransformCurrent)
+		{
+			if (parent != null)
+				world.setProduct2(parent.world, local); //W' = Wp * L
+			else
+				world.of(local); //root node
+			
+			mFlags |= IS_WORLD_BOUND_DIRTY;
+		}
+	}
+	
+	function updateWorldBound()
+	{
+		throw 'override for implementation';
+	}
+	
+	function propagateBoundToRoot()
+	{
+		if (parent != null)
+		{
+			parent.updateWorldBound();
+			parent.propagateBoundToRoot();
+		}
+	}
+	//}
+	
+	//{ render state
+	
 	/**
-	 * Assembles the rendering information at this node by traversing the scene graph hierarchy.
-	 */
-	public function updateRenderState(stacks:GlobalStateStacks = null):Void
+		Assembles rendering information at this node by traversing the scene graph hierarchy in a depth-first manner.
+		
+		This function needs only be called at a node whose subtree needs a render state update.
+	**/
+	public function updateRenderState(stacks:GlobalStateStackList = null)
 	{
 		var initiator = stacks == null;
 		
 		if (initiator)
-		{
-			stacks = GlobalState.getStacks();
-			
-			//traverse to root and push states from root to this node
-			propageStateFromRoot(stacks);
-		}
+			stacks = GlobalStateStack.propagateStateFromRoot(this);
 		else
-			pushState(stacks);
+			pushStates(stacks);
 		
-		//propagate new state to the subtree rooted here
+		//overriden in node class:
+		//propagate the render state update in a recursive traversal of the scene hierarchy
 		propagateRenderStateUpdate(stacks);
 		
-		initiator ? GlobalState.clrStacks() : popState(stacks);
+		initiator ? GlobalStateStack.clrStacks() : popStates(stacks);
+		
+		mFlags &= ~IS_RS_DIRTY;
 	}
 	
+	/**
+		Returns the attached render state object of the given `type` or null if no state was found.
+	**/
 	public function getGlobalState(type:GlobalStateType):GlobalState
 	{
-		var node = _globalStates;
+		var node = mGlobalState;
 		while (node != null)
 		{
-			if (node.type == type) return node;
+			if (node.type == type) return node.state;
 			node = node.next;
 		}
 		return null;
 	}
 	
-	public function setGlobalState(state:GlobalState):Void
+	/**
+		Adds the given `state` object to this node (existing state is replaced by `state`).
+	**/
+	public function setGlobalState(state:GlobalState)
 	{
-		D.assert(state != null, 'state != null');
-		D.assert(state.next == null, 'state.next == null');
+		assert(state != null);
 		
-		//set initial state
-		if (_globalStates == null)
+		mFlags |= IS_RS_DIRTY;
+		
+		if (mGlobalState == null)
 		{
-			_globalStates = state;
+			//initialize state list
+			mGlobalState = GlobalStateNode.get(state);
 			return;
 		}
 		
-		//replace existing state
-		var node = _globalStates, prev = null, type = state.type;
+		//first try replacing existing state
+		var node = mGlobalState, type = state.type;
 		while (node != null)
 		{
 			if (node.type == type)
 			{
-				state.next = node.next;
-				if (prev != null)
-					prev.next = state;
-				else
-					_globalStates = state;
-				node.next = null;
+				node.state = state;
 				return;
 			}
-			prev = node;
 			node = node.next;
 		}
 		
-		//add state
-		state.next = _globalStates;
-		_globalStates = state;
+		//state does not exist so prepend to list
+		node = GlobalStateNode.get(state);
+		node.next = mGlobalState;
+		mGlobalState = node;
 	}
 	
-	public function removeGlobalState(type:GlobalStateType):Void
+	/**
+		Finds and removes the state object of the given `type` (if any).
+	**/
+	public function removeGlobalState(type:GlobalStateType)
 	{
-		var node = _globalStates, prev = null;
+		mFlags |= IS_RS_DIRTY;
+		var node = mGlobalState, prev = null;
 		while (node != null)
 		{
 			if (node.type == type)
@@ -420,7 +401,10 @@ class Spatial extends HashableItem
 				if (prev != null)
 					prev.next = node.next;
 				else
-					_globalStates = node.next;
+					mGlobalState = node.next;
+					
+				node.next = null;
+				GlobalStateNode.put(node);
 				return;
 			}
 			prev = node;
@@ -428,156 +412,63 @@ class Spatial extends HashableItem
 		}
 	}
 	
-	public function removeAllGlobalStates():Void
+	public function removeAllGlobalStates()
 	{
-		var node = _globalStates, next;
+		mFlags |= IS_RS_DIRTY;
+		var node = mGlobalState, next;
 		while (node != null)
 		{
 			next = node.next;
+			
 			node.next = null;
+			GlobalStateNode.put(node);
+			
 			node = next;
 		}
-		_globalStates = null;
+		mGlobalState = null;
 	}
+	
+	function propagateRenderStateUpdate(stacks:GlobalStateStackList)
+	{
+		throw 'override for implementation';
+	}
+	
+	inline function pushStates(stacks:GlobalStateStackList)
+	{
+		var node = mGlobalState, state;
+		while (node != null)
+		{
+			state = node.state;
+			stacks[state.slot].push(state);
+			node = node.next;
+		}
+	}
+	
+	inline function popStates(stacks:GlobalStateStackList)
+	{
+		var node = mGlobalState;
+		while (node != null)
+		{
+			stacks[node.state.slot].pop();
+			node = node.next;
+		}
+	}
+	//}
+	
+	function createBoundingVolume():Bv
+	{
+		return
+		switch (getBvType())
+		{
+			case BvType.Circle: new CircleBv();
+			case BvType.Box: new BoxBv();
+		}
+	}
+	
+	function getBvType():BvType return DEFAULT_BV_TYPE;
 	
 	public function toString():String
 	{
-		if (isGeometry()) return Sprintf.format('Geometry id=%s userData=%s', [id, userData]);
-		if (isNode()) return Sprintf.format('Node id=%s userData=%s', [id, userData]);
-		return Sprintf.format("? id=%s userData=%s", [id, userData]);
-	}
-	
-	function updateWorldData(updateBV:Bool):Void
-	{
-		if (!hasf(BIT_UPDATE_WORLD_XFORM)) return;
-		
-		useZ ? syncLocalXForm3d() : syncLocalXForm2d();
-		
-		var parent = treeNode.parent;
-		if (parent != null)
-		{
-			//W' = Wp * L
-			useZ ? world.product(parent.val.world, local) : world.product2(parent.val.world, local);
-		}
-		else
-			world.set(local); //root node
-	}
-	
-	function updateWorldBound():Void
-	{
-	}
-	
-	function propagateBoundToRoot():Void
-	{
-		var parent = treeNode.parent;
-		if (parent != null)
-		{
-			var o = parent.val;
-			o.updateWorldBound();
-			o.propagateBoundToRoot();
-		}
-	}
-	
-	function propageStateFromRoot(stacks:GlobalStateStacks):Void
-	{
-		//traverse to root to allow downward state propagation
-		var parent = treeNode.parent;
-		if (parent != null) parent.val.propageStateFromRoot(stacks);
-		pushState(stacks);
-	}
-	
-	function propagateRenderStateUpdate(stacks:GlobalStateStacks):Void
-	{
-	}
-	
-	function syncLocalXForm2d():Void
-	{
-		var cx = centerX * M.fsgn(scaleX);
-		var cy = centerY * M.fsgn(scaleY);
-		
-		if (rotation != 0)
-		{
-			setf(BIT_HAS_ROTATION);
-			var r = local.getRotate();
-			var sineCosine = TrigApprox.sinCos(rotation, r.sineCosine);
-			var s = sineCosine.x;
-			var c = sineCosine.y;
-			r.m11 = c; r.m12 =-s;
-			r.m21 = s; r.m22 = c;
-			local.setTranslate2(x - (c * cx - s * cy), y - (s * cx + c * cy));
-		}
-		else
-		{
-			if (hasf(BIT_HAS_ROTATION))
-			{
-				//rotation was set to zero so reset rotation matrix
-				clrf(BIT_HAS_ROTATION);
-				var r = local.getRotate();
-				r.m11 = 1; r.m12 = 0;
-				r.m21 = 0; r.m22 = 1;
-			}
-			
-			local.setTranslate2(x - cx, y - cy);
-		}
-		
-		(scaleX == scaleY) ? local.setUniformScale2(scaleX) : local.setScale2(scaleX, scaleY);
-	}
-	
-	function syncLocalXForm3d():Void
-	{
-		if (rotation != 0)
-		{
-			setf(BIT_HAS_ROTATION);
-			var r = local.getRotate();
-			r.setRotateZ(rotation);
-			
-			if (centerX != 0 || centerY != 0)
-			{
-				//1. translate anchor to the origin (-a)
-				//2. rotate about the origin
-				//3. translate back (+a)
-				//var M = new Mat44();
-				//M.setScale(sx, sy, 1);
-				//M.catTranslate(-cx, -cy, 0);
-				//M.catRotateZ(rotation);
-				//M.catTranslate(cx + x, cy + y, 0);
-				var s = r.sineCosine.x;
-				var c = r.sineCosine.y;
-				local.setTranslate(x - (c * centerX - s * centerY), y - (s * centerX + c * centerY), 0);
-			}
-			else
-				local.setTranslate(x - centerX, y - centerY, 0);
-		}
-		else
-		{
-			if (hasf(BIT_HAS_ROTATION))
-			{
-				clrf(BIT_HAS_ROTATION);
-				local.getRotate().setIdentity();
-			}
-			local.setTranslate(x - centerX, y - centerY, 0);
-		}
-		
-		(scaleX == scaleY) ? local.setUniformScale(scaleX) : local.setScale(scaleX, scaleY, 1);
-	}
-	
-	inline function pushState(stacks:GlobalStateStacks):Void
-	{
-		var node = _globalStates;
-		while (node != null)
-		{
-			stacks[node.index].push(node);
-			node = node.next;
-		}
-	}
-	
-	inline function popState(stacks:GlobalStateStacks):Void
-	{
-		var node = _globalStates;
-		while (node != null)
-		{
-			stacks[node.index].pop();
-			node = node.next;
-		}
+		return Printf.format('${ClassUtil.getUnqualifiedClassName(this)} name=%s', [name]);
 	}
 }

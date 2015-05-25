@@ -1,87 +1,128 @@
 /*
- *                            _/                                                    _/
- *       _/_/_/      _/_/    _/  _/    _/    _/_/_/    _/_/    _/_/_/      _/_/_/  _/
- *      _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *     _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *    _/_/_/      _/_/    _/    _/_/_/    _/_/_/    _/_/    _/    _/    _/_/_/  _/
- *   _/                            _/        _/
- *  _/                        _/_/      _/_/
- *
- * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
- * Copyright (c) 2012 Michael Baczynski, http://www.polygonal.de
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 package de.polygonal.zz.render.effect;
 
+import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.math.Rect.Recti;
+import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.effect.Effect;
-import de.polygonal.zz.render.texture.Rect;
-import de.polygonal.zz.render.texture.Tex;
-import de.polygonal.zz.scene.Renderer;
-
-using de.polygonal.ds.BitFlags;
+import de.polygonal.zz.render.Renderer;
+import de.polygonal.zz.texture.atlas.TextureAtlas;
+import de.polygonal.zz.texture.Texture;
 
 class TextureEffect extends Effect
 {
-	public var crop:Rect;
+	inline public static var HINT_PMA = 0x01;
 	
-	public var uvOffsetX = 0.;
-	public var uvOffsetY = 0.;
+	#if flash
+	inline public static var HINT_COMPRESSED = 0x02;
+	inline public static var HINT_COMPRESSED_ALPHA = 0x04;
+	#end
 	
-	public var uvScaleX = 1.;
-	public var uvScaleY = 1.;
+	inline public static var TYPE = 1;
 	
-	public function new(tex:Tex)
+	public var texture:Texture;
+	
+	public var atlas(default, null):TextureAtlas;
+	
+	public var cropRectUv:Rectf;
+	public var cropRectPx:Recti;
+	
+	public var uvOffsetX:Float = 0;
+	public var uvOffsetY:Float = 0;
+	public var uvScaleX:Float = 1;
+	public var uvScaleY:Float = 1;
+	
+	var mFrameIndex:Int = -1;
+	
+	var mCropRectPx:Recti;
+	var mCropRectUv:Rectf;
+	
+	public function new()
 	{
-		super();
-		__textureEffect = this;
-		this.tex = tex;
+		super(TYPE);
 		
-		setCrop();
-		setf(Effect.UV_CHANGED);
+		mCropRectPx = new Recti(0, 0, 0, 0);
+		mCropRectUv = new Rectf(0, 0, 0, 0);
 	}
 	
-	override public function free():Void
+	public function setTexture(texture:Texture, ?atlas:TextureAtlas)
+	{
+		mFrameIndex = -1;
+		
+		this.texture = texture;
+		this.atlas = atlas;
+		
+		var sx = texture.sourceSize.x;
+		var sy = texture.sourceSize.y;
+		
+		cropRectPx = mCropRectPx;
+		cropRectPx.w = sx;
+		cropRectPx.h = sy;
+		
+		cropRectUv = mCropRectUv;
+		cropRectUv.w = sx / texture.paddedSize.x;
+		cropRectUv.h = sy / texture.paddedSize.y;
+		
+		hint = 0;
+		
+		if (texture.isAlphaPremultiplied) hint |= HINT_PMA;
+		
+		#if flash
+		if (texture.isCompressed)
+		{
+			switch (texture.format)
+			{
+				case flash.display3D.Context3DTextureFormat.COMPRESSED:
+					hint |= HINT_COMPRESSED;
+				
+				case flash.display3D.Context3DTextureFormat.COMPRESSED_ALPHA:
+					hint |= HINT_COMPRESSED_ALPHA;
+			}
+		}
+		#end
+	}
+	
+	override public function free()
 	{
 		super.free();
-		crop = null;
+		cropRectUv = null;
+		cropRectPx = null;
 	}
 	
-	override public function draw(renderer:Renderer):Void
+	inline public function getFrameIndex():Int
+	{
+		return mFrameIndex;
+	}
+	
+	inline public function setFrameIndex(value:Int)
+	{
+		if (mFrameIndex != value)
+		{
+			mFrameIndex = value;
+			cropRectUv = atlas.getFrameAt(value).texCoordUv;
+			cropRectPx = atlas.getFrameAt(value).texCoordPx;
+		}
+	}
+	
+	override public function draw(renderer:Renderer)
 	{
 		renderer.drawTextureEffect(this);
-	}
-	
-	function setCrop():Void
-	{
-		var x = .5;
-		var y = .5;
-		var w = tex.image.w - 1.;
-		var h = tex.image.h - 1.;
-		
-		if (tex.isNormalized)
-		{
-			x /= tex.width;
-			y /= tex.height;
-			w /= tex.width;
-			h /= tex.height;
-		}
-		
-		crop = new Rect(x, y, w, h);
 	}
 }

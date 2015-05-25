@@ -1,82 +1,70 @@
 /*
- *                            _/                                                    _/
- *       _/_/_/      _/_/    _/  _/    _/    _/_/_/    _/_/    _/_/_/      _/_/_/  _/
- *      _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *     _/    _/  _/    _/  _/  _/    _/  _/    _/  _/    _/  _/    _/  _/    _/  _/
- *    _/_/_/      _/_/    _/    _/_/_/    _/_/_/    _/_/    _/    _/    _/_/_/  _/
- *   _/                            _/        _/
- *  _/                        _/_/      _/_/
- *
- * POLYGONAL - A HAXE LIBRARY FOR GAME DEVELOPERS
- * Copyright (c) 2012 Michael Baczynski, http://www.polygonal.de
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 package de.polygonal.zz.scene;
 
 import de.polygonal.ds.ArrayedStack;
+import de.polygonal.zz.scene.GlobalState;
 
-typedef GlobalStateStacks = Array<ArrayedStack<GlobalState>>;
-
+/**
+	A global state attached to an interior node in a scene graph affects all leaf nodes in the
+	subtree rooted at that node.
+**/
+@:build(de.polygonal.core.macro.IntConsts.build(
+[
+	STATE_ALPHA_MULTIPLIER,
+	STATE_ALPHA_BLEND,
+	STATE_COLOR_TRANSFORM,
+	MAX
+], false, true))
 class GlobalState
 {
-	static var _stacks:GlobalStateStacks = null;
-	inline public static function getStacks():GlobalStateStacks
-	{
-		if (_stacks == null)
-		{
-			_stacks = [];
-			for (i in 0...Type.getEnumConstructs(GlobalStateType).length)
-				_stacks[i] = new ArrayedStack();
-		}
-		return _stacks;
-	}
-	
-	public static function clrStacks():Void
-	{
-		for (i in _stacks) i.clear();
-	}
-	
-	public static function dumpStacks():String
-	{
-		var s = '\n';
-		for (i in 0...Type.getEnumConstructs(GlobalStateType).length)
-			s += Printf.format("[%d] => [%s]\n", [i, _stacks[i].toArray().join('')]);
-		return s;
-	}
+	public static var NUM_STATES = Type.getEnumConstructs(GlobalStateType).length;
 	
 	public var type(default, null):GlobalStateType;
-	public var index(default, null):Int;
-	public var flags(default, null):Int;
-	public var enabled:Bool;
-	public var next:GlobalState;
 	
-	public var __alphaState:AlphaState;
+	public var slot(default, null):Int;
+	
+	public var bits(default, null):Int;
 	
 	public function new(type:GlobalStateType)
 	{
 		this.type = type;
-		this.index = Type.enumIndex(type);
-		flags = 1 << index;
-		enabled = true;
-		next = null;
+		slot = type.getIndex();
+		bits = 1 << slot;
 	}
 	
 	inline public function equals(other:GlobalState):Bool
-		return flags == other.flags;
+	{
+		return bits == other.bits;
+	}
+	
+	inline public function as<T:GlobalState>(state:Class<T>):T
+	{
+		#if flash
+		return untyped __as__(this, state);
+		#else
+		return cast this;
+		#end
+	}
+	
+	public function collapse(stack:ArrayedStack<GlobalState>):GlobalState
+	{
+		return throw "override for implementation";
+	}
 }
