@@ -68,7 +68,7 @@ class BmFontFormat implements TextureAtlasFormat
 			bc.y = char.y;
 			bc.offsetX = char.xoffset;
 			bc.offsetY = char.yoffset;
-			bc.stepX = char.xadvance;
+			bc.advanceX = char.xadvance;
 			bc.w = char.width;
 			bc.h = char.height;
 			
@@ -98,13 +98,13 @@ class BitmapChar
 	var h(default, null) = 0;
 	var offsetX(default, null) = 0;
 	var offsetY(default, null) = 0;
-	var stepX(default, null) = 0;
+	var advanceX(default, null) = 0;
 	
 	function new() {}
 	
 	function toString():String
 	{
-		return "{BitmapChar: code=$code, x=$x, y=$y, w=$w, h=$, offsetX=$offsetX, offsetY=$offsetX, stepX=$stepX";
+		return '{BitmapChar: code=$code, x=$x, y=$y, w=$w, h=$h, offsetX=$offsetX, offsetY=$offsetY, advanceX=$advanceX}';
 	}
 }
 
@@ -139,7 +139,7 @@ class BitmapCharSet
 	
 	function toString():String
 	{
-		return "{BitmapCharSet: lineHeight=$lineHeight, base=$base, renderedSize=$renderedSize, textureWidth=$textureWidth, textureHeight=$textureHeight";
+		return '{BitmapCharSet: lineHeight=$lineHeight, base=$base, renderedSize=$renderedSize, textureWidth=$textureWidth, textureHeight=$textureHeight}';
 	}
 }
 
