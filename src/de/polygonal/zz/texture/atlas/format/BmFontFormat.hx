@@ -81,7 +81,7 @@ class BmFontFormat implements TextureAtlasFormat
 		}
 		
 		for (pair in file.kerningPairs)
-			charSet.kerning.set(Bits.packUI16(pair.first, pair.second), pair.amount);
+			charSet.kerning.set((pair.second << 16) | pair.first, pair.amount);
 			
 		return data;
 	}
