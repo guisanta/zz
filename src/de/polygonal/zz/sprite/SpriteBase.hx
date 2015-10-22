@@ -28,6 +28,7 @@ import de.polygonal.zz.scene.AlphaMultiplierState;
 import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.GlobalStateType;
 import de.polygonal.zz.scene.Spatial;
+import de.polygonal.zz.scene.Spatial.as;
 
 /**
 	Abstract base class for sprite objects.
@@ -48,24 +49,6 @@ import de.polygonal.zz.scene.Spatial;
 class SpriteBase
 {
 	inline static var SCALE_EPS = .001;
-	
-	inline public static function asSpriteBase(value:Dynamic):SpriteBase
-	{
-		#if flash
-		return flash.Lib.as(value, SpriteBase);
-		#else
-		return cast value;
-		#end
-	}
-	
-	inline public static function asSpriteGroup(value:Dynamic):SpriteGroup
-	{
-		#if flash
-		return flash.Lib.as(value, SpriteGroup);
-		#else
-		return cast value;
-		#end
-	}
 	
 	public var tickable = true;
 	
@@ -133,21 +116,21 @@ class SpriteBase
 	public var parent(get_parent, set_parent):SpriteGroup;
 	inline function get_parent():SpriteGroup
 	{
-		return mSpatial.parent != null ? asSpriteGroup(mSpatial.parent.arbiter) : null;
+		return mSpatial.parent != null ? as(mSpatial.parent.arbiter, SpriteGroup) : null;
 	}
 	inline function set_parent(value:SpriteGroup):SpriteGroup
 	{
 		remove();
-		value.addChild(asSpriteBase(mSpatial.arbiter));
+		value.addChild(as(mSpatial.arbiter, SpriteBase));
 		return value;
 	}
 	
-	public function root():SpriteGroup
+	public function getRoot():SpriteGroup
 	{
 		var p = this;
 		while (p.parent != null)
 			p = p.parent;
-		return p.asGroup();
+		return as(p, SpriteGroup);
 	}
 	
 	public var name(get_name, set_name):String;
@@ -582,11 +565,6 @@ class SpriteBase
 				mSpatial.updateControllers(timeDelta);
 	}
 	
-	inline public function asGroup():SpriteGroup
-	{
-		return SpriteBase.asSpriteGroup(this);
-	}
-	
 	inline function updateAlphaAndVisibility()
 	{
 		if (mFlags & (IS_ALPHA_DIRTY | IS_VISIBILITY_DIRTY) > 0)
@@ -720,13 +698,4 @@ class SpriteBase
 	inline function clampScale(x:Float) return x < 0 ? (x > -SCALE_EPS ? -SCALE_EPS : x) : (x < SCALE_EPS ? SCALE_EPS : x);
 	
 	inline function invalidateWorldTransform() mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
-	
-	inline function as<T>(v:Dynamic, c:Class<T>):T
-	{
-		#if flash
-		return untyped __as__(v, c);
-		#else
-		return cast v;
-		#end
-	}
 }

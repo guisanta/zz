@@ -212,7 +212,7 @@ class Renderer
 	{
 		//if (globalEffect == null) //TODO for batching?
 		for (i in 0...visibleSet.size())
-			drawVisual(visibleSet.get(i).asVisual());
+			drawVisual(Spatial.as(visibleSet.get(i), Visual));
 		//else
 			//globalEffect.draw(this, visibleSet);
 	}

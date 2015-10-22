@@ -30,6 +30,7 @@ import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.scene.Bv.BvType;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
+import de.polygonal.zz.scene.Spatial.as;
 
 /**
 	Allows grouping of child nodes.
@@ -322,7 +323,7 @@ class Node extends Spatial
 		{
 			output.push(e);
 			if (e.isNode())
-				e.asNode().getDescendants(output);
+				as(e, Node).getDescendants(output);
 			e = e.mSibling;
 		}
 		return output;
@@ -336,7 +337,7 @@ class Node extends Spatial
 			if (e.name == name) return e;
 			if (e.isNode())
 			{
-				t = e.asNode().getDescendantByName(name);
+				t = as(e, Node).getDescendantByName(name);
 				if (t != null) return t;
 			}
 			e = e.mSibling;
@@ -351,7 +352,7 @@ class Node extends Spatial
 		{
 			if (e.name == name) output.push(e);
 			if (e.isNode())
-				e.asNode().getAllDescendantsByName(name, output);
+				as(e, Node).getAllDescendantsByName(name, output);
 			e = e.mSibling;
 		}
 		return output;

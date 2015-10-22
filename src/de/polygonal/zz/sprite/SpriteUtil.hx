@@ -23,6 +23,7 @@ import de.polygonal.core.math.Vec3;
 import de.polygonal.core.time.Timebase;
 import de.polygonal.zz.render.Renderer;
 import de.polygonal.zz.scene.*;
+import de.polygonal.zz.scene.Spatial.as;
 
 /**
 	Helper methods to operate on hierarchical sprite structures.
@@ -38,11 +39,11 @@ class SpriteUtil
 	
 	public static function drawScene(renderer:Renderer, root:SpriteGroup)
 	{
-		commit(root);
+		root.commit();
 		
 		tick(root, Timebase.gameTimeDelta);
 		
-		var node = root.sgn.asNode();
+		var node = as(root.sgn, Node);
 		
 		TreeUtil.updateGeometricState(node, true);
 		
@@ -66,7 +67,7 @@ class SpriteUtil
 			c++;
 			if (s.isNode())
 			{
-				s = s.asNode().child;
+				s = as(s, Node).child;
 				while (s != null)
 				{
 					a[top++] = s;
@@ -114,7 +115,7 @@ class SpriteUtil
 				
 				if (s.isNode())
 				{
-					n = s.asNode();
+					n = as(s, Node);
 					k = n.numChildren;
 					p = top + k;
 					
@@ -131,7 +132,7 @@ class SpriteUtil
 						a[p] = null;
 					}
 				}
-				return SpriteBase.asSpriteBase(s.arbiter);
+				return as(s.arbiter, SpriteBase);
 			}
 		}
 	}
@@ -152,21 +153,21 @@ class SpriteUtil
 			
 			if (s.arbiter == null) continue;
 			
-			sprite = SpriteBase.asSpriteBase(s.arbiter);
+			sprite = as(s.arbiter, SpriteBase);
 			
 			if (sprite.tickable)
 				sprite.tick(timeDelta);
 			
 			if (sprite.mFlags & SpriteGroup.IS_TOPOLOGY_FLATTENED > 0)
 			{
-				for (c in SpriteBase.asSpriteGroup(sprite).mDescendants)
+				for (c in as(sprite, SpriteGroup).mDescendants)
 					c.tick(timeDelta);
 				continue;
 			}
 			
 			if (s.isNode())
 			{
-				n = s.asNode();
+				n = as(s, Node);
 				var c = n.child;
 				while (c != null)
 				{
@@ -176,77 +177,6 @@ class SpriteUtil
 			}
 		}
 	}
-	
-	/**
-		Calls commit() on all descendants of `root`, including `root`.
-		
-		_Uses a non-allocating, iterative traversal._
-	**/
-	public static function commit(root:SpriteGroup)
-	{
-		var a = mStackSpatial;
-		a[0] = root.mNode;
-		var top = 1, s:Spatial, sprite:SpriteBase;
-		while (top != 0)
-		{
-			s = a[--top];
-			a[top] = null;
-			
-			if (s.arbiter == null) continue;
-			
-			sprite = SpriteBase.asSpriteBase(s.arbiter);
-			sprite.commit();
-			
-			if (sprite.mFlags & SpriteGroup.IS_TOPOLOGY_FLATTENED > 0)
-			{
-				for (c in cast(sprite, SpriteGroup).mDescendants)
-					c.commit();
-				continue;
-			}
-			
-			//TODO already called by spritegroup.assemble()?
-			if (s.isNode())
-			{
-				var c = s.asNode().child;
-				while (c != null)
-				{
-					a[top++] = c;
-					c = c.mSibling;
-				}
-			}
-		}
-	}
-	
-	/*public static function interpolate(root:SpriteGroup, alpha:Float)
-	{
-		var a = mStackTickSpatial;
-		a[0] = root.mNode;
-		var top = 1, s:Spatial, sprite:SpriteBase;
-		while (top != 0)
-		{
-			s = a[--top];
-			a[top] = null;
-			
-			if (s.arbiter == null)
-			{
-				//L.e('$s arbiter null');
-				continue;
-			}
-			
-			sprite = SpriteBase.asSpriteBase(s.arbiter);
-			sprite.interpolate(alpha);
-			
-			if (s.isNode())
-			{
-				var c = s.asNode().child;
-				while (c != null)
-				{
-					a[top++] = c;
-					c = c.mSibling;
-				}
-			}
-		}
-	}*/
 	
 	public static function clearFlags(root:SpriteGroup)
 	{
@@ -262,7 +192,7 @@ class SpriteUtil
 			
 			if (s.isNode())
 			{
-				n = s.asNode();
+				n = as(s, Node);
 				var c = n.child;
 				while (c != null)
 				{
@@ -280,11 +210,11 @@ class SpriteUtil
 	{
 		if (sprite.isGroup() && !Std.is(sprite, SpriteText))
 		{
-			var c = SpriteBase.asSpriteGroup(sprite).mNode.child, hook;
+			var c = as(sprite, SpriteGroup).mNode.child, hook;
 			while (c != null)
 			{
 				hook = c.mSibling;
-				freeSubtree(SpriteBase.asSpriteBase(c.arbiter), true);
+				freeSubtree(as(c.arbiter, SpriteBase), true);
 				c = hook;
 			}
 		}

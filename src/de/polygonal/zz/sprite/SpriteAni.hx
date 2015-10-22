@@ -23,7 +23,7 @@ import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.controller.KeyframeController;
-import de.polygonal.zz.controller.SheetController;
+import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.TweenController;
 import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.scene.Xform;
@@ -35,7 +35,7 @@ import haxe.EnumFlags;
 @:access(de.polygonal.zz.sprite.SpriteAni)
 private class Sheet implements SpriteSheetAnimControllerListener
 {
-	var mController:SheetController;
+	var mController:SpriteSheetController;
 	
 	var mCurrent(default, null):SpriteSheetAnim;
 	
@@ -46,10 +46,10 @@ private class Sheet implements SpriteSheetAnimControllerListener
 	{
 		mHost = host;
 		mLastTime = null;
-		//mController = new SheetController
+		//mController = new SpriteSheetController
 	}
 	
-	public function play(animation:SpriteSheetAnim, ?onFinish:SpriteSheetAnim->Void, startOver:Bool = true):SheetController
+	public function play(animation:SpriteSheetAnim, ?onFinish:SpriteSheetAnim->Void, startOver:Bool = true):SpriteSheetController
 	{
 		var c = getController();
 		c.play(animation, startOver ? 0 : mLastTime);
@@ -75,20 +75,20 @@ private class Sheet implements SpriteSheetAnimControllerListener
 		c.setListener(null);
 	}
 	
-	public function getController():SheetController
+	public function getController():SpriteSheetController
 	{
 		var spatial = mHost.mSprite.mVisual;
-		var c:SheetController = spatial.findControllerOfType(SheetController.TYPE);
+		var c:SpriteSheetController = spatial.findControllerOfType(SpriteSheetController.TYPE);
 		if (c == null)
 		{
-			c = new SheetController();
+			c = new SpriteSheetController();
 			spatial.attach(c);
 		}
 		c.setListener(this);
 		return c;
 	}
 	
-	function onSpriteSheetAnimUpdate(frame:String, time:Float, index:Int):Void 
+	function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void 
 	{
 		mSprite.frame = frame;
 		mLastTime = time;
@@ -99,7 +99,7 @@ private class Sheet implements SpriteSheetAnimControllerListener
 	{
 		if (mOnAnimationFinished != null)
 		{
-			var c = getSheetController();
+			var c = getSpriteSheetController();
 			var f = mOnAnimationFinished;
 			mOnAnimationFinished = null;
 			//f(c.currentAnim);
@@ -164,11 +164,11 @@ class SpriteAni
 		
 		if (mSprite != null)
 		{
-			var c = mSprite.getVisual().findControllerOfType(SheetController.TYPE);
+			var c = mSprite.getVisual().findControllerOfType(SpriteSheetController.TYPE);
 			if (c != null)
 			{
-				cast(c, SheetController).stop();
-				cast(c, SheetController).setListener(null);
+				cast(c, SpriteSheetController).stop();
+				cast(c, SpriteSheetController).setListener(null);
 			}
 		}
 		
@@ -177,24 +177,24 @@ class SpriteAni
 		mSprite = null;
 	}
 	
-	public function getSheetController():SheetController
+	public function getSpriteSheetController():SpriteSheetController
 	{
 		assert(mSprite != null, "cannot animate a SpriteGroup instance");
 		
 		var spatial = mSprite.mVisual;
-		var c:SheetController = spatial.findControllerOfType(SheetController.TYPE);
+		var c:SpriteSheetController = spatial.findControllerOfType(SpriteSheetController.TYPE);
 		if (c == null)
 		{
-			c = new SheetController();
+			c = new SpriteSheetController();
 			spatial.attach(c);
 		}
 		c.setListener(this);
 		return c;
 	}
 	
-	public function playSheetAni(animation:SheetAnimation, ?onFinish:SheetAnimation->Void, startOver:Bool = true):SheetController
+	public function playSpriteSheetAnimation(animation:SheetAnimation, ?onFinish:SheetAnimation->Void, startOver:Bool = true):SpriteSheetController
 	{
-		var c = getSheetController();
+		var c = getSpriteSheetController();
 		c.play(animation, startOver ? 0 : mLastTime);
 		mOnAnimationFinished = onFinish;
 		return c;
@@ -202,17 +202,17 @@ class SpriteAni
 	
 	public function pauseSheetAnim(name:String)
 	{
-		getSheetController().pause();
+		getSpriteSheetController().pause();
 	}
 	
 	public function resumeSheetAnim(name:String)
 	{
-		getSheetController().resume();
+		getSpriteSheetController().resume();
 	}
 	
-	public function stopSheetAni()
+	public function stopSpriteSheetAnimation()
 	{
-		var c = getSheetController();
+		var c = getSpriteSheetController();
 		//mOnAnimationFinished = null;
 		c.stop();
 		c.setListener(null);
@@ -220,7 +220,7 @@ class SpriteAni
 	
 	/*	public function defineNextAnimation(first:String, second:String)
 	{
-		getSheetController().defineNext(first, second);
+		getSpriteSheetController().defineNext(first, second);
 	}*/
 	
 	/*if (mNext != null)
@@ -228,7 +228,7 @@ class SpriteAni
 					if (mNext.exists(currentAnim.name)) //play next animation after this one?
 					{
 						play(mNext.get(currentAnim.name));
-						mListener.onSpriteSheetAnimUpdate(frame, controlTime, lastFrame);
+						mListener.onSpriteSheetChangeFrame(frame, controlTime, lastFrame);
 						return true;
 					}
 				}*/
@@ -240,18 +240,18 @@ class SpriteAni
 		mNext.set(first, second);
 	}*/
 	
-	function onSpriteSheetAnimUpdate(frame:String, time:Float, index:Int):Void 
+	function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void 
 	{
 		mSprite.frame = frame;
 		mLastTime = time;
 		//if (onEnterFrame != null) onEnterFrame(frame.index);
 	}
 	
-	function onSpriteSheetAnimFinish():Void 
+	function onSpriteSheetAniEnd():Void 
 	{
 		if (mOnAnimationFinished != null)
 		{
-			var c = getSheetController();
+			var c = getSpriteSheetController();
 			
 			var f = mOnAnimationFinished;
 			mOnAnimationFinished = null;

@@ -36,6 +36,8 @@ import de.polygonal.zz.sprite.SpriteUtil;
 import de.polygonal.zz.texture.atlas.TextureAtlas.TextureAtlasFrame;
 import de.polygonal.zz.texture.TextureLib;
 
+import de.polygonal.zz.scene.Spatial.as;
+
 //Sets the untransformed size of the node.
 //The contentSize remains the same no matter the node is scaled or rotated. All nodes has a size. Layer and Scene has the same size of the screen.
 //Parameters
@@ -57,7 +59,7 @@ class Sprite extends SpriteBase
 	public function new(?parent:SpriteGroup)
 	{
 		super(new Quad());
-		mVisual = mSpatial.asVisual();
+		mVisual = as(mSpatial, Visual);
 		if (parent != null) parent.addChild(this);
 	}
 	
@@ -133,7 +135,7 @@ class Sprite extends SpriteBase
 		mCurrentFrame = name;
 		
 		//change frame
-		var e = as(mVisual.effect, TextureEffect);
+		var e = mVisual.effect.as(TextureEffect);
 		
 		var frame = e.atlas.getFrameBy(name);
 		e.setFrameIndex(frame.index); //change uv coordinates
@@ -239,7 +241,7 @@ class Sprite extends SpriteBase
 	
 	public function hitTestPoint(point:Coord2f):Bool
 	{
-		//TODO assemble -make sure xforms are current
+		//TODO commit -make sure xforms are current
 		
 		return getVisual().pick(point, null) == 1;
 	}
@@ -255,9 +257,10 @@ class Sprite extends SpriteBase
 			return output;
 		}
 		
-		var r = root();
-		SpriteUtil.commit(r);
-		TreeUtil.updateGeometricState(r.sgn.asNode(), false);
+		var r = getRoot();
+		r.commit();
+		
+		TreeUtil.updateGeometricState(as(r.sgn, Node), false);
 		
 		return mSpatial.getBoundingBox(targetSpace.sgn, output);
 		
@@ -273,7 +276,7 @@ class Sprite extends SpriteBase
 			if (p == g)
 			{
 				SpriteUtil.update(g);
-				NodeUtil.updateGeometricState(g.sgn.asNode());
+				NodeUtil.updateGeometricState(as(g.sgn, Node));
 				trace('target space is a parent of $this');
 				break;
 			}

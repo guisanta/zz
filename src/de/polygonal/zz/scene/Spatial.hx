@@ -52,12 +52,21 @@ import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 	IS_NODE,
 	IS_VISUAL,
 	IS_COMPOSITE_LOCKED,
-	GS_UPDATED,
-	IS_FREED
+	IS_FREED,
+	GS_UPDATED
 ], true, false))
 @:access(de.polygonal.zz.scene.Node)
 class Spatial extends ControlledObject implements Hashable
 {
+	inline public static function as<T>(x:Dynamic, cl:Class<T>):T
+	{
+		#if flash
+		return untyped __as__(x, cl);
+		#else
+		return cast x;
+		#end
+	}
+	
 	public static var DEFAULT_BV_TYPE = BvType.Circle;
 	
 	public var name:String;
@@ -176,25 +185,7 @@ class Spatial extends ControlledObject implements Hashable
 	
 	inline public function isNode():Bool return mFlags & IS_NODE > 0;
 	
-	inline public function asNode():Node
-	{
-		#if flash
-		return flash.Lib.as(this, Node);
-		#else
-		return cast this;
-		#end
-	}
-	
 	inline public function isVisual():Bool return mFlags & IS_VISUAL > 0;
-	
-	inline public function asVisual():Visual
-	{
-		#if flash
-		return flash.Lib.as(this, Visual);
-		#else
-		return cast this;
-		#end
-	}
 	
 	/**
 		In some situations you might need to set the world transform directly and bypass the updateWorldData() mechanism.
@@ -286,17 +277,14 @@ class Spatial extends ControlledObject implements Hashable
 	{
 		mFlags &= ~IS_WORLD_XFORM_DIRTY;
 		
-		//updateBound ? (mFlags |= BOUND_UPDATED) : (mFlags &= ~BOUND_UPDATED);
+		if (worldTransformCurrent) return;
 		
-		if (!worldTransformCurrent)
-		{
-			if (parent != null)
-				world.setProduct2(parent.world, local); //W' = Wp * L
-			else
-				world.of(local); //root node
-			
-			mFlags |= IS_WORLD_BOUND_DIRTY;
-		}
+		if (parent != null)
+			world.setProduct2(parent.world, local); //W' = Wp * L
+		else
+			world.of(local); //root node
+		
+		mFlags |= IS_WORLD_BOUND_DIRTY;
 	}
 	
 	function updateWorldBound()

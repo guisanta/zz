@@ -23,6 +23,8 @@ import de.polygonal.core.math.Coord2;
 import de.polygonal.core.math.Limits;
 import de.polygonal.core.math.Rect.Rectf;
 
+import de.polygonal.zz.scene.Spatial.as;
+
 /**
 	Scene graph helper functions.
 **/
@@ -37,7 +39,8 @@ class TreeUtil
 		
 		_Uses a non-allocating, iterative traversal._
 	**/
-	public static function descendants(root:Node):Iterator<Spatial>
+	//TODO also iterates over groups?
+	public static function descendantsIterator(root:Node):Iterator<Spatial>
 	{
 		var a = mStackSpatial;
 		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
@@ -70,7 +73,7 @@ class TreeUtil
 				
 				if (s.isNode())
 				{
-					n = s.asNode();
+					n = as(s, Node);
 					k = n.numChildren;
 					p = top + k;
 					
@@ -150,7 +153,7 @@ class TreeUtil
 			
 			if (s.isNode())
 			{
-				n = s.asNode();
+				n = as(s, Node);
 				var c = n.child;
 				while (c != null)
 				{
@@ -182,7 +185,7 @@ class TreeUtil
 			
 			if (s.isNode())
 			{
-				n = s.asNode();
+				n = as(s, Node);
 				var c = n.child;
 				while (c != null)
 				{
@@ -223,7 +226,7 @@ class TreeUtil
 			
 			if (s.isVisual())
 			{
-				s.asVisual().getBoundingBox(targetSpace, output);
+				as(s, Visual).getBoundingBox(targetSpace, output);
 				
 				if (output.x < minX) minX = output.x;
 				if (output.y < minY) minY = output.y;
@@ -234,7 +237,7 @@ class TreeUtil
 			else
 			if (s.isNode())
 			{
-				n = s.asNode();
+				n = as(s, Node);
 				var c = n.child;
 				while (c != null)
 				{

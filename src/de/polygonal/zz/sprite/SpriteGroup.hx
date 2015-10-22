@@ -28,6 +28,7 @@ import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.SpriteUtil;
 import haxe.ds.Vector;
+import de.polygonal.zz.scene.Spatial.as;
 
 /**
 	A 'container' node that does not a have size in itself.
@@ -76,7 +77,7 @@ class SpriteGroup extends SpriteBase
 			invalidateWorldTransform();
 			
 			updateAlphaAndVisibility();
-		
+			
 			//same as Sprite.update() but ignores (mSizeX, mSizeY)
 			
 			var l = mSpatial.local;
@@ -198,7 +199,7 @@ class SpriteGroup extends SpriteBase
 			var c = mNode.child;
 			while (c != null)
 			{
-				asSpriteBase(c.arbiter).commit();
+				as(c.arbiter, SpriteBase).commit();
 				c = c.mSibling;
 			}
 		}
@@ -260,7 +261,7 @@ class SpriteGroup extends SpriteBase
 
 	public function getChildAt(index:Int):SpriteBase
 	{
-		return asSpriteBase(mNode.getChildAt(index).arbiter);
+		return as(mNode.getChildAt(index).arbiter, SpriteBase);
 	}
 
 	public function getChildIndex(x:SpriteBase):Int
@@ -279,21 +280,21 @@ class SpriteGroup extends SpriteBase
 	{
 		var child = mNode.getChildByName(name);
 		if (child == null) return null;
-		return asSpriteBase(child.arbiter);
+		return as(child.arbiter, SpriteBase);
 	}
 	
 	public function getDescendantByName(name:String):SpriteBase
 	{
 		var descendant = mNode.getDescendantByName(name);
 		if (descendant == null) return null;
-		return asSpriteBase(descendant.arbiter);
+		return as(SpriteBase, descendant.arbiter);
 	}
 
 	public function getAllDescendantsByName(name:String, output:Array<SpriteBase>):Array<SpriteBase>
 	{
 		var a = mNode.getAllDescendantsByName(name, []);
 		for (i in 0...a.length)
-			output[i] = asSpriteBase(a[i].arbiter);
+			output[i] = as(a[i].arbiter, SpriteBase);
 		return output;
 	}
 	
@@ -316,7 +317,7 @@ class SpriteGroup extends SpriteBase
 		var c = mNode.child;
 		for (i in 0...mNode.numChildren)
 		{
-			output[i] = asSpriteBase(c.arbiter);
+			output[i] = as(c.arbiter, SpriteBase);
 			c = c.mSibling;
 		}
 		return output;
@@ -361,7 +362,7 @@ class SpriteGroup extends SpriteBase
 			},
 			next: function()
 			{
-				var t = asSpriteBase(e.arbiter);
+				var t = as(e.arbiter, SpriteBase);
 				e = e.mSibling;
 				return t;
 			}
@@ -372,9 +373,9 @@ class SpriteGroup extends SpriteBase
 	
 	override public function getBound(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
-		var r = root();
-		SpriteUtil.commit(r);
-		TreeUtil.updateGeometricState(r.sgn.asNode(), true);
+		var r = getRoot();
+		r.commit();
+		TreeUtil.updateGeometricState(as(r.sgn, Node), true);
 		
 		return mSpatial.getBoundingBox(targetSpace.sgn, output);
 	}
@@ -407,7 +408,7 @@ class SpriteGroup extends SpriteBase
 	**/
 	override public function centerPivot()
 	{
-		SpriteUtil.commit(this);
+		commit();
 		mNode.updateGeometricState();
 		
 		var bound = getBound(this, mBoundOut);

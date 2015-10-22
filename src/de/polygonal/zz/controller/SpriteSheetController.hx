@@ -33,19 +33,19 @@ typedef SheetAnimation = Animation<String>;
 
 interface SheetControllerListener
 {
-	private function onSpriteSheetAnimUpdate(frame:String, time:Float, index:Int):Void;
+	private function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void;
 	
-	private function onSpriteSheetAnimFinish():Void;
+	private function onSpriteSheetAniEnd():Void;
 }
 
 /**
 	A controller for playing back a frame-by-frame animation.
 	
-	In contrast to the `KeyframeController`, the `SheetController` doesn't support inbetweens.
+	In contrast to the `KeyframeController`, the `SpriteSheetController` doesn't support inbetweens.
 **/
 @:access(de.polygonal.zz.scene.Spatial)
 @:access(de.polygonal.zz.controller.SheetControllerListener)
-class SheetController extends Controller
+class SpriteSheetController extends Controller
 {
 	static var mDataCache:StringMap<AniData> = null;
 	
@@ -190,11 +190,11 @@ class SheetController extends Controller
 			
 			currentFrameName = mData.names[index];
 			
-			mListener.onSpriteSheetAnimUpdate(currentFrameName, controlTime, index);
+			mListener.onSpriteSheetChangeFrame(currentFrameName, controlTime, index);
 			
 			if (isLastFrame)
 			{
-				mListener.onSpriteSheetAnimFinish();
+				mListener.onSpriteSheetAniEnd();
 				currentName = null;
 				
 				currentAnimation = null;
