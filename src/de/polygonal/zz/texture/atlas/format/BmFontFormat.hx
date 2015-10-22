@@ -33,19 +33,18 @@ using Std;
 **/
 class BmFontFormat implements TextureAtlasFormat
 {
-	var mStr:String;
+	var mSrc:Dynamic;
 	
-	public function new(str:String)
+	public function new(src:Dynamic)
 	{
-		mStr = str;
+		mSrc = src;
 	}
 	
 	public function getAtlas():TextureAtlasDef
 	{
 		var data:TextureAtlasDef = {size: new Sizei(), scale: 1., frames: []};
 		
-		var file = new BmFontFile(mStr);
-		
+		var file = new BmFontFile(mSrc);
 		var charSet = new BitmapCharSet();
 		charSet.renderedSize = file.info.size;
 		charSet.lineHeight = file.common.lineHeight;
@@ -161,20 +160,25 @@ private class BmFontFile
 	
 	public var kerningPairs:Array<FntKerningPair>;
 	
-	/**
-		Parses the given fnt-encoded `src` (text or xml) into `this.charSet`.
-	**/
-	public function new(src:String)
+	public function new(src:Dynamic)
 	{
 		chars = [];
 		kerningPairs = [];
 		
-		try 
+		try
 		{
-			if (~/<\?xml version="1.0"\?>/.match(src))
-				parseXml(src);
+			if (Std.is(src, haxe.io.Bytes))
+				parseBinary(src);
 			else
-				parseText(src);
+			if (Std.is(src, String))
+			{
+				if (~/<\?xml version="1.0"\?>/.match(src))
+					parseXml(src);
+				else
+					parseText(src);
+			}
+			else
+				throw "invalid source file";
 		}
 		catch(error:Dynamic)
 		{
@@ -182,9 +186,129 @@ private class BmFontFile
 		}
 	}
 	
-	function parseXml(text:String)
+	function parseBinary(src:haxe.io.Bytes)
 	{
-		var fast = new haxe.xml.Fast(Xml.parse(text).firstElement());
+		var input = new haxe.io.BytesInput(src);
+		
+		var b = input.readByte();
+		var m = input.readByte();
+		var f = input.readByte();
+		if (b != 66 || m != 77 || f != 70) throw "not a BMF file";
+		
+		if (input.readByte() != 3) throw "invalid version (must be 3)";
+		
+		//Block type 1: info
+		var blockType = input.readByte();
+		var blockSize = input.readInt32();
+		var fontSize = input.readInt16();
+		var bitField = input.readByte();
+		var charSet = input.readByte();
+		var stretchH = input.readUInt16();
+		var aa = input.readByte();
+		var paddingUp = input.readByte();
+		var paddingRight = input.readByte();
+		var paddingDown = input.readByte();
+		var paddingLeft = input.readByte();
+		var spacingHoriz = input.readByte();
+		var spacingVert = input.readByte();
+		var outline = input.readByte();
+		var name = input.readString(blockSize - 14);
+		
+		info = {size: fontSize};
+		
+		//Block type 2: common
+		var blockType = input.readByte();
+		var blockSize = input.readInt32();
+		
+		var lineHeight = input.readUInt16();
+		var base = input.readUInt16();
+		var scaleW = input.readUInt16();
+		var scaleH = input.readUInt16();
+		var pages = input.readUInt16();
+		var bitField = input.readByte();
+		var alphaChnl = input.readByte();
+		var redChnl = input.readByte();
+		var greenChnl = input.readByte();
+		var blueChnl = input.readByte();
+		
+		common =
+		{
+			lineHeight: lineHeight,
+			base: base,
+			scaleW: scaleW,
+			scaleH: scaleH
+		};
+		
+		//Block type 3: pages
+		var blockType = input.readByte();
+		var blockSize = input.readInt32();
+		
+		var a = input.position;
+		var s = input.readUntil(0);
+		var b = input.position;
+		var len = b - a;
+		blockSize -= len;
+		while (blockSize > 0)
+		{
+			var s = input.readUntil(0);
+			blockSize -= len;
+		}
+		
+		//Block type 4: chars
+		var blockType = input.readByte();
+		var blockSize = input.readInt32();
+		
+		var numChars = Std.int(blockSize / 20);
+		for (i in 0...numChars)
+		{
+			var id = input.readInt32();
+			var x = input.readUInt16();
+			var y = input.readUInt16();
+			var width = input.readUInt16();
+			var height = input.readUInt16();
+			var xoffset = input.readInt16();
+			var yoffset = input.readInt16();
+			var xadvance = input.readInt16();
+			var page = input.readByte();
+			var chnl = input.readByte();
+			
+			chars.push
+			({
+				id: id,
+				x: x,
+				y: y,
+				width: width,
+				height: height,
+				xoffset: xoffset,
+				yoffset: yoffset,
+				xadvance: xadvance
+			});
+		}
+		
+		//Block type 5: kerning pairs
+		if (input.position == input.length) return;
+		
+		var blockType = input.readByte();
+		var blockSize = input.readInt32();
+		
+		while (input.position < input.length)
+		{
+			var first = input.readInt32();
+			var second = input.readInt32();
+			var amount = input.readInt16();
+			
+			kerningPairs.push
+			({
+				first: first,
+				second: second,
+				amount: amount
+			});
+		}
+	}
+	
+	function parseXml(src:String)
+	{
+		var fast = new haxe.xml.Fast(Xml.parse(src).firstElement());
 		
 		info = { size: Std.int(Math.abs(fast.node.info.att.size.parseInt())) }
 		
@@ -200,13 +324,13 @@ private class BmFontFile
 		{
 			chars.push
 			({
-					  id: e.att.id.parseInt(),
-					   x: e.att.x.parseInt(),
-					   y: e.att.y.parseInt(),
-				   width: e.att.width.parseInt(),
-				  height: e.att.height.parseInt(),
-				 xoffset: e.att.xoffset.parseInt(),
-				 yoffset: e.att.yoffset.parseInt(),
+				id: e.att.id.parseInt(),
+				x: e.att.x.parseInt(),
+				y: e.att.y.parseInt(),
+				width: e.att.width.parseInt(),
+				height: e.att.height.parseInt(),
+				xoffset: e.att.xoffset.parseInt(),
+				yoffset: e.att.yoffset.parseInt(),
 				xadvance:  e.att.xadvance.parseInt()
 			});
 		}
@@ -217,7 +341,7 @@ private class BmFontFile
 			{
 				kerningPairs.push
 				({
-					 first: e.att.first.parseInt(),
+					first: e.att.first.parseInt(),
 					second: e.att.second.parseInt(),
 					amount: e.att.amount.parseInt()
 				});
@@ -225,9 +349,9 @@ private class BmFontFile
 		}
 	}
 	
-	function parseText(text:String)
+	function parseText(src:String)
 	{
-		var lines = ~/\r\n/g.match(text) ? text.split("\r\n") : text.split("\n");
+		var lines = ~/\r\n/g.match(src) ? src.split("\r\n") : src.split("\n");
 		
 		var nextLine = 0;
 		
@@ -277,13 +401,13 @@ private class BmFontFile
 				
 				chars.push
 				({
-					      id: reChar.matched(1).parseInt(),
-					       x: reChar.matched(2).parseInt(),
-					       y: reChar.matched(3).parseInt(),
-					   width: reChar.matched(4).parseInt(),
-					  height: reChar.matched(5).parseInt(),
-					 xoffset: reChar.matched(6).parseInt(),
-					 yoffset: reChar.matched(7).parseInt(),
+					id: reChar.matched(1).parseInt(),
+					x: reChar.matched(2).parseInt(),
+					y: reChar.matched(3).parseInt(),
+					width: reChar.matched(4).parseInt(),
+					height: reChar.matched(5).parseInt(),
+					xoffset: reChar.matched(6).parseInt(),
+					yoffset: reChar.matched(7).parseInt(),
 					xadvance: reChar.matched(8).parseInt(),
 				});
 				
@@ -301,7 +425,7 @@ private class BmFontFile
 				reKerning.match(line);
 				kerningPairs.push
 				({
-					 first: reKerning.matched(1).parseInt(),
+					first: reKerning.matched(1).parseInt(),
 					second: reKerning.matched(2).parseInt(),
 					amount: reKerning.matched(3).parseInt()
 				});
