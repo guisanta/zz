@@ -65,6 +65,9 @@ class CanvasWindow extends RenderWindow
 		//disable elastic scrolling
 		doc.body.addEventListener("touchmove", function(e) e.preventDefault(), false);
 		
+		//disable context menu
+		doc.body.oncontextmenu = function() return false;
+		
 		mUseExistingCanvasElement = false;
 		if (doc.body.getElementsByTagName("canvas").length == 1)
 		{
