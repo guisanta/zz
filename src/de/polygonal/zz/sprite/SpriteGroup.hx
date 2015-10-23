@@ -20,10 +20,13 @@ package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Aabb2;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.scene.Node;
+import de.polygonal.zz.scene.PickResult;
+import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.SpriteUtil;
@@ -42,6 +45,8 @@ class SpriteGroup extends SpriteBase
 	var mNode:Node;
 	var mDescendants:Vector<SpriteBase>;
 	var mBoundOut:Aabb2;
+	
+	var mResult:PickResult;
 	
 	public function new(?name:String, ?parent:SpriteGroup, ?children:Array<SpriteBase>)
 	{
@@ -371,7 +376,23 @@ class SpriteGroup extends SpriteBase
 	
 	//}
 	
-	override public function getBound(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	public function pick(point:Coord2f, result:Array<Sprite>):Int
+	{
+		if (getDirty()) commit();
+		
+		var f = sgn.mFlags;
+		if (f & Spatial.IS_WORLD_XFORM_DIRTY > 0)
+			sgn.updateGeometricState(false, true);
+		else
+		if (f & Spatial.IS_WORLD_BOUND_DIRTY > 0)
+			sgn.updateBoundState(true, false);
+		
+		if (mResult == null) mResult = new PickResult();	
+		var k = mNode.pick(point, mResult);
+		for (i in 0...k) result[i] = as(mResult.get(i).arbiter, Sprite);
+		return k;
+	}
+	
 	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
 		var r = getRoot();

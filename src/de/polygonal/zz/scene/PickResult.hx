@@ -18,20 +18,32 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
+import de.polygonal.core.util.Assert.assert;
+
 class PickResult
 {
-	public var count:Int;
-	public var data:Array<Visual>;
+	public var count(default, null):Int = 0;
+	
+	var mData(default, null):Array<Visual> = [];
 	
 	public function new()
 	{
-		count = 0;
-		data = [];
+	}
+	
+	public function free()
+	{
+		mData = null;
 	}
 	
 	inline public function add(x:Visual)
 	{
-		data[count++] = x;
+		mData[count++] = x;
+	}
+	
+	inline public function get(index:Int):Visual
+	{
+		assert(index >= 0 && index < count);
+		return mData[index];
 	}
 	
 	inline public function clear()
@@ -43,7 +55,7 @@ class PickResult
 	{
 		for (i in 0...count)
 		{
-			if (data[i].name == name)
+			if (mData[i].name == name)
 				return true;
 		}
 		return false;

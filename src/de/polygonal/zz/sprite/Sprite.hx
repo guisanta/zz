@@ -239,9 +239,16 @@ class Sprite extends SpriteBase
 		mFlags |= (HINT_UNIFORM_SCALE | IS_DIRTY);
 	}
 	
-	public function hitTestPoint(point:Coord2f):Bool
+	public function pick(point:Coord2f):Bool
 	{
-		//TODO commit -make sure xforms are current
+		if (getDirty()) commit();
+		
+		var f = sgn.mFlags;
+		if (f & Spatial.IS_WORLD_XFORM_DIRTY > 0)
+			sgn.updateWorldData(true);
+		else
+		if (f & Spatial.IS_WORLD_BOUND_DIRTY > 0)
+			sgn.updateWorldBound();
 		
 		return getVisual().pick(point, null) == 1;
 	}
