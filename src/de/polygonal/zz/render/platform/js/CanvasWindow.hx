@@ -42,7 +42,7 @@ class CanvasWindow extends RenderWindow
 	var mTimer:Timer;
 	var mFirstTouchId:Float = null;
 	var mOffset = new Coord2i();
-	var mRatio:Float = 1;
+	var mDevicePixelRatio:Float = 1;
 	
 	public function new(listener:RenderWindowListener)
 	{
@@ -223,10 +223,10 @@ class CanvasWindow extends RenderWindow
 		
 		var s = canvas.style;
 		s.position = "absolute";
-		s.left = px(view.x);
-		s.top = px(view.y);
-		s.width = px(view.w);
-		s.height = px(view.h);
+		s.left   = px(Std.int(view.x / mDevicePixelRatio));
+		s.top    = px(Std.int(view.y / mDevicePixelRatio));
+		s.width  = px(Std.int(view.w / mDevicePixelRatio));
+		s.height = px(Std.int(view.h / mDevicePixelRatio));
 		
 		if (internalResolution != null)
 		{
@@ -237,8 +237,6 @@ class CanvasWindow extends RenderWindow
 		{
 			canvas.width = view.w;
 			canvas.height = view.h;
-			canvas.style.width = px(Std.int(view.w / mRatio));
-			canvas.style.height = px(Std.int(view.h  / mRatio));
 		}
 	}
 	
@@ -281,9 +279,9 @@ class CanvasWindow extends RenderWindow
 		var win = Browser.window;
 		var w = win.innerWidth;
 		var h = win.innerHeight;
-		mRatio = win.devicePixelRatio;
-		w = Std.int(w * mRatio);
-		h = Std.int(h * mRatio);
+		mDevicePixelRatio = win.devicePixelRatio;
+		w = Std.int(w * mDevicePixelRatio);
+		h = Std.int(h * mDevicePixelRatio);
 		
 		resize(w, h);
 	}
@@ -442,9 +440,9 @@ class CanvasWindow extends RenderWindow
 			mOffset.set(0, 0);
 		}
 		
-		mRatio = Browser.window.devicePixelRatio;
-		w = Std.int(w * mRatio);
-		h = Std.int(h * mRatio);
+		mDevicePixelRatio = Browser.window.devicePixelRatio;
+		w = Std.int(w * mDevicePixelRatio);
+		h = Std.int(h * mDevicePixelRatio);
 		
 		if (mSize.x != w || mSize.y != h) resize(w, h);
 	}
