@@ -62,7 +62,7 @@ class FlashWindow extends RenderWindow
 		stage.doubleClickEnabled = true;
 		stage.colorCorrection = ColorCorrection.OFF;
 		
-		dpi = Capabilities.screenDPI;
+		dpi = Std.int(Capabilities.screenDPI);
 		
 		flash.ui.Multitouch.inputMode = flash.ui.MultitouchInputMode.TOUCH_POINT;
 		
