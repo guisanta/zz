@@ -26,6 +26,7 @@ import flash.display.*;
 import flash.display3D.*;
 import flash.events.*;
 import flash.Lib;
+import flash.system.Capabilities;
 import flash.ui.Mouse;
 
 @:enum
@@ -59,6 +60,8 @@ class FlashWindow extends RenderWindow
 		stage.stageFocusRect = false;
 		stage.doubleClickEnabled = true;
 		stage.colorCorrection = ColorCorrection.OFF;
+		
+		dpi = Capabilities.screenDPI;
 		
 		flash.ui.Multitouch.inputMode = flash.ui.MultitouchInputMode.TOUCH_POINT;
 		stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);

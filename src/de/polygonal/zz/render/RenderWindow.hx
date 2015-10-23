@@ -30,6 +30,8 @@ class RenderWindow extends RenderTarget
 	inline function get_multiTouch():Bool return mMultiTouch;
 	function set_multiTouch(value:Bool):Bool return mMultiTouch = value;
 	
+	public var dpi(default, null):Int = 96;
+	
 	var mListener:RenderWindowListener;
 	var mPointer = new Coord2i();
 	var mMultiTouch = false;

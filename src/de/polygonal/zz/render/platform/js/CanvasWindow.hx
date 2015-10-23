@@ -51,6 +51,17 @@ class CanvasWindow extends RenderWindow
 		var doc = Browser.document;
 		var win = Browser.window;
 		
+		var div = doc.createDivElement();
+		div.id = "tmpdiv";
+		div.style.height = "1in";
+		div.style.width = "1in";
+		doc.body.appendChild(div);
+		var dpiX = doc.getElementById("tmpdiv").offsetWidth * win.devicePixelRatio;
+		var dpiY = doc.getElementById("tmpdiv").offsetHeight * win.devicePixelRatio;
+		dpi = Std.int(Math.max(dpiX, dpiY));
+		doc.body.removeChild(div);
+		div = null;
+		
 		//disable elastic scrolling
 		doc.body.addEventListener("touchmove", function(e) e.preventDefault(), false);
 		
