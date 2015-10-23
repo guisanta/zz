@@ -246,14 +246,25 @@ class Sprite extends SpriteBase
 		return getVisual().pick(point, null) == 1;
 	}
 	
-	override public function getBound(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
 		if (this == targetSpace)
 		{
-			output.x = originX;
-			output.y = originY;
-			output.w = mSizeX;
-			output.h = mSizeY;
+			if (hasHint(HINT_TRIMMED))
+			{
+				output.x = originX + mTrimRect.x;
+				output.y = originY + mTrimRect.y;
+				output.w = mTrimRect.w;
+				output.h = mTrimRect.h;
+			}
+			else
+			{
+				output.x = originX;
+				output.y = originY;
+				output.w = mSizeX;
+				output.h = mSizeY;
+			}
+			
 			return output;
 		}
 		

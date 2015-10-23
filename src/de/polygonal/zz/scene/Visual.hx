@@ -77,7 +77,7 @@ class Visual extends Spatial
 	
 	public function updateModelBound()
 	{
-		return throw 'override for implementation';
+		mFlags |= Spatial.IS_MODEL_BOUND_DIRTY;
 	}
 	
 	override public function pick(point:Coord2f, ?result:PickResult):Int
@@ -87,17 +87,20 @@ class Visual extends Spatial
 	
 	override function updateWorldBound()
 	{
-		if (!worldBoundCurrent)
-		{
-			#if profile
-			SceneStats.numBvUpdates++;
-			#end
-			
-			//apply world transformation to compute model -> world bounding volume
-			modelBound.transformBy(world, worldBound);
-			
-			mFlags &= ~Spatial.IS_WORLD_BOUND_DIRTY;
-		}
+		if (worldBoundCurrent) return;
+		
+		if (mFlags & (Spatial.IS_WORLD_BOUND_DIRTY | Spatial.IS_MODEL_BOUND_DIRTY) == 0) return;
+		
+		#if profile
+		SceneStats.numBvUpdates++;
+		#end
+		
+		//apply world transformation to compute model -> world bounding volume
+		modelBound.transformBy(world, worldBound);
+		
+		mFlags &= ~(Spatial.IS_WORLD_BOUND_DIRTY | Spatial.IS_MODEL_BOUND_DIRTY);
+		
+		super.updateWorldBound();
 	}
 	
 	override function getVisibleSet(culler:Culler, noCull:Bool)

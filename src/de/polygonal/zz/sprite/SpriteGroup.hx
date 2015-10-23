@@ -372,6 +372,7 @@ class SpriteGroup extends SpriteBase
 	//}
 	
 	override public function getBound(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
 		var r = getRoot();
 		r.commit();
@@ -382,7 +383,7 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_width():Float
 	{
-		return getBound(this, mBoundOut).w;
+		return getBounds(this, mBoundOut).w;
 	}
 	override function set_width(value:Float):Float
 	{
@@ -393,7 +394,7 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_height():Float
 	{
-		return getBound(this, mBoundOut).h;
+		return getBounds(this, mBoundOut).h;
 	}
 	override function set_height(value:Float):Float
 	{
@@ -411,7 +412,7 @@ class SpriteGroup extends SpriteBase
 		commit();
 		mNode.updateGeometricState();
 		
-		var bound = getBound(this, mBoundOut);
+		var bound = getBounds(this, mBoundOut);
 		mPivotX = bound.w / 2;
 		mPivotY = bound.h / 2;
 		setDirty();
@@ -419,7 +420,7 @@ class SpriteGroup extends SpriteBase
 	
 	override public function centerOrigin()
 	{
-		var bound = getBound(this, mBoundOut);
+		var bound = getBounds(this, mBoundOut);
 		originX = -bound.w / 2;
 		originY = -bound.h / 2;
 		setDirty();
@@ -427,7 +428,7 @@ class SpriteGroup extends SpriteBase
 	
 	override public function centerPivotAndOrigin()
 	{
-		var bound = getBound(this, mBoundOut);
+		var bound = getBounds(this, mBoundOut);
 		var cx = bound.w / 2;
 		var cy = bound.h / 2;
 		mPivotX = cx;

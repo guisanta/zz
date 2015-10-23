@@ -48,6 +48,7 @@ import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 	IS_WORLD_BOUND_CURRENT,
 	IS_WORLD_XFORM_DIRTY,
 	IS_WORLD_BOUND_DIRTY,
+	IS_MODEL_BOUND_DIRTY,
 	IS_RS_DIRTY,
 	IS_NODE,
 	IS_VISUAL,
@@ -115,7 +116,7 @@ class Spatial extends ControlledObject implements Hashable
 		local = new Xform();
 		world = new Xform();
 		worldBound = createBoundingVolume();
-		mFlags = GS_UPDATED;
+		mFlags = GS_UPDATED | IS_WORLD_XFORM_DIRTY | IS_WORLD_BOUND_DIRTY | IS_MODEL_BOUND_DIRTY | IS_RS_DIRTY;
 	}
 	
 	/**
@@ -264,11 +265,25 @@ class Spatial extends ControlledObject implements Hashable
 	}
 	
 	/**
-		Updates world bounding volumes on an upward pass without recomputing transformations.
+		Updates world bounding volumes without recomputing transformations.
 		Useful if just the model data changes.
 	**/
-	public function updateBoundState(propagateToRoot = true)
+	public function updateBoundState(updateChildren = true, propagateToRoot = true)
 	{
+		if (updateChildren)
+		{
+			if (isNode())
+			{
+				var node = as(this, Node);
+				var c = node.child;
+				while (c != null)
+				{
+					c.updateBoundState(updateChildren, false);
+					c = c.mSibling;
+				}
+			}
+		}
+		
 		updateWorldBound();
 		if (propagateToRoot) propagateBoundToRoot();
 	}
@@ -289,7 +304,7 @@ class Spatial extends ControlledObject implements Hashable
 	
 	function updateWorldBound()
 	{
-		throw 'override for implementation';
+		if (parent != null) parent.mFlags |= Spatial.IS_WORLD_BOUND_DIRTY;
 	}
 	
 	function propagateBoundToRoot()

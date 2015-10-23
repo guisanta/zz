@@ -534,9 +534,10 @@ class SpriteBase
 		mSpatial.local.setIdentity2();
 	}
 	
-	public function getBound(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
-		commit();
+		if (getDirty()) commit();
+		
 		return mSpatial.getBoundingBox(targetSpace.sgn, output);
 	}
 	
@@ -545,7 +546,8 @@ class SpriteBase
 	**/
 	public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		commit();
+		if (getDirty()) commit();
+		
 		return mSpatial.world.applyForward2(input, output);
 	}
 	
@@ -554,7 +556,8 @@ class SpriteBase
 	**/
 	public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		commit();
+		if (getDirty()) commit();
+		
 		return mSpatial.world.applyInverse2(input, output);
 	}
 	

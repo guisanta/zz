@@ -77,10 +77,10 @@ class Quad extends Visual
 	{
 		if (this == targetSpace)
 		{
-			output.x = 0;
-			output.y = 0;
-			output.w = 1;
-			output.h = 1;
+			output.minX = 0;
+			output.minY = 0;
+			output.maxX = 1;
+			output.maxY = 1;
 			return output;
 		}
 		
@@ -124,16 +124,18 @@ class Quad extends Visual
 		w1.applyInverse2(c, c);
 		minMax(c);
 		
-		output.x = minX;
-		output.y = minY;
-		output.w = maxX - minX;
-		output.h = maxY - minY;
+		output.minX = minX;
+		output.minY = minY;
+		output.maxX = maxX;
+		output.maxY = maxY;
 		
 		return output;
 	}
 	
 	override function updateModelBound()
 	{
+		super.updateModelBound();
+		
 		modelBound.center.x = .5;
 		modelBound.center.y = .5;
 		modelBound.radius = Math.sqrt(.5);

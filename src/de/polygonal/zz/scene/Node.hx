@@ -518,28 +518,29 @@ class Node extends Spatial
 	
 	override function updateWorldBound()
 	{
-		if (!worldBoundCurrent)
+		if (worldBoundCurrent) return;
+		
+		//compute world bounding volume containing world bounding volume of all its children
+		//set to first non-null child
+		if (child == null) return;
+		
+		#if profile
+		SceneStats.numBvUpdates++;
+		#end
+		
+		//merge world bound with the world bounds of all children
+		var c = child;
+		worldBound.of(c.worldBound);
+		c = c.mSibling;
+		while (c != null)
 		{
-			#if profile
-			SceneStats.numBvUpdates++;
-			#end
-			
-			//compute world bounding volume containing world bounding volume of all its children
-			//set to first non-null child
-			if (child == null) return;
-			
-			//merge world bound with the world bounds of all children
-			var c = child;
-			worldBound.of(c.worldBound);
+			worldBound.growToContain(c.worldBound);
 			c = c.mSibling;
-			while (c != null)
-			{
-				worldBound.growToContain(c.worldBound);
-				c = c.mSibling;
-			}
-			
-			mFlags &= ~Spatial.IS_WORLD_BOUND_DIRTY;
 		}
+		
+		mFlags &= ~Spatial.IS_WORLD_BOUND_DIRTY;
+		
+		super.updateWorldBound();
 	}
 	
 	override function propagateRenderStateUpdate(stack:GlobalStateStackList)

@@ -218,7 +218,7 @@ class TreeUtil
 		
 		var a = mStackSpatial;
 		a[0] = root;
-		var top = 1, s:Spatial, n:Node;
+		var top = 1, s:Spatial, n:Node, c;
 		while (top != 0)
 		{
 			s = a[--top];
@@ -228,17 +228,16 @@ class TreeUtil
 			{
 				as(s, Visual).getBoundingBox(targetSpace, output);
 				
-				if (output.x < minX) minX = output.x;
-				if (output.y < minY) minY = output.y;
-				
-				if (output.x + output.w > maxX) maxX = output.x + output.w;
-				if (output.y + output.h > maxY) maxY = output.y + output.h;
+				if (output.minX < minX) minX = output.minX;
+				if (output.minY < minY) minY = output.minY;
+				if (output.maxX > maxX) maxX = output.maxX;
+				if (output.maxY > maxY) maxY = output.maxY;
 			}
 			else
 			if (s.isNode())
 			{
 				n = as(s, Node);
-				var c = n.child;
+				c = n.child;
 				while (c != null)
 				{
 					a[top++] = c;
@@ -247,10 +246,10 @@ class TreeUtil
 			}
 		}
 		
-		output.x = minX;
-		output.y = minY;
-		output.w = maxX - minX;
-		output.h = maxY - minY;
+		output.minX = minX;
+		output.minY = minY;
+		output.maxX = maxX;
+		output.maxY = maxY;
 		
 		return output;
 	}
