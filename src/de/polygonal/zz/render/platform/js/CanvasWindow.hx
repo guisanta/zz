@@ -43,6 +43,7 @@ class CanvasWindow extends RenderWindow
 	var mFirstTouchId:Float = null;
 	var mOffset = new Coord2i();
 	var mDevicePixelRatio:Float = 1;
+	var mCoord = new Coord2i();
 	
 	public function new(listener:RenderWindowListener)
 	{
@@ -294,7 +295,7 @@ class CanvasWindow extends RenderWindow
 		mMouseDown = true;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
-		onInput(x, y, Press);
+		onInput(x, y, Press, 0, true, cast e.which);
 	}
 	
 	function onMouseUp(e:MouseEvent)
@@ -302,7 +303,7 @@ class CanvasWindow extends RenderWindow
 		mMouseDown = false;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
-		onInput(x, y, Release);
+		onInput(x, y, Release, true, cast e.which);
 	}
 	
 	function onMouseMove(e:MouseEvent)
@@ -316,7 +317,7 @@ class CanvasWindow extends RenderWindow
 	{
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
-		onInput(x, y, Select);
+		onInput(x, y, Select, 0, true, cast e.which);
 	}
 	
 	function onTouchStart(e:TouchEvent)
@@ -413,16 +414,16 @@ class CanvasWindow extends RenderWindow
 		}
 	}
 	
-	function onInput(x:Int, y:Int, type:InputType, id = 0, syncPointer = true)
+	function onInput(x:Int, y:Int, type:InputType, id = 0, syncPointer = true, hint:InputHint = cast 0)
 	{
-		x = Std.int(x * mRatio);
-		y = Std.int(y * mRatio);
+		x = Std.int(x * mDevicePixelRatio);
+		y = Std.int(y * mDevicePixelRatio);
 		if (syncPointer) mPointer.set(x, y);
 		
 		if (!mMouseDown && type == Move) return;
 		if (!pointerInsideViewport(x, y)) return;
 		
-		mListener.onInput(x, y, type, id);
+		mListener.onInput(mCoord.set(x, y), type, id, hint);
 	}
 	
 	function detectResize()

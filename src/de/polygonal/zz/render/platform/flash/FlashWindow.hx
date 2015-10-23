@@ -49,6 +49,7 @@ class FlashWindow extends RenderWindow
 	var mDrawBoxing:Bool;
 	var mFullscreen = false;
 	var mVisible = true;
+	var mCoord = new Coord2i();
 	
 	public function new(listener:RenderWindowListener)
 	{
@@ -64,9 +65,15 @@ class FlashWindow extends RenderWindow
 		dpi = Capabilities.screenDPI;
 		
 		flash.ui.Multitouch.inputMode = flash.ui.MultitouchInputMode.TOUCH_POINT;
+		
 		stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
+		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
+		stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
+		stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
+		
 		stage.addEventListener(MouseEvent.CLICK, onClick);
 		stage.addEventListener(Event.RESIZE, onResize);
 		stage.addEventListener(Event.FULLSCREEN, onFullScreen);
@@ -94,7 +101,11 @@ class FlashWindow extends RenderWindow
 		}
 		
 		stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
+		stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
 		stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
+		stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
 		stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		stage.removeEventListener(MouseEvent.CLICK, onClick);
 		stage.removeEventListener(Event.RESIZE, onResize);
@@ -422,13 +433,33 @@ class FlashWindow extends RenderWindow
 	function onMouseDown(e:MouseEvent)
 	{
 		mMouseDown = true;
-		onInput(e.stageX, e.stageY, Press);
+		onInput(e.stageX, e.stageY, Press, 0, InputHint.LeftButton);
+	}
+	
+	function onMiddleMouseDown(e:MouseEvent)
+	{
+		onInput(e.stageX, e.stageY, Press, 0, InputHint.MiddleButton);
+	}
+	
+	function onRightMouseDown(e:MouseEvent)
+	{
+		onInput(e.stageX, e.stageY, Press, 0, InputHint.RightButton);
 	}
 	
 	function onMouseUp(e:MouseEvent)
 	{
 		mMouseDown = false;
-		onInput(e.stageX, e.stageY, Release);
+		onInput(e.stageX, e.stageY, Release, 0, InputHint.LeftButton);
+	}
+	
+	function onMiddleMouseUp(e:MouseEvent)
+	{
+		onInput(e.stageX, e.stageY, Release, 0, InputHint.MiddleButton);
+	}
+	
+	function onRightMouseUp(e:MouseEvent)
+	{
+		onInput(e.stageX, e.stageY, Release, 0, InputHint.RightButton);
 	}
 	
 	function onMouseMove(e:MouseEvent)
@@ -461,12 +492,11 @@ class FlashWindow extends RenderWindow
 		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Select, e.touchPointID);
 	}
 	
-	function onInput(x:Float, y:Float, type:InputType, id = 0)
+	function onInput(x:Float, y:Float, type:InputType, id = 0, hint:InputHint = InputHint.None)
 	{
 		var ix = Std.int(x);
 		var iy = Std.int(y);
-		
 		if (pointerInsideViewport(ix, iy))
-			mListener.onInput(ix, iy, type, id);
+			mListener.onInput(mCoord.set(ix, iy), type, id, hint);
 	}
 }
