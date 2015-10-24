@@ -25,12 +25,14 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.util.Assert.assert;
-
 import de.polygonal.core.math.Mathematics;
 
 @:autoBuild(de.polygonal.zz.controller.ControllerType.build())
 class Controller
 {
+	public static var COUNT = 0;
+	public static var ACTIVE_COUNT = 0;
+	
 	inline static var DISPOSE_AFTER_SECONDS = 10;
 	
 	public var repeat:RepeatType;
@@ -39,11 +41,19 @@ class Controller
 	public var phase:Float = 0;
 	public var frequency:Float = 1;
 	public var passedTime:Float = 0;
-	public var active:Bool;
 	public var dispose:Bool;
 	
 	public var type:Int;
 	public var next:Controller;
+	
+	var mActive = false;
+	public var active(get_active, set_active):Bool;
+	inline function get_active():Bool return mActive;
+	inline function set_active(value:Bool):Bool
+	{
+		value ? ACTIVE_COUNT++ : ACTIVE_COUNT--;
+		return value;
+	}
 	
 	var mObject:ControlledObject;
 	
@@ -51,6 +61,7 @@ class Controller
 	{
 		repeat = RepeatType.Clamp;
 		type = Reflect.field(Type.getClass(this), "TYPE");
+		COUNT++;
 	}
 	
 	public function free()
@@ -59,6 +70,9 @@ class Controller
 		mObject = null;
 		repeat = null;
 		assert(next == null);
+		
+		if (active) ACTIVE_COUNT--;
+		COUNT--;
 	}
 	
 	public function getObject():ControlledObject

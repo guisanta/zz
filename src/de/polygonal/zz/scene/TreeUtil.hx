@@ -253,23 +253,4 @@ class TreeUtil
 		
 		return output;
 	}
-	
-	/**
-		Counts the total number of active controllers.
-	**/
-	public static function countActiveControllers(root:Node):Int
-	{
-		var c = 0;
-		for (i in descendants(root))
-		{
-			var n = i.controllers;
-			while (n != null)
-			{
-				if (n.active) c++;
-				n = n.next;
-			}
-		}
-		
-		return c;
-	}
 }
