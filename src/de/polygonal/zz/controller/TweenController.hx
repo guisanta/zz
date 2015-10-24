@@ -35,8 +35,6 @@ interface TweenControllerListener
 @:access(de.polygonal.zz.controller.TweenControllerListener)
 class TweenController extends Controller
 {
-	static var mCounter = 0;
-	
 	public var id(default, null):Int;
 	
 	var mSrcVal:Float;
@@ -70,7 +68,6 @@ class TweenController extends Controller
 		maxTime = duration;
 		mInterpolation = EaseFactory.create(ease);
 		
-		if (!active) id = mCounter++;
 		active = true;
 		dispose = false;
 		return id;

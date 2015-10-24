@@ -51,8 +51,9 @@ class Controller
 	inline function get_active():Bool return mActive;
 	inline function set_active(value:Bool):Bool
 	{
-		value ? ACTIVE_COUNT++ : ACTIVE_COUNT--;
-		return value;
+		if (mActive != value)
+			value ? ACTIVE_COUNT++ : ACTIVE_COUNT--;
+		return mActive = value;
 	}
 	
 	var mObject:ControlledObject;
