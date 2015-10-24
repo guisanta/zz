@@ -492,7 +492,7 @@ class FlashWindow extends RenderWindow
 		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Select, e.touchPointID);
 	}
 	
-	function onInput(x:Float, y:Float, type:InputType, id = 0, hint:InputHint = InputHint.None)
+	function onInput(x:Float, y:Float, type:InputType, id = 0, hint:InputHint = cast 0)
 	{
 		var ix = Std.int(x);
 		var iy = Std.int(y);
