@@ -38,7 +38,6 @@ import de.polygonal.zz.scene.Spatial.as;
 	The width and height properties represent the extents of its children.
 	Changing those properties will scale all children accordingly.
 **/
-@:build(de.polygonal.core.macro.IntConsts.build([IS_TOPOLOGY_FLATTENED], true, false, "de.polygonal.zz.sprite.SpriteBase"))
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteGroup extends SpriteBase
 {
@@ -57,20 +56,6 @@ class SpriteGroup extends SpriteBase
 			for (i in children)
 				addChild(i);
 		mBoundOut = new Aabb2();
-	}
-	
-	public function flatten()
-	{
-		mDescendants = new Vector<SpriteBase>(SpriteUtil.count(this));
-		var i = 0;
-		for (j in SpriteUtil.descendants(this)) mDescendants.set(i, j);
-		mFlags |= IS_TOPOLOGY_FLATTENED;
-	}
-	
-	public function unflatten()
-	{
-		mDescendants = null;
-		mFlags &= ~IS_TOPOLOGY_FLATTENED;
 	}
 	
 	override public function commit()
@@ -190,23 +175,11 @@ class SpriteGroup extends SpriteBase
 			}
 		}
 		
-		//update descendants
-		if (isFlattened())
+		var c = mNode.child;
+		while (c != null)
 		{
-			//iterative
-			for (c in mDescendants)
-				if (c.getDirty())
-					c.commit();
-		}
-		else
-		{
-			//recursive
-			var c = mNode.child;
-			while (c != null)
-			{
-				as(c.arbiter, SpriteBase).commit();
-				c = c.mSibling;
-			}
+			as(c.arbiter, SpriteBase).commit();
+			c = c.mSibling;
 		}
 	}
 	
@@ -220,7 +193,6 @@ class SpriteGroup extends SpriteBase
 	public function freeDescendants()
 	{
 		SpriteUtil.freeSubtree(this);
-		mFlags &= ~IS_TOPOLOGY_FLATTENED;
 		mDescendants = null;
 	}
 	
@@ -231,35 +203,30 @@ class SpriteGroup extends SpriteBase
 	
 	public function addChild(child:SpriteBase):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.addChild(child.mSpatial);
 		return this;
 	}
 
 	public function addChildAt(x:SpriteBase, index:Int):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.addChildAt(x.mSpatial, index);
 		return this;
 	}
 		
 	public function removeChild(x:SpriteBase):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.removeChild(x.mSpatial);
 		return this;
 	}
 
 	public function removeChildAt(index:Int):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.removeChildAt(index);
 		return this;
 	}
 
 	public function removeChildren(beginIndex = 0, endIndex = -1):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.removeChildren(beginIndex, endIndex);
 		return this;
 	}
@@ -276,7 +243,6 @@ class SpriteGroup extends SpriteBase
 
 	public function setChildIndex(x:SpriteBase, index:Int):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.setChildIndex(x.mSpatial, index);
 		return this;
 	}
@@ -305,14 +271,12 @@ class SpriteGroup extends SpriteBase
 	
 	public function swapChildren(x:SpriteBase, y:SpriteBase):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.swapChildren(x.mSpatial, y.mSpatial);
 		return this;
 	}
 
 	public function swapChildrenAt(i:Int, j:Int):SpriteGroup
 	{
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.swapChildrenAt(i, j);
 		return this;
 	}
@@ -337,7 +301,6 @@ class SpriteGroup extends SpriteBase
 			return this;
 		}
 		
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.setLast(x.mSpatial);
 		return this;
 	}
@@ -351,7 +314,6 @@ class SpriteGroup extends SpriteBase
 			return this;
 		}
 		
-		assert(!isFlattened(), "group must not be flattened.");
 		mNode.setFirst(x.mSpatial);
 		return this;
 	}
@@ -458,6 +420,4 @@ class SpriteGroup extends SpriteBase
 		originY =-cy;
 		setDirty();
 	}
-	
-	inline function isFlattened() return mFlags & IS_TOPOLOGY_FLATTENED > 0;
 }

@@ -158,13 +158,6 @@ class SpriteUtil
 			if (sprite.tickable)
 				sprite.tick(timeDelta);
 			
-			if (sprite.mFlags & SpriteGroup.IS_TOPOLOGY_FLATTENED > 0)
-			{
-				for (c in as(sprite, SpriteGroup).mDescendants)
-					c.tick(timeDelta);
-				continue;
-			}
-			
 			if (s.isNode())
 			{
 				n = as(s, Node);
