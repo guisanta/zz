@@ -108,7 +108,7 @@ class SpriteTextSettings
 	function set_multiline(value:Bool):Bool
 	{
 		mChanged = mChanged || (mMultiline != value);
-		return value;
+		return mMultiline = value;
 	}
 	
 	public var kerning(get_kerning, set_kerning):Bool;
