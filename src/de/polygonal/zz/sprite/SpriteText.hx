@@ -198,6 +198,36 @@ class SpriteText extends SpriteBase
 			settings.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
 	}
 	
+	public function shrinkToFit(minSize:Int)
+	{
+		if (settings.size < minSize) return;
+		
+		entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		
+		while (!entireTextFits && settings.size >= minSize)
+		{
+			settings.size--;
+			entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		}
+		
+		commit();
+	}
+	
+	public function growToFit(maxSize:Int)
+	{
+		if (settings.size > maxSize) return;
+		
+		entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		
+		while (!entireTextFits && settings.size <= maxSize)
+		{
+			settings.size++;
+			entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		}
+		
+		commit();
+	}
+	
 	override function get_width():Float
 	{
 		commit();
