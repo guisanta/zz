@@ -50,8 +50,8 @@ class SpriteTextSettings
 	var mMultiline = true;
 	var mKerning = true;
 	var mSize = 0.;
-	var mWidth = 0.;
-	var mHeight = 0.;
+	var mWidth = 100.;
+	var mHeight = 100.;
 	var mTracking = 0.;
 	var mLeading = 0.;
 	
