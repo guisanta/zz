@@ -691,6 +691,8 @@ class SpriteBase
 		return value;
 	}
 	
+	inline public function asGroup():SpriteGroup return as(this, SpriteGroup);
+	
 	inline function hasHint(x:Int) return (mFlags & x) > 0;
 	inline function clrHint(x:Int) mFlags &= ~x;
 	
