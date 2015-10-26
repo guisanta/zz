@@ -51,11 +51,13 @@ class Sprite extends SpriteBase
 	var mCurrentFrame:String;
 	var mSize = new Sizef(0, 0);
 	
-	public function new(?parent:SpriteGroup)
+	public function new(?parent:SpriteGroup, ?texture:Null<Int>, ?frame:String)
 	{
 		super(new Quad());
 		mVisual = as(mSpatial, Visual);
 		if (parent != null) parent.addChild(this);
+		if (texture != null) this.texture = texture;
+		if (frame != null) this.frame = frame;
 	}
 	
 	override public function free()
