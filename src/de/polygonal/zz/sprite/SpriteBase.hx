@@ -604,9 +604,9 @@ class SpriteBase
 	/**
 		Updates local transformation.
 	**/
-	public function commit()
+	public function commit():SpriteBase
 	{
-		if (!getDirty()) return;
+		if (!getDirty()) return this;
 		clrDirty();
 		
 		updateAlphaAndVisibility();
@@ -651,6 +651,8 @@ class SpriteBase
 			-(spx * c) + (spy * s) + mPivotX + x + mOriginX,
 			-(spx * s) - (spy * c) + mPivotY + y + mOriginY
 		);
+		
+		return this;
 	}
 	
 	public var ani(get_ani, set_ani):SpriteAni;

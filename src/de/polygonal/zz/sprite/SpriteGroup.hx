@@ -56,7 +56,7 @@ class SpriteGroup extends SpriteBase
 		mBoundOut = new Aabb2();
 	}
 	
-	override public function commit()
+	override public function commit():SpriteBase
 	{
 		if (getDirty())
 		{
@@ -179,6 +179,8 @@ class SpriteGroup extends SpriteBase
 			as(c.arbiter, SpriteBase).commit();
 			c = c.mSibling;
 		}
+		
+		return this;
 	}
 	
 	override public function free()

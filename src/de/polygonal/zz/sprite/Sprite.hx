@@ -336,11 +336,11 @@ class Sprite extends SpriteBase
 		return null;
 	}
 	
-	override public function commit()
+	override public function commit():SpriteBase
 	{
-		if (mFlags & HAS_SIZE == 0) return;
+		if (mFlags & HAS_SIZE == 0) return this;
 		
-		if (!getDirty()) return;
+		if (!getDirty()) return this;
 		clrDirty();
 		
 		updateAlphaAndVisibility();
@@ -612,6 +612,8 @@ class Sprite extends SpriteBase
 				}
 			}
 		}
+		
+		return this;
 	}
 	
 	inline public function sendToForeground()

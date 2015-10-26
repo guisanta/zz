@@ -276,17 +276,17 @@ class SpriteText extends SpriteBase
 		super.tick(timeDelta);
 	}
 	
-	override public function commit()
+	override public function commit():SpriteBase
 	{
 		if (getDirty()) super.commit();
 		
 		clrDirty();
 		
-		if (mTexture == null) return;
+		if (mTexture == null) return this;
 		
-		if (settings.text == null) return;
+		if (settings.text == null) return this;
 		
-		if (!settings.mChanged && !mTextureChanged) return;
+		if (!settings.mChanged && !mTextureChanged) return this;
 		
 		if (mTextureChanged)
 		{
@@ -410,6 +410,8 @@ class SpriteText extends SpriteBase
 			c.free();
 			c = next;
 		}
+		
+		return this;
 	}
 	
 	public function getOutputText():String //TODO includes whitespace?
