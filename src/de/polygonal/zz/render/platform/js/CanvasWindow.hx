@@ -23,7 +23,6 @@ import de.polygonal.zz.render.RenderWindowListener;
 import haxe.Timer;
 import js.Browser;
 import js.html.CanvasElement;
-import js.html.ClientRect;
 import js.html.Event;
 import js.html.EventTarget;
 import js.html.MouseEvent;

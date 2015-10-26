@@ -23,7 +23,6 @@ import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Bits;
 import de.polygonal.ds.Da;
 import de.polygonal.motor.geom.data.Plane2;
-import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.Renderer;
 
 @:access(de.polygonal.zz.scene.Spatial)

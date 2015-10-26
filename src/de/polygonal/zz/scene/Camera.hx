@@ -18,11 +18,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
-import de.polygonal.core.math.Rect;
-import de.polygonal.zz.data.Size.Sizef;
+import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.math.Rect.Recti;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.Renderer;
 

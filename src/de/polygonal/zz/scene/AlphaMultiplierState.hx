@@ -20,9 +20,8 @@ package de.polygonal.zz.scene;
 
 import de.polygonal.ds.ArrayedStack;
 import de.polygonal.ds.pooling.DynamicObjectPool;
-import de.polygonal.ds.pooling.ObjectPool;
-import de.polygonal.zz.scene.GlobalState;
 import de.polygonal.zz.scene.AlphaMultiplierState;
+import de.polygonal.zz.scene.GlobalState;
 
 class AlphaMultiplierState extends GlobalState
 {

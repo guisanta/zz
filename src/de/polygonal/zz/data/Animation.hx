@@ -18,9 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.data;
 
-import de.polygonal.ds.Vector;
-import de.polygonal.core.util.Assert.assert;
-
 /**
 	The data (e.g. an image) to be displayed (identified by `value`) and how long the data is to be displayed (`holdTime`).
 **/

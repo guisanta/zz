@@ -30,6 +30,7 @@ import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.*;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.*;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.Painter;
+import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.scene.GlobalStateType;

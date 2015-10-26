@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.texture.atlas.format;
 
-import de.polygonal.core.math.Coord2;
 import de.polygonal.core.math.Rect.Recti;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizei;

@@ -23,14 +23,11 @@ import de.polygonal.ds.Da;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureShader;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.Painter.*;
+import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
 import de.polygonal.zz.scene.Visual;
 import de.polygonal.zz.texture.Texture;
-import flash.display3D.Context3D;
 import flash.display3D.Context3DProgramType;
-import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
-
-import flash.display3D.textures.Texture as Stage3dTexture;
 
 @:access(de.polygonal.zz.render.Renderer)
 class PainterQuadTexture extends PainterQuad

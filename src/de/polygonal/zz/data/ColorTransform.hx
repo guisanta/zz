@@ -18,8 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.data;
 
-import de.polygonal.core.math.Vec3;
-
 using de.polygonal.core.math.Mathematics;
 
 class ColorTransform

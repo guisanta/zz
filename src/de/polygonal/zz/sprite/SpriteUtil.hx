@@ -18,8 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
-import de.polygonal.core.math.Coord2;
-import de.polygonal.core.math.Vec3;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.time.Timebase;
 import de.polygonal.zz.render.Renderer;
 import de.polygonal.zz.scene.*;

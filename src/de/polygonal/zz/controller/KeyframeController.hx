@@ -20,7 +20,6 @@ package de.polygonal.zz.controller;
 
 import de.polygonal.core.math.Interpolation;
 import de.polygonal.core.math.Mat33;
-import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.tween.ease.EaseFactory;
 import de.polygonal.ds.Vector;
@@ -28,6 +27,7 @@ import de.polygonal.zz.data.Animation;
 import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Xform;
 import haxe.ds.StringMap;
+import de.polygonal.core.math.Mathematics;
 
 using Reflect;
 

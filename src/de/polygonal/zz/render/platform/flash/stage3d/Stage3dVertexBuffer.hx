@@ -18,9 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d;
 
-import de.polygonal.core.math.Limits;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.core.util.Assert.assert;
 import flash.display3D.Context3D;
 import flash.display3D.Context3DVertexBufferFormat;
 import flash.display3D.VertexBuffer3D;

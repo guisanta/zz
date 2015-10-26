@@ -19,19 +19,17 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.core.math.Mathematics;
-import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
 import de.polygonal.zz.scene.Spatial;
+import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.SpriteUtil;
 import haxe.ds.Vector;
-import de.polygonal.zz.scene.Spatial.as;
+import de.polygonal.core.math.Mathematics;
 
 /**
 	A 'container' node that does not a have size in itself.

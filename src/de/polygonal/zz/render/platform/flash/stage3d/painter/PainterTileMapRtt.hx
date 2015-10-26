@@ -21,6 +21,7 @@ package de.polygonal.zz.render.platform.flash.stage3d.painter;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.effect.TileMapEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalShader;
@@ -35,7 +36,6 @@ import flash.display3D.Context3D;
 import flash.display3D.Context3DTextureFormat;
 import flash.display3D.textures.Texture;
 import flash.Vector;
-import de.polygonal.core.util.Assert.assert;
 
 //2. render to texture http://jacksondunstan.com/articles/1998
 //3. vbo, ido - allocate more upfront for scaling/rotation? 

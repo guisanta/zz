@@ -19,24 +19,19 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.effect.TextureEffect;
-import de.polygonal.zz.render.Renderer;
-import de.polygonal.zz.render.RenderTarget;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.Quad;
+import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.sprite.SpriteBase;
 import de.polygonal.zz.sprite.SpriteBase.*;
-import de.polygonal.zz.sprite.SpriteUtil;
-import de.polygonal.zz.texture.atlas.TextureAtlas.TextureAtlasFrame;
 import de.polygonal.zz.texture.TextureLib;
-
-import de.polygonal.zz.scene.Spatial.as;
 
 //Sets the untransformed size of the node.
 //The contentSize remains the same no matter the node is scaled or rotated. All nodes has a size. Layer and Scene has the same size of the screen.

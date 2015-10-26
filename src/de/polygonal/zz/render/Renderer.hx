@@ -18,7 +18,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render;
 
-import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
@@ -27,7 +28,6 @@ import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.texture.*;
-import haxe.ds.IntMap;
 import haxe.EnumFlags;
 
 @:allow(de.polygonal.zz.render.effect)

@@ -19,7 +19,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas;
 
 import de.polygonal.core.math.Coord2.Coord2i;
-import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.math.Rect.Recti;
 import de.polygonal.core.util.Assert.assert;
@@ -28,7 +27,7 @@ import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
-import haxe.ds.StringMap;
+import de.polygonal.core.math.Mathematics;
 
 class TextureAtlas
 {

@@ -18,18 +18,15 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.js;
 
-import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.zz.data.Color;
-import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.render.effect.TileMapEffect;
-import de.polygonal.zz.scene.AlphaBlendState;
-import de.polygonal.zz.scene.AlphaMultiplierState;
+import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.scene.Xform;
 import haxe.ds.IntMap;
 import haxe.ds.Vector;

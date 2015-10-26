@@ -18,14 +18,13 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.math.Coord2;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Bits;
+import de.polygonal.motor.geom.containment.PointInsidePlane;
 import de.polygonal.motor.geom.data.Plane2;
 import de.polygonal.motor.geom.intersection.IntersectAabb2;
-import de.polygonal.motor.geom.containment.PointInsidePlane;
 import de.polygonal.zz.scene.Bv.BvType;
 import haxe.ds.Vector;
 

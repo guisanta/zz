@@ -20,8 +20,8 @@ package de.polygonal.zz.render.effect;
 
 import de.polygonal.core.math.Rect.Rectf;
 import de.polygonal.core.math.Rect.Recti;
-import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.effect.Effect;
+import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.Renderer;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;

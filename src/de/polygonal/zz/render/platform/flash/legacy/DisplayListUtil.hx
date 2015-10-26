@@ -1,11 +1,9 @@
 ﻿package de.polygonal.zz.render.platform.flash.legacy;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.ArrayedStack;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;
-import flash.display.Stage;
 
 /**
 	Helper methods for working with the flash display list.

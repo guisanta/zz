@@ -18,20 +18,17 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
+import de.polygonal.core.util.Assert.assert;
 import de.polygonal.core.util.ClassUtil;
 import de.polygonal.ds.Da;
 import de.polygonal.zz.render.effect.Effect.*;
-import de.polygonal.zz.render.effect.Effect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalShader;
+import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
-import de.polygonal.zz.render.platform.flash.stage3d.Stage3dTextureFlag;
-import de.polygonal.zz.scene.GlobalStateType;
 import de.polygonal.zz.scene.Visual;
-import de.polygonal.zz.texture.Texture;
 import flash.display3D.Context3D;
 import flash.Vector;
 import haxe.ds.IntMap;
-import haxe.EnumFlags;
 import de.polygonal.core.util.Assert.assert;
 
 import de.polygonal.zz.render.effect.Effect.*;

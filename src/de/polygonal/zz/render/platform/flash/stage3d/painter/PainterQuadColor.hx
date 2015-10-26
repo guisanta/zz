@@ -24,9 +24,9 @@ import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Color;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalColorShader;
+import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
 import de.polygonal.zz.scene.Visual;
-import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
 import flash.display3D.Context3DProgramType;
 
 @:access(de.polygonal.zz.render.Renderer)

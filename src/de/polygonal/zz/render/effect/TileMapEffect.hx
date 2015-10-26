@@ -20,12 +20,9 @@ package de.polygonal.zz.render.effect;
 
 import de.polygonal.core.math.Limits;
 import de.polygonal.core.math.Mathematics.M;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Array2;
-import de.polygonal.ds.ArrayConvert;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
-import de.polygonal.zz.tiled.TmxFile;
 
 class TileMapEffect extends Effect
 {

@@ -1,22 +1,16 @@
 package de.polygonal.zz.render.platform.flash.legacy;
 
-import de.polygonal.core.math.Coord2;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.render.effect.ColorEffect;
-import de.polygonal.zz.render.effect.Effect;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.render.Renderer;
-import de.polygonal.zz.scene.Bv;
 import de.polygonal.zz.scene.BoxBv;
 import de.polygonal.zz.scene.Spatial;
-import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.scene.Xform;
 import flash.display.Graphics;
 import flash.display.JointStyle;
-import flash.display.Shape;
 
 @:access(de.polygonal.zz.scene.Spatial)
 class XrayRenderer extends Renderer

@@ -27,7 +27,6 @@ import de.polygonal.zz.render.platform.flash.stage3d.agal.*;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
 import de.polygonal.zz.scene.Quad;
 import de.polygonal.zz.scene.Visual;
-import flash.display3D.Context3D;
 import flash.display3D.Context3DProgramType;
 
 @:access(de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer)

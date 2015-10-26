@@ -26,7 +26,7 @@ import de.polygonal.ds.ArrayConvert;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
-import de.polygonal.zz.tiled.TmxFile;
+import de.polygonal.zz.tiled.TmxFile.TmxData;
 import haxe.ds.IntMap;
 
 /**

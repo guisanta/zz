@@ -23,13 +23,12 @@ import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.controller.KeyframeController;
+import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.TweenController;
-import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.scene.Xform;
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
-import haxe.EnumFlags;
 
 /*@:access(de.polygonal.zz.sprite.Sprite)
 @:access(de.polygonal.zz.sprite.SpriteAni)

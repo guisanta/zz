@@ -24,11 +24,11 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.math.Coord2;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Vec3;
+import de.polygonal.core.util.Assert.assert;
 import de.polygonal.motor.geom.data.Plane2;
 import haxe.ds.Vector;
-import de.polygonal.core.util.Assert.assert;
 
 @:enum
 abstract BvType(Int)

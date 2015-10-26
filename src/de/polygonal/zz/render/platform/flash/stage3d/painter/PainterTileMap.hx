@@ -25,9 +25,7 @@ import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureBatchVertex
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dIndexBuffer;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dVertexBuffer;
-import de.polygonal.zz.render.Renderer;
 import de.polygonal.zz.scene.Visual;
-import flash.display3D.Context3D;
 import flash.Lib;
 import flash.Vector;
 

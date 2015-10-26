@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.legacy;
 
-import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.time.Timebase;
@@ -27,12 +26,11 @@ import de.polygonal.ds.Dll;
 import de.polygonal.ds.DllNode;
 import de.polygonal.ds.IntHashTable;
 import de.polygonal.zz.data.ColorTransform;
-import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.texture.*;
 import de.polygonal.zz.scene.*;
-import de.polygonal.zz.scene.AlphaBlendState;
+import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.texture.Texture;
 import flash.display.*;
 import flash.geom.Matrix;
