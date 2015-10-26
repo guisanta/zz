@@ -20,6 +20,7 @@ package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Limits;
 import de.polygonal.motor.geom.containment.PointInsideAabb2;
 import de.polygonal.zz.scene.BoxBv;
 import de.polygonal.zz.scene.Bv.BvType;
@@ -83,18 +84,12 @@ class Quad extends Visual
 		}
 		
 		var c = mScratchCoord;
-		
 		var w0 = world;
-		var w1 = targetSpace.world;
 		
-		c.set(0, 0);
-		w0.applyForward2(c, c);
-		w1.applyInverse2(c, c);
-		
-		var minX = c.x;
-		var minY = c.y;
-		var maxX = c.x;
-		var maxY = c.y;
+		var minX = Limits.FLOAT_MAX;
+		var minY = Limits.FLOAT_MAX;
+		var maxX = Limits.FLOAT_MIN;
+		var maxY = Limits.FLOAT_MIN;
 		
 		inline function minMax(c)
 		{
@@ -107,20 +102,48 @@ class Quad extends Visual
 			if (c.y > maxY) maxY = c.y;
 		}
 		
-		c.set(1, 0);
-		w0.applyForward2(c, c);
-		w1.applyInverse2(c, c);
-		minMax(c);
-		
-		c.set(1, 1);
-		w0.applyForward2(c, c);
-		w1.applyInverse2(c, c);
-		minMax(c);
-		
-		c.set(0, 1);
-		w0.applyForward2(c, c);
-		w1.applyInverse2(c, c);
-		minMax(c);
+		if (targetSpace.parent == null)
+		{
+			c.set(0, 0);
+			w0.applyForward2(c, c);
+			minMax(c);
+			
+			c.set(1, 0);
+			w0.applyForward2(c, c);
+			minMax(c);
+			
+			c.set(1, 1);
+			w0.applyForward2(c, c);
+			minMax(c);
+			
+			c.set(0, 1);
+			w0.applyForward2(c, c);
+			minMax(c);
+		}
+		else
+		{
+			var w1 = targetSpace.world;
+			
+			c.set(0, 0);
+			w0.applyForward2(c, c);
+			w1.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(1, 0);
+			w0.applyForward2(c, c);
+			w1.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(1, 1);
+			w0.applyForward2(c, c);
+			w1.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(0, 1);
+			w0.applyForward2(c, c);
+			w1.applyInverse2(c, c);
+			minMax(c);
+		}
 		
 		output.minX = minX;
 		output.minY = minY;

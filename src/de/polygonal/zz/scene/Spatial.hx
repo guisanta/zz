@@ -430,6 +430,13 @@ class Spatial extends ControlledObject implements Hashable
 		mGlobalState = null;
 	}
 	
+	public function getRoot()
+	{
+		var p = this;
+		while (p.parent != null) p = p.parent;
+		return p;
+	}
+	
 	function propagateRenderStateUpdate(stacks:GlobalStateStackList)
 	{
 		throw 'override for implementation';

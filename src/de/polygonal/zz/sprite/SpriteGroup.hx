@@ -366,24 +366,28 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_width():Float
 	{
-		return getBounds(this, mBoundOut).w;
+		var r = getRoot().commit();
+		var n = as(r.sgn.getRoot(), Node);
+		TreeUtil.updateGeometricState(n, false);
+		
+		return mSpatial.getBoundingBox(n, mBoundOut).w;
 	}
 	override function set_width(value:Float):Float
 	{
-		var w = get_width();
-		scaleX = value / w;
-		return value;
+		return throw "unsupported operation (a SpriteGroup object only supports uniform scaling)";
 	}
 	
 	override function get_height():Float
 	{
-		return getBounds(this, mBoundOut).h;
+		var r = getRoot().commit();
+		var n = as(r.sgn.getRoot(), Node);
+		TreeUtil.updateGeometricState(n, false);
+		
+		return mSpatial.getBoundingBox(n, mBoundOut).h;
 	}
 	override function set_height(value:Float):Float
 	{
-		var h = get_height();
-		scaleY = value / h;
-		return value;
+		return throw "unsupported operation (a SpriteGroup object only supports uniform scaling)";
 	}
 	
 	/**
