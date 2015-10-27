@@ -58,7 +58,7 @@ class CanvasWindow extends RenderWindow
 		doc.body.appendChild(div);
 		var dpiX = doc.getElementById("tmpdiv").offsetWidth * win.devicePixelRatio;
 		var dpiY = doc.getElementById("tmpdiv").offsetHeight * win.devicePixelRatio;
-		dpi = Std.int(Math.max(dpiX, dpiY));
+		dpi = M.max(Std.int(Math.max(dpiX, dpiY)), 96);
 		doc.body.removeChild(div);
 		div = null;
 		
