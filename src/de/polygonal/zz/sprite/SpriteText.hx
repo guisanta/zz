@@ -139,7 +139,7 @@ class SpriteTextSettings
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteText extends SpriteBase
 {
-	public var settings(default, null):SpriteTextSettings;
+	public var settings(default, null) = new SpriteTextSettings();
 	public var entireTextFits(default, null):Bool;
 	
 	public var bounds(default, null) = new Aabb2(0, 0, 0, 0);
@@ -151,9 +151,9 @@ class SpriteText extends SpriteBase
 	
 	var mTextureChanged:Bool;
 	
-	public function new(?textureId:Null<Int>, ?parent:SpriteGroup)
+	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
 	{
-		var spatial = new Node("bla");
+		var spatial = new Node();
 		super(spatial);
 		
 		mSpatial.mFlags &= ~Spatial.IS_COMPOSITE_LOCKED;
@@ -161,13 +161,11 @@ class SpriteText extends SpriteBase
 		mSpatial.mFlags |= Spatial.IS_COMPOSITE_LOCKED;
 		
 		mNode = cast mSpatial;
+		
 		mShaper = new Shaper();
 		
-		settings = new SpriteTextSettings();
-		
-		if (textureId != null) setTexture(textureId);
-		
 		if (parent != null) parent.addChild(this);
+		if (textureId != null) setTexture(textureId);
 	}
 	
 	override public function free()

@@ -28,6 +28,7 @@ import flash.events.*;
 import flash.Lib;
 import flash.system.Capabilities;
 import flash.ui.Mouse;
+import de.polygonal.core.math.Mathematics;
 
 @:enum
 abstract Stage3dAntiAliasFlag(Int) { var None = 0; var Low = 2; var High = 4; var Ultra = 16; }
