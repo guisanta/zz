@@ -140,7 +140,7 @@ class SpriteTextSettings
 class SpriteText extends SpriteBase
 {
 	public var settings(default, null) = new SpriteTextSettings();
-	public var entireTextFits(default, null):Bool;
+	public var overflow(default, null):Bool;
 	
 	public var bounds(default, null) = new Aabb2(0, 0, 0, 0);
 	
@@ -196,34 +196,82 @@ class SpriteText extends SpriteBase
 			settings.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
 	}
 	
-	public function shrinkToFit(minSize:Int)
+	public function autoFit(minSize:Int, maxSize:Int)
 	{
-		if (settings.size < minSize) return;
+		overflow = mShaper.shape(mAtlas.userData, settings);
 		
-		entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		var currentSize = settings.size, bestSize;
 		
-		while (!entireTextFits && settings.size >= minSize)
+		if (overflow)
 		{
-			settings.size--;
-			entireTextFits = mShaper.shape(mAtlas.userData, settings);
+			if (currentSize < minSize) return;
+			
+			bestSize = bsearch(minSize, currentSize - 1);
+		}
+		else
+		{
+			if (currentSize > maxSize) return;
+			
+			bestSize = bsearch(currentSize, maxSize + 1);
 		}
 		
-		commit();
+		settings.size = bestSize;
+		overflow = mShaper.shape(mAtlas.userData, settings);
+	}
+	
+	public function shrinkToFit(minSize:Int)
+	{
+		overflow = mShaper.shape(mAtlas.userData, settings);
+		
+		if (!overflow) return;
+		
+		var currentSize = settings.size;
+		if (currentSize < minSize) return;
+		
+		settings.size = bsearch(minSize, currentSize - 1);
+		overflow = mShaper.shape(mAtlas.userData, settings);
 	}
 	
 	public function growToFit(maxSize:Int)
 	{
-		if (settings.size > maxSize) return;
+		overflow = mShaper.shape(mAtlas.userData, settings);
 		
-		entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		if (overflow) return;
 		
-		while (!entireTextFits && settings.size <= maxSize)
+		var currentSize = settings.size;
+		if (currentSize > maxSize) return;
+		
+		settings.size = bsearch(currentSize, maxSize + 1);
+		overflow = mShaper.shape(mAtlas.userData, settings);
+	}
+	
+	function bsearch(lo:Int, hi:Int):Int
+	{
+		var l = lo, h = hi, s = -1;
+		var m = l + ((h - l) >> 1);
+		while (true)
 		{
-			settings.size++;
-			entireTextFits = mShaper.shape(mAtlas.userData, settings);
+			settings.size = m;
+			if (mShaper.shape(mAtlas.userData, settings))
+			{
+				//decrease size
+				h = m;
+				m = l + ((h - l) >> 1);
+				if (m == l) break;
+			}
+			else
+			{
+				//increase size
+				s = m;
+				l = m;
+				m = l + ((h - l) >> 1);
+				if (m == l) break;
+			}
 		}
 		
-		commit();
+		if (s < 0) return lo;
+		
+		return s;
 	}
 	
 	override function get_width():Float
@@ -302,7 +350,7 @@ class SpriteText extends SpriteBase
 		
 		settings.mChanged = false;
 		
-		entireTextFits = mShaper.shape(mAtlas.userData, settings);
+		overflow = mShaper.shape(mAtlas.userData, settings);
 		
 		var minX = M.POSITIVE_INFINITY;
 		var minY = M.POSITIVE_INFINITY;
@@ -581,7 +629,7 @@ private class Shaper
 			if (newline)
 			{
 				line++;
-				if (line > numLines) return false;
+				if (line > numLines) return true;
 				//trace('line from $firstCharInLineIndex ... $lastCharInLineIndex');
 				
 				if (align != TextAlign.Left)
@@ -643,7 +691,7 @@ private class Shaper
 			
 			if (charCountCurrent < charCountSegment) //wrap segment?
 			{
-				if ((segmentMaxX - segmentMinX) > boxW) return false; //segment will never fit, quit
+				if ((segmentMaxX - segmentMinX) > boxW) return true; //segment will never fit, quit
 				nextLine();
 				continue;
 			}
@@ -719,6 +767,6 @@ private class Shaper
 		if (align != TextAlign.Left)
 			alignLine(firstCharInLineIndex, lastCharInLineIndex);
 		
-		return true;
+		return false;
 	}
 }
