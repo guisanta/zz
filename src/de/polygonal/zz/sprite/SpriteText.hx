@@ -70,9 +70,9 @@ class SpriteTextSettings
 		return mText = value;
 	}
 	
-	public var size(get_size, set_size):Float;
-	inline function get_size():Float return mSize;
-	function set_size(value:Float):Float
+	public var size(get_size, set_size):Int;
+	inline function get_size():Int return mSize;
+	function set_size(value:Int):Int
 	{
 		mChanged = mChanged || (mSize != value);
 		return mSize = value;
