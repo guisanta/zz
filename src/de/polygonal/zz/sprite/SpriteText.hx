@@ -464,8 +464,8 @@ private class Shaper
 		var scale = settings.size / charSet.renderedSize;
 		var stepY = (charSet.lineHeight + settings.leading) * scale;
 		var numLines = Std.int(boxH / stepY);
-		if (numLines == 0) return false;
-		if (settings.multiline) numLines = 1;
+		if (numLines == 0) return true;
+		if (!settings.multiline) numLines = 1;
 		
 		var codes = mCharCodes, code, lastCode = 0;
 		var kerningAmount = 0;
