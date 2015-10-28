@@ -49,7 +49,7 @@ class SpriteTextSettings
 	var mAlign = TextAlign.Left;
 	var mMultiline = true;
 	var mKerning = true;
-	var mSize = 0.;
+	var mSize = 12;
 	var mWidth = 100.;
 	var mHeight = 100.;
 	var mTracking = 0.;
