@@ -414,8 +414,8 @@ class SpriteBase
 	**/
 	public function centerOrigin()
 	{
-		originX = -mSizeX / 2;
-		originY = -mSizeY / 2;
+		originX = -width / 2;
+		originY = -height / 2;
 		setDirty();
 	}
 	
@@ -424,7 +424,7 @@ class SpriteBase
 	**/
 	public function centerOriginX()
 	{
-		originX = -mSizeX / 2;
+		originX = -width / 2;
 		setDirty();
 	}
 	
@@ -433,7 +433,7 @@ class SpriteBase
 	**/
 	public function centerOriginY()
 	{
-		originY = -mSizeY / 2;
+		originY = -height / 2;
 		setDirty();
 	}
 	
