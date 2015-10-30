@@ -200,9 +200,11 @@ class SpriteText extends SpriteBase
 		mTexture = TextureLib.getTexture(textureId);
 		mTextureChanged = true;
 		mAtlas = mTexture.atlas;
-		
-		if (settings.size == 0)
-			settings.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
+	}
+	
+	public function setToRenderedSize()
+	{
+		settings.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
 	}
 	
 	public function autoFit(minSize:Int, maxSize:Int)
