@@ -54,6 +54,7 @@ class SpriteTextSettings
 	var mHeight = 100.;
 	var mTracking = 0.;
 	var mLeading = 0.;
+	var mPixelSnapping = false;
 	
 	var mChanged = true;
 	
@@ -133,6 +134,14 @@ class SpriteTextSettings
 	{
 		mChanged = mChanged || (mLeading != value);
 		return mLeading = value;
+	}
+	
+	public var pixelSnapping(get_pixelSnapping, set_pixelSnapping):Bool;
+	inline function get_pixelSnapping():Bool return mPixelSnapping;
+	function set_pixelSnapping(value:Bool):Bool
+	{
+		mChanged = mChanged || (mPixelSnapping != value);
+		return mPixelSnapping = value;
 	}
 }
 
@@ -352,6 +361,8 @@ class SpriteText extends SpriteBase
 		
 		overflow = mShaper.shape(mAtlas.userData, settings);
 		
+		var pixelSnapping = settings.pixelSnapping;
+		
 		var minX = M.POSITIVE_INFINITY;
 		var minY = M.POSITIVE_INFINITY;
 		var maxX = M.NEGATIVE_INFINITY;
@@ -415,6 +426,14 @@ class SpriteText extends SpriteBase
 			}
 			
 			//set position and frame
+			if (pixelSnapping)
+			{
+				x = Std.int(x);
+				y = Std.int(y);
+				w = Std.int(w);
+				h = Std.int(h);
+			}
+			
 			g.local.setTranslate2(x, y);
 			g.local.setScale2(w, h);
 			g.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY; //enforce updateGeometricState()
