@@ -178,6 +178,9 @@ private class BmFontFile
 			}
 			else
 				throw "invalid source file";
+			
+			//font generator rounding bug? line height should always be >= rendered size
+			if (common.lineHeight < info.size) common.lineHeight = info.size;
 		}
 		catch(error:Dynamic)
 		{
