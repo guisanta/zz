@@ -1,19 +1,23 @@
 package de.polygonal.zz;
 
+import de.polygonal.core.log.Log;
+import de.polygonal.core.log.LogSystem;
+
 #if log
 class L
 {
-	static var _log:de.polygonal.core.log.Log;
-	public static function log():de.polygonal.core.log.Log
+	static var mLog:Log;
+	public static var log(get_log, never):Log;
+	static function get_log():Log
 	{
-		if (_log == null) _log = de.polygonal.core.log.LogSystem.createLog("zz", true);
-		return _log;
+		if (mLog == null) mLog = LogSystem.createLog("zz", true);
+		return mLog;
 	}
 	
-	inline public static function d(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log().d(msg, tag, posInfos);
-	inline public static function i(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log().i(msg, tag, posInfos);
-	inline public static function w(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log().w(msg, tag, posInfos);
-	inline public static function e(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log().e(msg, tag, posInfos);
+	inline public static function d(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log.d(msg, tag, posInfos);
+	inline public static function i(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log.i(msg, tag, posInfos);
+	inline public static function w(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log.w(msg, tag, posInfos);
+	inline public static function e(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log.e(msg, tag, posInfos);
 }
 #else
 class L
