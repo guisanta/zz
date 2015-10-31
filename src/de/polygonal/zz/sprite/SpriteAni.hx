@@ -21,14 +21,11 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.controller.KeyframeController;
 import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.TweenController;
 import de.polygonal.zz.scene.Xform;
-import haxe.ds.IntMap;
-import haxe.ds.StringMap;
 
 /*@:access(de.polygonal.zz.sprite.Sprite)
 @:access(de.polygonal.zz.sprite.SpriteAni)
@@ -107,54 +104,26 @@ private class Sheet implements SpriteSheetAnimControllerListener
 	
 }*/
 
-//private class Tweening
+enum TweenProperty { X; Y; ScaleX; ScaleY; UniformScale; Rotation; Alpha; }
 
-
-@:build(de.polygonal.core.macro.IntConsts.build(
-[
-	TWEEN_X, TWEEN_Y,
-	TWEEN_SCALE_X, TWEEN_SCALE_Y, TWEEN_SCALE,
-	TWEEN_ROTATION,
-	TWEEN_ALPHA
-], true, false))
 @:access(de.polygonal.zz.sprite.SpriteBase)
 class SpriteAni
 	implements SheetControllerListener
 	implements TweenControllerListener
 	implements KeyframeControllerListener
 {
-	public static function print():String
-	{
-		var s = "";
-		s += 'TWEEN_X=$TWEEN_X\n';
-		s += 'TWEEN_Y=$TWEEN_Y\n';
-		s += 'TWEEN_SCALE_X=$TWEEN_SCALE_X\n';
-		s += 'TWEEN_SCALE_Y=$TWEEN_SCALE_Y\n';
-		s += 'TWEEN_SCALE=$TWEEN_SCALE\n';
-		s += 'TWEEN_ROTATION=$TWEEN_ROTATION\n';
-		s += 'TWEEN_ALPHA=$TWEEN_ALPHA\n';
-		return s;
-	}
-	
-	static var mPropertyMap:IntIntHashTable;
-	static var mCallbackMap:IntMap<Void->Void>;
-	
 	var mSpriteBase:SpriteBase;
 	var mSprite:Sprite;
 	
 	var mLastTime:Float = 0;
 	var mOnAnimationFinished:SheetAnimation->Void;
 	
+	var mTweenBits:Int;
+	
 	public function new(spriteBase:SpriteBase)
 	{
 		mSpriteBase = spriteBase;
 		if (Std.is(spriteBase, Sprite)) mSprite = cast(spriteBase, Sprite);
-		
-		if (mPropertyMap == null)
-		{
-			mPropertyMap = new IntIntHashTable(4096, 4096, false);
-			mCallbackMap = new IntMap();
-		}
 	}
 	
 	public function free()
@@ -284,66 +253,77 @@ class SpriteAni
 		mSprite.rotation = angle;
 	}
 	
-	public var onEnterFrame:Int->Void;
+	public function tweenX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(X, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
+	public function tweenY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(Y, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
-	
-
-	
-	public function getTweenBuilder():TweenBuilder
-		return new TweenBuilder(this);
-	
-	public function tweenX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_X, target, duration, ease, repeat, onFinish);
-	
-	public function tweenY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_Y, target, duration, ease, repeat, onFinish);
-	
-	public function tweenXY(targetX:Float, targetY:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
+	public function tweenPosition(targetX:Float, targetY:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
 	{
 		if (onFinish != null)
 		{
 			var c = 0;
 			var f = function() if (++c == 2) onFinish();
-			
-			var a = tween(TWEEN_X, targetX, duration, ease, repeat, f);
-			var b = tween(TWEEN_Y, targetY, duration, ease, repeat, f);
+			var a = tween(X, targetX, duration, ease, repeat, f);
+			var b = tween(Y, targetY, duration, ease, repeat, f);
 		}
 		else
 		{
-			tween(TWEEN_X, targetX, duration, ease, repeat, onFinish);
-			tween(TWEEN_Y, targetY, duration, ease, repeat, onFinish);
+			tween(X, targetX, duration, ease, repeat, onFinish);
+			tween(Y, targetY, duration, ease, repeat, onFinish);
 		}
+		
+		return this;
 	}
 	
-	public function tweenScaleX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_SCALE_X, target, duration, ease, repeat, onFinish);
+	public function tweenScaleX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(ScaleX, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
-	public function tweenScaleY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_SCALE_Y, target, duration, ease, repeat, onFinish);
+	public function tweenScaleY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(ScaleY, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
-	public function tweenScale(targetScale:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
+	public function tweenUniformScale(targetScale:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
 	{
 		if (onFinish != null)
 		{
 			var c = 0;
 			var f = function() if (++c == 2) onFinish();
-			
-			var a = tween(TWEEN_SCALE_X, targetScale, duration, ease, repeat, f);
-			var b = tween(TWEEN_SCALE_Y, targetScale, duration, ease, repeat, f);
+			var a = tween(ScaleX, targetScale, duration, ease, repeat, f);
+			var b = tween(ScaleY, targetScale, duration, ease, repeat, f);
 		}
 		else
 		{
-			tween(TWEEN_SCALE_X, targetScale, duration, ease, repeat, onFinish);
-			tween(TWEEN_SCALE_Y, targetScale, duration, ease, repeat, onFinish);
+			tween(ScaleX, targetScale, duration, ease, repeat, onFinish);
+			tween(ScaleY, targetScale, duration, ease, repeat, onFinish);
 		}
+		
+		return this;
 	}
 	
-	public function tweenRotation(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_ROTATION, target, duration, ease, repeat, onFinish);
+	public function tweenRotation(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(Rotation, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
-	public function tweenAlpha(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void)
-		tween(TWEEN_ALPHA, target, duration, ease, repeat, onFinish);
+	public function tweenAlpha(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteAni
+	{
+		tween(Alpha, target, duration, ease, repeat, onFinish);
+		return this;
+	}
 	
 	public function stopTweens()
 	{
@@ -353,122 +333,62 @@ class SpriteAni
 			var next = c.next;
 			if (c.type == TweenController.TYPE)
 			{
-				var tc:TweenController = cast c;
-				var id = tc.id;
-				mPropertyMap.clr(id);
-				mCallbackMap.remove(id);
+				var tc = c.as(TweenController);
 				tc.stop();
 				tc.setListener(null);
 			}
 			c = next;
 		}
-	}
-	
-	function onTweenUpdate(id:Int, value:Float)
-	{
-		var property = mPropertyMap.get(id);
-		switch (property)
-		{
-			case TWEEN_X: 
-				
-				//mSpriteBase.xSmooth(value);
-				mSpriteBase.x = value;
-			
-			case TWEEN_Y:
-				
-				//mSpriteBase.ySmooth(value);
-				mSpriteBase.y = value;
-			
-			case TWEEN_SCALE_X:
-				//mSpriteBase.scaleXSmooth(value);
-				mSpriteBase.scaleX = value;
-			
-			case TWEEN_SCALE_Y:
-				//mSpriteBase.scaleYSmooth(value);
-				mSpriteBase.scaleY = value;
-			
-			case TWEEN_SCALE:
-				mSpriteBase.scale = mSpriteBase.scaleY = value;
-			
-			case TWEEN_ROTATION: mSpriteBase.rotation = value;
-			case TWEEN_ALPHA:    mSpriteBase.alpha = value;
-		}
-	}
-	
-	function onTweenFinish(id:Int)
-	{
-		var property = mPropertyMap.get(id);
-		mPropertyMap.clr(id);
 		
-		/*switch (property)
-		{
-			case TWEEN_X: 
-				mSpriteBase.x0 = mSpriteBase.x1;
-			
-			case TWEEN_Y: 
-				mSpriteBase.y0 = mSpriteBase.y1;
-				
-			case TWEEN_SCALE_X:
-				mSpriteBase.scaleX0 = mSpriteBase.scaleX1;
-				
-			case TWEEN_SCALE_Y:
-				mSpriteBase.scaleY0 = mSpriteBase.scaleY1;
-		}*/
-		
-		var func = mCallbackMap.get(id);
-		if (func != null)
-		{
-			mCallbackMap.remove(id);
-			func();
-		}
+		mTweenBits = 0;
 	}
 	
-	function tween(property:Int, target:Float, duration:Float, ease:Ease, repeat:RepeatType, onFinish:Void->Void):TweenController
+	function tween(property:TweenProperty, target:Float, duration:Float, ease:Ease, repeat:RepeatType, onFinish:Void->Void):TweenController
 	{
 		var source =
 		switch (property)
 		{
-			case TWEEN_X: mSpriteBase.x;
-			case TWEEN_Y: mSpriteBase.y;
-			case TWEEN_SCALE_X: mSpriteBase.scaleX;
-			case TWEEN_SCALE_Y: mSpriteBase.scaleY;
-			case TWEEN_SCALE: mSpriteBase.scale;
-			case TWEEN_ROTATION: mSpriteBase.rotation;
-			case TWEEN_ALPHA: mSpriteBase.alpha;
-			case _: throw "invalid property";
+			case X: mSpriteBase.x;
+			case Y: mSpriteBase.y;
+			case ScaleX: mSpriteBase.scaleX;
+			case ScaleY: mSpriteBase.scaleY;
+			case UniformScale: mSpriteBase.scale;
+			case Rotation: mSpriteBase.rotation;
+			case Alpha: mSpriteBase.alpha;
 		}
 		
-		if (ease == null) ease = Ease.None;
+		var key = property.getIndex();
 		
 		var c:TweenController = getTweenController(property, duration);
-		c.tween(source, target, duration, ease);
+		c.tween(key, source, target, duration, ease == null ? Ease.None : ease);
 		c.repeat = repeat == null ? RepeatType.Clamp : repeat;
+		c.onFinish = onFinish;
 		
-		mPropertyMap.setIfAbsent(c.id, property); //don't create duplicate entries when overriding controller
-		
-		if (onFinish != null) mCallbackMap.set(c.id, onFinish);
+		mTweenBits |= 1 << key;
 		
 		return c;
 	}
 	
-	function getTweenController(property:Int, duration:Float):TweenController
+	function getTweenController(property:TweenProperty, duration:Float):TweenController
 	{
-		var tc:TweenController = null;
+		var tc = null;
+		
+		var key = property.getIndex();
 		
 		var c = mSpriteBase.sgn.controllers;
-		if (c != null) //there are controllers
+		if (c != null)
 		{
-			if (mPropertyMap.has(property))
+			if (mTweenBits & (1 << key) > 0) //try overriding existing controller
 			{
-				//override existing controller
 				while (c != null)
 				{
 					if (c.type == TweenController.TYPE)
 					{
-						tc = cast c;
-						if (mPropertyMap.get(tc.id) == property)
+						tc = c.as(TweenController);
+						if (tc.key == key)
 						{
 							tc.setListener(this);
+							
 							return tc;
 						}
 					}
@@ -484,6 +404,7 @@ class SpriteAni
 					{
 						tc = cast c;
 						tc.setListener(this);
+						
 						return tc;
 					}
 					c = c.next;
@@ -495,99 +416,30 @@ class SpriteAni
 		tc = new TweenController();
 		tc.setListener(this);
 		mSpriteBase.sgn.attach(tc);
+		
 		return tc;
 	}
-}
-
-@:access(de.polygonal.zz.sprite.SpriteAni)
-private class TweenBuilder
-{
-	static var mFlagLookup:StringMap<Int>;
 	
-	var mAnim:SpriteAni;
-	var mDuration:Float;
-	var mProperty:String;
-	var mTarget:Float;
-	var mEase:Ease;
-	var mRepeat:RepeatType;
+	/* INTERFACE de.polygonal.zz.controller.TweenController.TweenControllerListener */
 	
-	public function new(anim:SpriteAni)
+	function onTweenUpdate(key:Int, val:Float)
 	{
-		mAnim = anim;
-		reset();
-		
-		if (mFlagLookup == null)
+		switch (key)
 		{
-			mFlagLookup = new StringMap<Int>();
-			mFlagLookup.set("x", SpriteAni.TWEEN_X);
-			mFlagLookup.set("y", SpriteAni.TWEEN_Y);
-			mFlagLookup.set("sx", SpriteAni.TWEEN_SCALE_X);
-			mFlagLookup.set("sy", SpriteAni.TWEEN_SCALE_Y);
-			mFlagLookup.set("scale", SpriteAni.TWEEN_SCALE);
-			mFlagLookup.set("rotation", SpriteAni.TWEEN_ROTATION);
-			mFlagLookup.set("alpha", SpriteAni.TWEEN_ALPHA);
+			case 0: mSpriteBase.x = val;
+			case 1: mSpriteBase.y = val;
+			case 2: mSpriteBase.scaleX = val;
+			case 3: mSpriteBase.scaleY = val;
+			case 4: mSpriteBase.scale = val;
+			case 5: mSpriteBase.rotation = val;
+			case 6: mSpriteBase.alpha = val;
 		}
 	}
 	
-	inline public function prop(name:String):TweenBuilder
-	{
-		assert(~/x|y|sx|sy|rotation|alpha|scale/.match(name), "invalid property name");
-		mProperty = name;
-		return this;
-	}
+	/* INTERFACE de.polygonal.zz.controller.TweenController.TweenControllerListener */
 	
-	inline public function dur(seconds:Float):TweenBuilder
+	function onTweenFinish(key:Int)
 	{
-		mDuration = seconds;
-		return this;
-	}
-	
-	inline public function ease(ease:Ease):TweenBuilder
-	{
-		mEase = ease;
-		return this;
-	}
-	
-	inline public function val(value:Float):TweenBuilder
-	{
-		mTarget = value;
-		return this;
-	}
-	
-	inline public function wrap():TweenBuilder
-	{
-		mRepeat = RepeatType.Wrap;
-		return this;
-	}
-	
-	inline public function cycle():TweenBuilder
-	{
-		mRepeat = RepeatType.Cycle;
-		return this;
-	}
-	
-	inline public function clamp():TweenBuilder
-	{
-		mRepeat = RepeatType.Clamp;
-		return this;
-	}
-	
-	public function run(?onFinish:Void->Void):TweenBuilder
-	{
-		assert(mProperty != null, "property missing");
-		assert(!Math.isNaN(mTarget), "target value missing");
-		assert(!Math.isNaN(mDuration), "duration missing");
-		
-		mAnim.tween(mFlagLookup.get(mProperty), mTarget, mDuration, mEase, mRepeat, onFinish);
-		return this;
-	}
-	
-	public function reset()
-	{
-		mProperty = null;
-		mDuration = Math.NaN;
-		mTarget = Math.NaN;
-		mEase = Ease.None;
-		mRepeat = RepeatType.Clamp;
+		mTweenBits &= ~(1 << key);
 	}
 }

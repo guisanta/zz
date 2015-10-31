@@ -32,8 +32,7 @@ class Controller
 {
 	public static var COUNT = 0;
 	public static var ACTIVE_COUNT = 0;
-	
-	inline static var DISPOSE_AFTER_SECONDS = 10;
+	inline static var DISPOSE_TIMEOUT = 10;
 	
 	public var repeat:RepeatType;
 	public var minTime:Float = 0;
@@ -86,6 +85,15 @@ class Controller
 		mObject = object;
 	}
 	
+	inline public function as<T:Controller>(cl:Class<T>):T
+	{
+		#if flash
+		return untyped __as__(this, cl);
+		#else
+		return cast this;
+		#end
+	}
+	
 	inline public function update(dt:Float):Bool
 	{
 		if (active)
@@ -101,7 +109,7 @@ class Controller
 		if (dispose)
 		{
 			passedTime += dt;
-			if (passedTime > DISPOSE_AFTER_SECONDS) free();
+			if (passedTime > DISPOSE_TIMEOUT) free();
 			return true;
 		}
 		else
@@ -144,6 +152,6 @@ class Controller
 		dispose = true;
 		active = false;
 		passedTime = 0;
-		maxTime = DISPOSE_AFTER_SECONDS;
+		maxTime = DISPOSE_TIMEOUT;
 	}
 }

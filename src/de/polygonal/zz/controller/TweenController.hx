@@ -27,15 +27,17 @@ import de.polygonal.zz.controller.RepeatType;
 
 interface TweenControllerListener
 {
-	private function onTweenUpdate(id:Int, value:Float):Void;
+	private function onTweenUpdate(key:Int, val:Float):Void;
 	
-	private function onTweenFinish(id:Int):Void;
+	private function onTweenFinish(key:Int):Void;
 }
 
 @:access(de.polygonal.zz.controller.TweenControllerListener)
 class TweenController extends Controller
 {
-	public var id(default, null):Int;
+	public var key(default, null):Int;
+	
+	public var onFinish:Void->Void;
 	
 	var mSrcVal:Float;
 	var mDstVal:Float;
@@ -56,25 +58,28 @@ class TweenController extends Controller
 	{
 		mInterpolation = null;
 		mListener = null;
+		onFinish = null;
 		super.free();
 	}
 	
-	public function tween(srcVal:Float, dstVal:Float, duration:Float, ease:Ease):Int
+	public function tween(key:Int, srcVal:Float, dstVal:Float, duration:Float, ease:Ease)
 	{
+		this.key = key;
 		mSrcVal = srcVal;
 		mDstVal = dstVal;
+		mInterpolation = EaseFactory.create(ease);
+		
 		passedTime = 0;
 		minTime = 0;
 		maxTime = duration;
-		mInterpolation = EaseFactory.create(ease);
 		
 		active = true;
 		dispose = false;
-		return id;
 	}
 	
 	public function stop()
 	{
+		onFinish = null;
 		disposeAfterTimeout();
 	}
 	
@@ -82,8 +87,15 @@ class TweenController extends Controller
 	{
 		if (time >= maxTime && repeat == RepeatType.Clamp)
 		{
-			mListener.onTweenUpdate(id, mDstVal);
-			mListener.onTweenFinish(id);
+			mListener.onTweenUpdate(key, mDstVal);
+			mListener.onTweenFinish(key);
+			
+			if (onFinish != null)
+			{
+				onFinish();
+				onFinish = null;
+			}
+			
 			disposeAfterTimeout();
 			return false;
 		}
@@ -91,7 +103,7 @@ class TweenController extends Controller
 		var controlTime = getControlTime();
 		var alpha = (controlTime - minTime) / (maxTime - minTime); //[0,1]
 		var value = M.lerp(mSrcVal, mDstVal, mInterpolation.interpolate(alpha));
-		mListener.onTweenUpdate(id, value);
+		mListener.onTweenUpdate(key, value);
 		return true;
 	}
 }
