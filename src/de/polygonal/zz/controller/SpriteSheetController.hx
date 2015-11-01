@@ -31,7 +31,7 @@ import haxe.ds.StringMap;
 **/
 typedef SheetAnimation = Animation<String>;
 
-interface SheetControllerListener
+interface SpriteSheetControllerListener
 {
 	private function onSpriteSheetAniUpdate(frame:String, time:Float, index:Int):Void;
 	
@@ -43,33 +43,17 @@ interface SheetControllerListener
 	
 	In contrast to the `KeyframeController`, the `SpriteSheetController` doesn't support inbetweens.
 **/
-@:access(de.polygonal.zz.scene.Spatial)
-@:access(de.polygonal.zz.controller.SheetControllerListener)
+@:access(de.polygonal.zz.controller.SpriteSheetControllerListener)
 class SpriteSheetController extends Controller
 {
 	static var mDataCache:StringMap<AniData> = null;
 	
-	public var onEnterFrame:Int->String->Bool;
+	public var onFinish:SheetAnimation->Void;
 	
-	public var currentName(default, null):String = null;
-	
-	public var currentFrameName(default, null):String;
-	
-	var mListener:SheetControllerListener;
+	var mListener:SpriteSheetControllerListener;
 	var mLastIndex:Int;
-	var mCurIndex:Int;
+	var mCurrentIndex:Int;
 	var mData:AniData;
-	
-	public var currentAnimation:SheetAnimation;
-	
-	/**
-		Current animation length in seconds.
-	**/
-	public var length(get_length, never):Float;
-	inline function get_length():Float return maxTime;
-	
-	public var currentFrame(get_currentFrame, never):Int;
-	inline function get_currentFrame():Int return mCurIndex;
 	
 	public function new()
 	{
@@ -79,54 +63,55 @@ class SpriteSheetController extends Controller
 	override public function free()
 	{
 		mData = null;
-		currentName = null;
 		mListener = null;
+		onFinish = null;
 		super.free();
 	}
 	
-	inline public function setListener(listener:SheetControllerListener)
+	inline public function setListener(listener:SpriteSheetControllerListener)
 	{
 		mListener = listener;
 	}
 	
-	public function play(def:SheetAnimation, startTime:Float = 0.)
+	public function play(animation:SheetAnimation, startTime:Float = 0)
 	{
-		if (mDataCache == null) mDataCache = new StringMap();
-		mData = mDataCache.get(def.name);
-		if (mData == null) mDataCache.set(def.name, mData = new AniData(def));
+		if (mDataCache == null)
+			mDataCache = new StringMap();
+		mData = mDataCache.get(animation.name);
+		if (mData == null)
+		{
+			mData = new AniData(animation);
+			mDataCache.set(animation.name, mData);
+		}
 		
-		currentAnimation = def;
-		
-		currentName = def.name;
-		
-		repeat = def.loop ? RepeatType.Wrap : RepeatType.Clamp;
+		repeat = animation.loop ? RepeatType.Wrap : RepeatType.Clamp;
 		passedTime = startTime;
 		minTime = 0;
 		maxTime = mData.length;
 		active = true;
 		dispose = false;
-		
+		mCurrentIndex = -1;
 		mLastIndex = 0;
-		mCurIndex = -1;
 		
 		onUpdate(passedTime);
 	}
 	
 	public function pause()
 	{
+		assert(mData != null, "Call play() first.");
 		active = false;
 	}
 	
 	public function resume()
 	{
-		assert(mData != null);
+		assert(mData != null, "Call play() first.");
 		active = true;
 	}
 	
 	public function stop()
 	{
 		mData = null;
-		currentName = null;
+		onFinish = null;
 		disposeAfterTimeout();
 	}
 	
@@ -185,21 +170,24 @@ class SpriteSheetController extends Controller
 		}
 		
 		var isLastFrame = (repeat == RepeatType.Clamp) && (maxTime - controlTime) <= .01;
-		if (index != mCurIndex || isLastFrame) //frame changed?
+		
+		if (index != mCurrentIndex || isLastFrame) //frame changed?
 		{
-			mCurIndex = index;
+			mCurrentIndex = index;
 			
-			currentFrameName = mData.names[index];
-			
-			mListener.onSpriteSheetAniUpdate(currentFrameName, controlTime, index);
+			mListener.onSpriteSheetAniUpdate(mData.names[index], controlTime, index);
 			
 			if (isLastFrame)
 			{
 				mListener.onSpriteSheetAniFinish();
-				currentName = null;
 				
-				currentAnimation = null;
+				if (onFinish != null)
+				{
+					onFinish(mData.animation);
+					onFinish = null;
+				}
 				
+				mData = null;
 				disposeAfterTimeout();
 			}
 		}
@@ -210,14 +198,17 @@ class SpriteSheetController extends Controller
 
 private class AniData
 {
+	public var animation:SheetAnimation;
 	public var totalFrames:Int;
 	public var length:Float;
 	public var times:Vector<Float>;
 	public var names:Vector<String>;
 	
-	public function new(def:SheetAnimation)
+	public function new(animation:SheetAnimation)
 	{
-		totalFrames = def.frames.length;
+		this.animation = animation;
+		
+		totalFrames = animation.frames.length;
 		
 		times = new Vector<Float>(totalFrames + 1);
 		names = new Vector<String>(totalFrames);
@@ -225,10 +216,10 @@ private class AniData
 		length = 0;
 		var i = 0;
 		
-		var k = def.frames.length;
+		var k = animation.frames.length;
 		while (i < k)
 		{
-			var frame = def.frames[i];
+			var frame = animation.frames[i];
 			
 			times[i] = length;
 			names[i] = frame.value;

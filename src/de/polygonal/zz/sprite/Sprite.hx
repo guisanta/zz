@@ -50,10 +50,12 @@ class Sprite extends SpriteBase
 	var mCurrentTexture:Int = -1;
 	var mCurrentFrame:String;
 	var mSize = new Sizef(0, 0);
+	var mSheetAni:SpriteSheetAni = null;
 	
 	public function new(?parent:SpriteGroup, ?texture:Null<Int>, ?frame:String)
 	{
 		super(new Quad());
+		
 		mVisual = as(mSpatial, Visual);
 		if (parent != null) parent.addChild(this);
 		if (texture != null) this.texture = texture;
@@ -63,6 +65,12 @@ class Sprite extends SpriteBase
 	override public function free()
 	{
 		super.free();
+		
+		if (mSheetAni != null)
+		{
+			mSheetAni.free();
+			mSheetAni = null;
+		}
 		
 		mVisual.free();
 		mVisual = null;
@@ -198,6 +206,13 @@ class Sprite extends SpriteBase
 	{
 		mVisual.effect = new ColorEffect(value); //todo reuse effect if changing color..
 		return value;
+	}
+	
+	public var sheet(get_sheet, never):SpriteSheetAni;
+	function get_sheet():SpriteSheetAni
+	{
+		if (mSheetAni == null) mSheetAni = new SpriteSheetAni(this);
+		return mSheetAni;
 	}
 	
 	/**

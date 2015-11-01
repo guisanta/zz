@@ -1,0 +1,114 @@
+/*
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+package de.polygonal.zz.sprite;
+
+import de.polygonal.zz.controller.SpriteSheetController;
+import de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener;
+
+class SpriteSheetAni implements SpriteSheetControllerListener
+{
+	/**
+		Current animation length in seconds or -1 if no animation is playing.
+	**/
+	public var length(default, null):Float = -1;
+	
+	var mController:SpriteSheetController = null;
+	var mSprite:Sprite;
+	var mLastTime:Float = 0;
+	var mCurrentAnimation:SheetAnimation;
+	
+	public function new(sprite:Sprite)
+	{
+		mSprite = sprite;
+	}
+	
+	public function free()
+	{
+		if (mController != null)
+		{
+			mController.setListener(null);
+			mController.free();
+			mController = null;
+		}
+		mSprite = null;
+	}
+	
+	public function play(animation:SheetAnimation, ?startOver:Bool = true, ?onFinish:SheetAnimation->Void):SpriteSheetController
+	{
+		var c = getController();
+		c.play(animation, startOver ? 0 : mLastTime);
+		c.onFinish = onFinish;
+		length = c.maxTime;
+		mCurrentAnimation = animation;
+		
+		return c;
+	}
+	
+	public function pause()
+	{
+		getController().pause();
+	}
+	
+	public function resume()
+	{
+		getController().resume();
+	}
+	
+	public function stop()
+	{
+		getController().stop();
+		length = -1;
+		mCurrentAnimation = null;
+	}
+	
+	@:access(de.polygonal.zz.sprite.Sprite)
+	function getController():SpriteSheetController
+	{
+		if (mController == null || mController.type < 0)
+		{
+			var spatial = mSprite.mVisual;
+			var c:SpriteSheetController = spatial.findControllerOfType(SpriteSheetController.TYPE);
+			if (c == null)
+			{
+				c = new SpriteSheetController();
+				spatial.attach(c);
+			}
+			c.setListener(this);
+			mController = c;
+		}
+		
+		return mController;
+	}
+	
+	/* INTERFACE de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener */
+	
+	function onSpriteSheetAniUpdate(frame:String, time:Float, index:Int)
+	{
+		mSprite.frame = frame;
+		mLastTime = time;
+	}
+	
+	/* INTERFACE de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener */
+	
+	function onSpriteSheetAniFinish()
+	{
+		length = -1;
+		mCurrentAnimation = null;
+	}
+}

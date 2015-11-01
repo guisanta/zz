@@ -73,6 +73,7 @@ class Controller
 		}
 		repeat = null;
 		assert(next == null);
+		type = -1;
 		
 		if (active) ACTIVE_COUNT--;
 		COUNT--;
