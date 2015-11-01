@@ -66,7 +66,7 @@ class SpriteBase
 	var mVisible:Bool = true;
 	var mFlags:Int = 0;
 	
-	var mTween:SpriteTween;
+	var mTween:SpriteTween = null;
 	var mBlending:SpriteBlending;
 	
 	function new(spatial:Spatial)
@@ -661,16 +661,6 @@ class SpriteBase
 	{
 		if (mTween == null) mTween = new SpriteTween(this);
 		return mTween;
-	}
-	
-	function set_tween(value:SpriteTween):SpriteTween
-	{
-		if (value == null)
-		{
-			mTween.free();
-			mTween = null;
-		}
-		return value;
 	}
 	
 	/**
