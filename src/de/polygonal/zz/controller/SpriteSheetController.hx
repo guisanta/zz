@@ -33,9 +33,9 @@ typedef SheetAnimation = Animation<String>;
 
 interface SheetControllerListener
 {
-	private function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void;
+	private function onSpriteSheetAniUpdate(frame:String, time:Float, index:Int):Void;
 	
-	private function onSpriteSheetAniEnd():Void;
+	private function onSpriteSheetAniFinish():Void;
 }
 
 /**
@@ -79,6 +79,7 @@ class SpriteSheetController extends Controller
 	override public function free()
 	{
 		mData = null;
+		currentName = null;
 		mListener = null;
 		super.free();
 	}
@@ -190,11 +191,11 @@ class SpriteSheetController extends Controller
 			
 			currentFrameName = mData.names[index];
 			
-			mListener.onSpriteSheetChangeFrame(currentFrameName, controlTime, index);
+			mListener.onSpriteSheetAniUpdate(currentFrameName, controlTime, index);
 			
 			if (isLastFrame)
 			{
-				mListener.onSpriteSheetAniEnd();
+				mListener.onSpriteSheetAniFinish();
 				currentName = null;
 				
 				currentAnimation = null;

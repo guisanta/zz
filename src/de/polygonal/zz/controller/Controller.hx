@@ -66,8 +66,11 @@ class Controller
 	
 	public function free()
 	{
-		mObject.detach(this);
-		mObject = null;
+		if (mObject != null)
+		{
+			mObject.detach(this);
+			mObject = null;
+		}
 		repeat = null;
 		assert(next == null);
 		

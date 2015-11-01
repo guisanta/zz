@@ -65,7 +65,8 @@ class SpriteBase
 	var mAlpha:Float = 1;
 	var mVisible:Bool = true;
 	var mFlags:Int = 0;
-	var mAni:SpriteAni;
+	
+	var mTween:SpriteTween;
 	var mBlending:SpriteBlending;
 	
 	function new(spatial:Spatial)
@@ -80,10 +81,10 @@ class SpriteBase
 	{
 		remove();
 		
-		if (mAni != null)
+		if (mTween != null)
 		{
-			mAni.free();
-			mAni = null;
+			mTween.free();
+			mTween = null;
 		}
 		
 		if (mBlending != null)
@@ -655,19 +656,19 @@ class SpriteBase
 		return this;
 	}
 	
-	public var ani(get_ani, set_ani):SpriteAni;
-	function get_ani():SpriteAni
+	public var tween(get_tween, never):SpriteTween;
+	function get_tween():SpriteTween
 	{
-		if (mAni == null)
-			mAni = new SpriteAni(this);
-		return mAni;
+		if (mTween == null) mTween = new SpriteTween(this);
+		return mTween;
 	}
-	function set_ani(value:SpriteAni):SpriteAni
+	
+	function set_tween(value:SpriteTween):SpriteTween
 	{
 		if (value == null)
 		{
-			mAni.free();
-			mAni = null;
+			mTween.free();
+			mTween = null;
 		}
 		return value;
 	}

@@ -84,14 +84,14 @@ private class Sheet implements SpriteSheetAnimControllerListener
 		return c;
 	}
 	
-	function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void 
+	function onSpriteSheetChangeFrame(frame:String, time:Float, index:Int):Void
 	{
 		mSprite.frame = frame;
 		mLastTime = time;
 		//if (onEnterFrame != null) onEnterFrame(frame.index);
 	}
 	
-	function onSpriteSheetAnimFinish():Void 
+	function onSpriteSheetAnimFinish():Void
 	{
 		if (mOnAnimationFinished != null)
 		{
@@ -325,7 +325,7 @@ class SpriteAni
 		return this;
 	}
 	
-	public function stopTweens()
+	public function tweenStopAll()
 	{
 		var c = mSpriteBase.sgn.controllers;
 		while (c != null)
