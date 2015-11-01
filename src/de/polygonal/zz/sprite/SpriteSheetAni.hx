@@ -18,8 +18,10 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
+import de.polygonal.core.math.random.Random;
 import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener;
+import de.polygonal.core.util.Assert.assert;
 
 class SpriteSheetAni implements SpriteSheetControllerListener
 {
@@ -49,7 +51,7 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 		mSprite = null;
 	}
 	
-	public function play(animation:SheetAnimation, ?startOver:Bool = true, ?onFinish:SheetAnimation->Void):SpriteSheetController
+	public function play(animation:SheetAnimation, ?startOver:Bool = true, ?onFinish:SheetAnimation->Void):SpriteSheetAni
 	{
 		var c = getController();
 		c.play(animation, startOver ? 0 : mLastTime);
@@ -57,24 +59,38 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 		length = c.maxTime;
 		mCurrentAnimation = animation;
 		
-		return c;
+		return this;
 	}
 	
-	public function pause()
+	public function pause():SpriteSheetAni
 	{
 		getController().pause();
+		
+		return this;
 	}
 	
-	public function resume()
+	public function resume():SpriteSheetAni
 	{
 		getController().resume();
+		
+		return this;
 	}
 	
-	public function stop()
+	public function stop():SpriteSheetAni
 	{
 		getController().stop();
 		length = -1;
 		mCurrentAnimation = null;
+		
+		return this;
+	}
+	
+	public function randomizeTime():SpriteSheetAni
+	{
+		assert(mCurrentAnimation != null, "Call play() first.");
+		getController().passedTime = Random.frandRange(0, length);
+		
+		return this;
 	}
 	
 	@:access(de.polygonal.zz.sprite.Sprite)

@@ -44,12 +44,14 @@ class SpriteTween implements TweenControllerListener
 	public function x(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(X, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
 	public function y(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(Y, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
@@ -74,12 +76,14 @@ class SpriteTween implements TweenControllerListener
 	public function scaleX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(ScaleX, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
 	public function scaleY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(ScaleY, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
@@ -104,12 +108,14 @@ class SpriteTween implements TweenControllerListener
 	public function rotation(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(Rotation, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
 	public function alpha(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
 		tween(Alpha, target, duration, ease, repeat, onFinish);
+		
 		return this;
 	}
 	
