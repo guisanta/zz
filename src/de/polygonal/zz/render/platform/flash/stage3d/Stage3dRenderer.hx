@@ -56,6 +56,7 @@ class Stage3dRenderer extends Renderer
 {
 	public var numCallsToDrawTriangle(default, null):Int;
 	public var favorBatchSizeOverShaderSize:Bool = false;
+	public var handleContextLoss:Bool = true;
 	public var batchStrategy(default, null):BatchStrategy;
 	
 	var mContext:Context3D;
@@ -232,6 +233,12 @@ class Stage3dRenderer extends Renderer
 			}
 			else
 				o.uploadFromBitmapData(source.imageData, 0);
+		}
+		
+		if (!handleContextLoss)
+		{
+			source.imageData.dispose();
+			source.imageData = null;
 		}
 		
 		return o;
