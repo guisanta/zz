@@ -20,7 +20,7 @@ class TextureLib
 		mRenderer = renderer;
 	}
 	
-	public static function allocateTexture(id:Int, image:ImageData, ?format:TextureAtlasFormat):Texture
+	public static function allocateTexture(id:Int, image:ImageData, ?pma:Bool = true, ?format:TextureAtlasFormat):Texture
 	{
 		assert(mRenderer != null);
 		assert(!mImageLut.exists(id), "image [$id] was already mapped to the given id");
@@ -28,6 +28,7 @@ class TextureLib
 		mImageLut.set(id, image);
 		
 		var texture = new Texture();
+		texture.isAlphaPremultiplied = pma;
 		texture.setImageData(image, mRenderer.supportsNonPowerOfTwoTextures);
 		
 		assert(!mTextureLut.exists(id));

@@ -83,8 +83,6 @@ class Renderer
 	var mSmooth:Bool;
 	var mSmoothChanged:Bool;
 	
-	
-	
 	var mScratchVec:Vec3;
 	
 	public function new()
