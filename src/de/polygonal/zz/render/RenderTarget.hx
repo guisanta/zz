@@ -94,6 +94,10 @@ class RenderTarget
 		
 		if (mInvalidate)
 		{
+			if (mSize.isZero()) return;
+			
+			L.i('configure back buffer ${mSize.x}x${mSize.y}px');
+			
 			configureBackBuffer();
 			
 			if (mRenderer != null)

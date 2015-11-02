@@ -72,6 +72,7 @@ class Renderer
 	public var currentAlphaMultiplier(default, null):Float = 1;
 	
 	var mRenderTarget:RenderTarget;
+	
 	var mCuller:Culler;
 	var mCamera:Camera;
 	
@@ -178,7 +179,9 @@ class Renderer
 	{
 		assert(scene != null);
 		
-		if (getRenderTarget().getContext() == null) return; //render target initialized?
+		//quit if back buffer or context is invalid
+		if (getRenderTarget().getSize().isZero()) return;
+		if (getRenderTarget().getContext() == null) return;
 		
 		mCurSceneRoot = scene;
 		
@@ -338,7 +341,6 @@ class Renderer
 	
 	function onCameraChanged()
 	{
-		
 	}
 	
 	//TODO initial values for new batch?

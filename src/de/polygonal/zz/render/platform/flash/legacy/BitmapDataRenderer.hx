@@ -116,6 +116,7 @@ class BitmapDataRenderer extends Renderer
 	override function onTargetResize(width:Int, height:Int)
 	{
 		mContext = cast(getRenderTarget().getContext(), Bitmap).bitmapData;
+		super.onTargetResize(width, height);
 	}
 	
 	override function clear()

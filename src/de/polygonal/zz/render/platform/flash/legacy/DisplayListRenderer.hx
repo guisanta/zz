@@ -156,6 +156,7 @@ class DisplayListRenderer extends Renderer
 	override function onTargetResize(width:Int, height:Int)
 	{
 		mResized = true;
+		super.onTargetResize(width, height);
 	}
 	
 	override function clear()

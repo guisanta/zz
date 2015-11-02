@@ -139,7 +139,6 @@ class Stage3dRenderer extends Renderer
 		assert(Std.is(handle, Context3D), "invalid context: flash.display3D.Context3D required");
 		
 		mContextLost = false;
-		
 		mContext = cast(handle, Context3D);
 		
 		setAlphaBlendState(AlphaBlendMode.Normal);
@@ -192,7 +191,7 @@ class Stage3dRenderer extends Renderer
 	
 	override function present()
 	{
-		mContext.present();
+		if (mContext != null) mContext.present();
 		
 		super.present();
 	}
