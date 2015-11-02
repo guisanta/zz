@@ -362,6 +362,8 @@ class Stage3dRenderer extends Renderer
 			currentVisual = visibleSet.get(min);
 			currentEffect = currentVisual.effect;
 			
+			assert(currentEffect != null);
+			
 			batching = min != max;
 			stateFlags = currentVisual.stateFlags;
 			

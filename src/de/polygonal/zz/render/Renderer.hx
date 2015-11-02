@@ -223,7 +223,10 @@ class Renderer
 		currentVisual = visual;
 		
 		var e = visual.effect;
-		if (e != null && e.active)
+		
+		assert(e != null);
+		
+		if (e.active)
 		{
 			currentEffect = e;
 			setGlobalState(visual);
