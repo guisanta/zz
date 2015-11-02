@@ -39,7 +39,9 @@ class PainterQuadTexture extends PainterQuad
 		inline function registerShader(featuresFlags:Int, textureFlags:Int)
 			mShaderLut.set(featuresFlags, new AgalTextureShader(mContext, featuresFlags, textureFlags));
 		
-		registerShader(PAINTER_FEATURE_TEXTURE_PMA, textureFlags);
+		registerShader(PAINTER_FEATURE_TEXTURE                            , textureFlags);
+		registerShader(PAINTER_FEATURE_TEXTURE     | PAINTER_FEATURE_ALPHA, textureFlags);
+		registerShader(PAINTER_FEATURE_TEXTURE_PMA                        , textureFlags);
 		registerShader(PAINTER_FEATURE_TEXTURE_PMA | PAINTER_FEATURE_ALPHA, textureFlags);
 	}
 	
@@ -69,14 +71,17 @@ class PainterQuadTexture extends PainterQuad
 		for (i in 0...3 * 4) cr[i] = 0;
 		
 		renderer.setGlobalState(visual);
-			
+		
 		var featureFlags = 0;
 		
 		var alpha = renderer.currentAlphaMultiplier;
 		if (alpha < 1) featureFlags |= PAINTER_FEATURE_ALPHA;
 		
 		var effect = visual.effect.as(TextureEffect);
-		if (effect.texture.isAlphaPremultiplied) featureFlags |= PAINTER_FEATURE_TEXTURE_PMA;
+		if (effect.texture.isAlphaPremultiplied)
+			featureFlags |= PAINTER_FEATURE_TEXTURE_PMA;
+		else
+			featureFlags |= PAINTER_FEATURE_TEXTURE;
 		
 		setShader(featureFlags);
 		bindTexture(effect.texture);
