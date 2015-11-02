@@ -611,11 +611,13 @@ class Stage3dRenderer extends Renderer
 		
 		//create painter object on the fly
 		var clss:Class<Painter> = null;
-		var args:Array<Dynamic> = [this, key];
+		var args:Array<Dynamic> = [this, key, 0];
+		
+		var textureFlags = mTextureFlags;
 		
 		if (effect.type == TileMapEffect.TYPE)
 		{
-			painter = new PainterTileMap(this, key, mTextureFlags);
+			painter = new PainterTileMap(this, key, textureFlags);
 			
 			usePainter(painter);
 			
@@ -647,17 +649,15 @@ class Stage3dRenderer extends Renderer
 			
 			if (key & (PAINTER_FEATURE_COMPRESSED | PAINTER_FEATURE_COMPRESSED_ALPHA) > 0)
 			{
-				args.push
-				(
+				textureFlags |=
 					if (key & PAINTER_FEATURE_COMPRESSED > 0)
-						mTextureFlags | Stage3dTextureFlag.DXT1;
+						Stage3dTextureFlag.DXT1;
 					else
-						mTextureFlags | Stage3dTextureFlag.DXT5
-				);
+						Stage3dTextureFlag.DXT5;
 			}
 		}
 		
-		painter = Type.createInstance(clss, args);
+		painter = Type.createInstance(clss, [this, key, mTextureFlags]);
 		mPainterLut.set(key, painter);
 		
 		usePainter(painter);
