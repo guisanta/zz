@@ -121,6 +121,8 @@ class CanvasWindow extends RenderWindow
 	{
 		mContext = canvas.getContext2d();
 		
+		mListener.onContext();
+		
 		detectResize();
 		
 		mTimer = new Timer(500);
@@ -144,6 +146,8 @@ class CanvasWindow extends RenderWindow
 		Reflect.setField(attributes, "failIfMajorPerformanceCaveat", true);
 		Reflect.setField(attributes, "preferLowPowerToHighPerformance", true);
 		mContext = canvas.getContextWebGL(attributes);
+		
+		mListener.onContext();
 		
 		detectResize();
 		

@@ -154,6 +154,8 @@ class FlashWindow extends RenderWindow
 		
 		mCanvas = canvas;
 		
+		mListener.onContext();
+		
 		resize(stage.stageWidth, stage.stageHeight);
 		
 		return this;
@@ -414,6 +416,10 @@ class FlashWindow extends RenderWindow
 		#else
 		mStage3dContext.enableErrorChecking = false;
 		#end
+		
+		mContext = mStage3dContext;
+		
+		mListener.onContext();
 		
 		resize(stage.stageWidth, stage.stageHeight);
 		

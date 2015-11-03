@@ -33,6 +33,8 @@ abstract InputHint(Int)
 
 interface RenderWindowListener
 {
+	private function onContext():Void;
+	
 	private function onResize(size:Sizei):Void;
 	
 	private function onVisibilityChanged(isVisible:Bool):Void;
