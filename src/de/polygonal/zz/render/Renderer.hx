@@ -23,6 +23,7 @@ import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
+import de.polygonal.core.util.ClassUtil;
 import de.polygonal.ds.Da;
 import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.scene.*;
@@ -88,8 +89,10 @@ class Renderer
 	
 	public function new()
 	{
+		L.d('${ClassUtil.getUnqualifiedClassName(this)} created');
+		
 		mCuller = new Culler(this);
-
+		
 		mCamera = new Camera(this);
 		
 		mProjMatrix = new Mat44();
