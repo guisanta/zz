@@ -70,11 +70,6 @@ class FlashWindow extends RenderWindow
 		stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
-		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
-		stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
-		stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
-		
 		stage.addEventListener(MouseEvent.CLICK, onClick);
 		stage.addEventListener(Event.RESIZE, onResize);
 		stage.addEventListener(Event.FULLSCREEN, onFullScreen);
@@ -191,6 +186,18 @@ class FlashWindow extends RenderWindow
 	{
 		mAntiAliasFlag = flag;
 		configureBackBuffer();
+	}
+	
+	public function enableRightMouseButton()
+	{
+		stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
+		stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
+	}
+	
+	public function enableMiddleMouseButton()
+	{
+		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
+		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
 	}
 	
 	override public function getContext():Dynamic

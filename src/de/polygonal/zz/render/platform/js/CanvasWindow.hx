@@ -44,6 +44,8 @@ class CanvasWindow extends RenderWindow
 	var mDevicePixelRatio:Float = 1;
 	var mCoord = new Coord2i();
 	
+	var mMouseButtonMask:Int = 1 << 1;
+	
 	public function new(listener:RenderWindowListener)
 	{
 		super(listener);
@@ -148,6 +150,16 @@ class CanvasWindow extends RenderWindow
 		mTimer = new Timer(500);
 		mTimer.run = detectResize;
 		mTimer.run();
+	}
+	
+	public function enableRightMouseButton()
+	{
+		mMouseButtonMask |= 1 << 3;
+	}
+	
+	public function enableMiddleMouseButton()
+	{
+		mMouseButtonMask |= 1 << 2;
 	}
 	
 	override public function free()
@@ -291,6 +303,8 @@ class CanvasWindow extends RenderWindow
 	
 	function onMouseDown(e:MouseEvent)
 	{
+		if (mMouseButtonMask & (1 << e.which) == 0) return;
+		
 		mMouseDown = true;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
@@ -299,6 +313,8 @@ class CanvasWindow extends RenderWindow
 	
 	function onMouseUp(e:MouseEvent)
 	{
+		if (mMouseButtonMask & (1 << e.which) == 0) return;
+		
 		mMouseDown = false;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
@@ -314,6 +330,8 @@ class CanvasWindow extends RenderWindow
 	
 	function onClick(e:MouseEvent)
 	{
+		if (mMouseButtonMask & (1 << e.which) == 0) return;
+		
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
 		onInput(x, y, Select, 0, true, cast e.which);
