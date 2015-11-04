@@ -97,12 +97,11 @@ class Canvas2dRenderer extends Renderer
 			h = target.internalResolution.y;
 		}
 		
-		Color.extractR8G8B8A8(target.color, mColorChannels);
+		Color.extractR8G8B8(target.color, mColorChannels);
 		var r = mColorChannels[0];
 		var g = mColorChannels[1];
 		var b = mColorChannels[2];
-		var a = mColorChannels[3] * 0xFF;
-		context.fillStyle = 'rgba($r,$g,$b,$a)';
+		context.fillStyle = 'rgb($r,$g,$b)';
 		context.globalCompositeOperation = "copy";
 		context.fillRect(0, 0, w, h);
 		context.globalCompositeOperation = "source-over";

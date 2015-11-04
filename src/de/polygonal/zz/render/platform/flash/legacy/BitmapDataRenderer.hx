@@ -125,7 +125,7 @@ class BitmapDataRenderer extends Renderer
 		if (target == null) return;
 		
 		if (mContext != null)
-			mContext.fillRect(mContext.rect, target.color);
+			mContext.fillRect(mContext.rect, target.color | 0xff000000);
 	}
 	
 	override function onBeginScene()

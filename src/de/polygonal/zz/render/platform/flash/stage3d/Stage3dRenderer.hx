@@ -179,13 +179,12 @@ class Stage3dRenderer extends Renderer
 		var target = getRenderTarget();
 		if (target == null) return;
 		
-		Color.extractR8G8B8A8(target.color, mColorChannels);
+		Color.extractR8G8B8(target.color, mColorChannels);
 		var r = mColorChannels[0] / 0xFF;
 		var g = mColorChannels[1] / 0xFF;
 		var b = mColorChannels[2] / 0xFF;
-		var a = mColorChannels[3] / 0xFF;
 		
-		if (mContext != null) mContext.clear(r, g, b, a);
+		if (mContext != null) mContext.clear(r, g, b, 1);
 		
 		numCallsToDrawTriangle = 0;
 	}

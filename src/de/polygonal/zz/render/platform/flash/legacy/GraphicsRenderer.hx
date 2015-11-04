@@ -98,14 +98,10 @@ class GraphicsRenderer extends Renderer
 		
 		mContext.clear();
 		
-		var alpha = target.color >>> 24;
-		if (alpha > 0)
-		{
-			mContext.beginFill(target.color & 0xFFFFFF, alpha / 0xFF);
-			var v = target.getPixelViewport();
-			mContext.drawRect(0, 0,v.w, v.h);
-			mContext.endFill();
-		}
+		mContext.beginFill(target.color, 1);
+		var v = target.getPixelViewport();
+		mContext.drawRect(0, 0,v.w, v.h);
+		mContext.endFill();
 		
 		mViewport = target.getPixelViewport();
 	}

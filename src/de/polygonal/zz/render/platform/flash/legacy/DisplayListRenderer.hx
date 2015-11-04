@@ -73,7 +73,7 @@ class DisplayListRenderer extends Renderer
 	var mCleared = false;
 	
 	var mResized = false;
-	var mCurrentColor:UInt = 0;
+	var mCurrentColor:Int = -1;
 	
 	public function new()
 	{
@@ -173,21 +173,16 @@ class DisplayListRenderer extends Renderer
 			var g = cast(mContext, Sprite).graphics;
 			g.clear();
 			
-			var alpha = color >>> 24;
-			if (alpha > 0)
+			g.beginFill(color, 1);
+			var r = target.internalResolution;
+			if (r != null)
+				g.drawRect(0, 0, r.x, r.y);
+			else
 			{
-				g.beginFill(color & 0xFFFFFF, alpha / 0xFF);
-				
-				var r = target.internalResolution;
-				if (r != null)
-					g.drawRect(0, 0, r.x, r.y);
-				else
-				{
-					var viewport = target.getPixelViewport();
-					g.drawRect(0, 0, viewport.w, viewport.h);
-				}
-				g.endFill();
+				var viewport = target.getPixelViewport();
+				g.drawRect(0, 0, viewport.w, viewport.h);
 			}
+			g.endFill();
 		}
 		
 		mCleared = true;

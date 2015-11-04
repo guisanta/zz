@@ -28,7 +28,7 @@ import de.polygonal.zz.texture.TextureLib;
 @:access(de.polygonal.zz.render.Renderer)
 class RenderTarget
 {
-	public var color:UInt = 0xFF000000;
+	public var color:Int = 0xffffff;
 	
 	var mSize = new Sizei(0, 0);
 	var mSizeOut = new Sizei(0, 0);
