@@ -68,7 +68,7 @@ class Culler
 		//if the camera has changed, compute a plane for each side of source rectangle in world space
 		//plane normals are pointing into the view frustum
 		updateClipPlanes();
-			
+		
 		mVisibleSet.clear();
 		scene.onGetVisibleSet(this, noCull);
 		

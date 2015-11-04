@@ -36,6 +36,7 @@ import flash.display.*;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import flash.Lib;
 
 private typedef NativeColorTransform = flash.geom.ColorTransform;
 
@@ -146,11 +147,11 @@ class DisplayListRenderer extends Renderer
 		}*/
 	}
 	
-	override function onInitRenderContext(value:Dynamic)
+	override function onInitRenderContext(handle:Dynamic)
 	{
-		assert(Std.is(value, DisplayObjectContainer), "invalid context: flash.display.DisplayObjectContainer required");
+		assert(Std.is(handle, DisplayObjectContainer), "invalid context: flash.display.DisplayObjectContainer required");
 		
-		mContext = cast(value, DisplayObjectContainer);
+		mContext = Lib.as(handle, DisplayObjectContainer);
 	}
 	
 	override function onTargetResize(width:Int, height:Int)

@@ -19,14 +19,15 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.js;
 
 import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.zz.render.RenderWindowListener;
 import haxe.Timer;
 import js.Browser;
 import js.html.CanvasElement;
 import js.html.Event;
 import js.html.EventTarget;
-import js.html.MouseEvent;
 import js.html.TouchEvent;
+import js.html.MouseEvent;
 
 @:access(de.polygonal.zz.render.Renderer)
 @:access(de.polygonal.zz.render.RenderWindowListener)
@@ -115,11 +116,22 @@ class CanvasWindow extends RenderWindow
 		}
 		
 		if (!mUseExistingCanvasElement) win.addEventListener("resize", onResize);
+		
+		var tmp = mListener;
+		mListener = null; //skip onResize()
+		try 
+		{
+			onResize(null);
+		}
+		catch(error:Dynamic) {}
+		mListener = tmp;
 	}
 	
 	public function initCanvas2dContext()
 	{
 		mContext = canvas.getContext2d();
+		
+		configureBackBuffer();
 		
 		mListener.onContext();
 		
@@ -146,6 +158,8 @@ class CanvasWindow extends RenderWindow
 		Reflect.setField(attributes, "failIfMajorPerformanceCaveat", true);
 		Reflect.setField(attributes, "preferLowPowerToHighPerformance", true);
 		mContext = canvas.getContextWebGL(attributes);
+		
+		configureBackBuffer();
 		
 		mListener.onContext();
 		
@@ -290,7 +304,7 @@ class CanvasWindow extends RenderWindow
 		}
 	}
 	
-	function onResize(e:Event)
+	function onResize(_)
 	{
 		var viewport:Dynamic = Browser.document.querySelector("meta[name=viewport]");
 		untyped __js__("viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0')");

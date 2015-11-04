@@ -34,6 +34,7 @@ import flash.display.TriangleCulling;
 import flash.geom.ColorTransform;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import flash.Lib;
 import haxe.ds.Vector;
 
 private typedef NativeVector<T> = flash.Vector<T>;
@@ -83,20 +84,11 @@ class GraphicsRenderer extends Renderer
 		mScratchBitmap = null;
 	}
 	
-	override function onInitRenderContext(value:Dynamic)
+	override function onInitRenderContext(handle:Dynamic)
 	{
-		#if debug
-		try
-		{
-			mContext = untyped value.graphics;
-		}
-		catch(error:Dynamic)
-		{
-			throw "invalid context: no flash.display.Graphics object found";
-		}
-		#else
-		mContext = untyped value.graphics;
-		#end
+		assert(Std.is(handle, Graphics), "invalid context: flash.display.Graphics required");
+		
+		mContext = Lib.as(handle, Graphics);
 	}
 	
 	override function clear()

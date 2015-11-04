@@ -52,6 +52,8 @@ class FlashWindow extends RenderWindow
 	var mVisible = true;
 	var mCoord = new Coord2i();
 	
+	var mContext:Dynamic;
+	
 	public function new(listener:RenderWindowListener)
 	{
 		super(listener);
@@ -75,6 +77,8 @@ class FlashWindow extends RenderWindow
 		stage.addEventListener(Event.FULLSCREEN, onFullScreen);
 		stage.addEventListener(Event.ACTIVATE, onActivate);
 		stage.addEventListener(Event.DEACTIVATE, onDeactivate);
+		
+		mSize.set(stage.stageWidth, stage.stageHeight);
 	}
 	
 	override public function free()
@@ -129,12 +133,13 @@ class FlashWindow extends RenderWindow
 		
 		canvas.name = "canvas";
 		
+		mContext = canvas;
+		
 		if (Std.is(canvas, Bitmap))
-		{
-			var bitmap:Bitmap = cast canvas;
-			if (bitmap.bitmapData != null) bitmap.bitmapData.dispose();
-			bitmap.bitmapData = null;
-		}
+			mContext = null;
+		else
+		if (Std.is(canvas, Shape))
+			mContext = cast(canvas, Shape).graphics;
 		
 		if (Std.is(canvas, InteractiveObject))
 		{
@@ -153,6 +158,8 @@ class FlashWindow extends RenderWindow
 		if (canvas.parent == null) stage.addChild(canvas);
 		
 		mCanvas = canvas;
+		
+		configureBackBuffer();
 		
 		mListener.onContext();
 		
@@ -204,11 +211,7 @@ class FlashWindow extends RenderWindow
 	
 	override public function getContext():Dynamic
 	{
-		return
-		if (mStage3d != null)
-			mStage3dContext;
-		else
-			mCanvas;
+		return mContext;
 	}
 	
 	override public function getPointer():Coord2i
@@ -326,6 +329,8 @@ class FlashWindow extends RenderWindow
 			}
 			
 			b.smoothing = true;
+			
+			mContext = b.bitmapData;
 		}
 		else
 		if (Std.is(mCanvas, Sprite))
@@ -418,6 +423,8 @@ class FlashWindow extends RenderWindow
 		#end
 		
 		mContext = mStage3dContext;
+		
+		configureBackBuffer();
 		
 		mListener.onContext();
 		

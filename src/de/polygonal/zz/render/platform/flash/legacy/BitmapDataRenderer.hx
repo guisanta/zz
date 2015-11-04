@@ -106,16 +106,16 @@ class BitmapDataRenderer extends Renderer
 		}
 	}
 	
-	override function onInitRenderContext(value:Dynamic)
+	override function onInitRenderContext(handle:Dynamic)
 	{
-		assert(Std.is(value, Bitmap), "invalid context: flash.display.Bitmap required");
+		assert(Std.is(handle, BitmapData), "invalid context: flash.display.BitmapData required");
 		
-		mContext = cast(value, Bitmap).bitmapData;
+		mContext = flash.Lib.as(handle, BitmapData);
 	}
 	
 	override function onTargetResize(width:Int, height:Int)
 	{
-		mContext = cast(getRenderTarget().getContext(), Bitmap).bitmapData;
+		mContext = cast getRenderTarget().getContext();
 		super.onTargetResize(width, height);
 	}
 	

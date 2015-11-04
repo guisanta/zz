@@ -332,12 +332,12 @@ class Renderer
 		throw "override for implementation";
 	}
 	
-	function onInitRenderContext(value:Dynamic)
+	function onInitRenderContext(handle:Dynamic)
 	{
 		throw "override for implementation";
 	}
 	
-	function onRestoreRenderContext(value:Dynamic)
+	function onRestoreRenderContext(handle:Dynamic)
 	{
 	}
 	

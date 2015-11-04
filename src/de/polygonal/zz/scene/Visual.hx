@@ -104,7 +104,7 @@ class Visual extends Spatial
 	
 	override function getVisibleSet(culler:Culler, noCull:Bool)
 	{
-		culler.insert(this);
+		if (effect != null) culler.insert(this);
 	}
 	
 	override function propagateRenderStateUpdate(stacks:GlobalStateStackList)
