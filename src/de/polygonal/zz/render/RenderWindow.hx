@@ -89,6 +89,50 @@ class RenderWindow extends RenderTarget
 		throw "override for implementation";
 	}
 	
+	/**
+		Adjusts the viewport to match `contentSize`.
+	**/
+	public function fitContent(contentSize:Sizei, allowWindowBoxing = false, nonUniformThreshold = 1.)
+	{
+		var size = getSize();
+		
+		var v = new Rectf();
+		var rx = size.x / contentSize.x;
+		var ry = size.y / contentSize.y;
+		
+		if (allowWindowBoxing && rx >= 1 && ry >= 1)
+		{
+			//windowboxing
+			v.x = ((size.x - contentSize.x) / 2) / size.x;
+			v.y = ((size.y - contentSize.y) / 2) / size.y;
+			v.w = contentSize.x / size.x;
+			v.h = contentSize.y / size.y;
+		}
+		else
+		if (rx <= ry)
+		{
+			//letterboxing
+			var h = contentSize.y * rx / size.y;
+			if (h >= nonUniformThreshold) h = 1; //allow some non-uniform scaling
+			v.x = 0;
+			v.y = (1 - h) / 2;
+			v.w = 1;
+			v.h = h;
+		}
+		else
+		{
+			//pillarboxing
+			var w = contentSize.x * ry / size.x;
+			if (w >= nonUniformThreshold) w = 1; //allow some non-uniform scaling
+			v.x = (1 - w) / 2;
+			v.y = 0;
+			v.w = w;
+			v.h = 1;
+		}
+		
+		setViewport(v);
+	}
+	
 	override public function resize(width:Int, height:Int)
 	{
 		super.resize(width, height);
