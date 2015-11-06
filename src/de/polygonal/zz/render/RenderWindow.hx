@@ -19,6 +19,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render;
 
 import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.zz.data.Size.Sizei;
 
 @:access(de.polygonal.zz.render.RenderWindowListener)
 class RenderWindow extends RenderTarget
