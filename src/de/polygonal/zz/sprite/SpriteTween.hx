@@ -89,18 +89,7 @@ class SpriteTween implements TweenControllerListener
 	
 	public function uniformScale(targetScale:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
 	{
-		if (onFinish != null)
-		{
-			var c = 0;
-			var f = function() if (++c == 2) onFinish();
-			var a = tween(ScaleX, targetScale, duration, ease, repeat, f);
-			var b = tween(ScaleY, targetScale, duration, ease, repeat, f);
-		}
-		else
-		{
-			tween(ScaleX, targetScale, duration, ease, repeat, onFinish);
-			tween(ScaleY, targetScale, duration, ease, repeat, onFinish);
-		}
+		tween(UniformScale, targetScale, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
