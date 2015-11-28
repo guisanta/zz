@@ -91,7 +91,7 @@ class Painter
 	{
 		mCurrentFeatureFlags = 0;
 		
-		#if (verbose=="extra")
+		#if (verbose == "extra")
 		L.d("binding vertex buffer", "s3d");
 		#end
 		
@@ -100,7 +100,7 @@ class Painter
 	
 	public function unbind()
 	{
-		#if (verbose=="extra")
+		#if (verbose == "extra")
 		L.d("unbinding vertex buffer", "s3d");
 		#end
 		
@@ -116,7 +116,7 @@ class Painter
 			assert(mCurrentShader != null, "no AGAL shader registered");
 			mCurrentShader.bindProgram();
 			
-			#if (verbose=="extra")
+			#if (verbose == "extra")
 			L.d('changed shader, supported features: ${formatFeatures(featureFlags)}', "s3d");
 			#end
 		}

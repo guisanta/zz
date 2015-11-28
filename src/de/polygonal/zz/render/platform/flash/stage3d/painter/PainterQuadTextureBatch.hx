@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
-import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.ds.Da;
 import de.polygonal.zz.render.effect.TextureEffect;

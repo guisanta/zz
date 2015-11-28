@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Coord2f;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
@@ -392,7 +392,8 @@ class SpriteGroup extends SpriteBase
 	
 	/**
 		Takes only into account existing sprites.
-		If sprites are added or removed, this method has to be called every time a sprite is added or removed.
+		
+		This method has to be called every time a sprite is added or removed.
 	**/
 	override public function centerPivot()
 	{

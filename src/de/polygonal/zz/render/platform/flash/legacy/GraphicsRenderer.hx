@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.legacy;
 
 import de.polygonal.core.math.Mat44;
-import de.polygonal.core.math.Rect.Recti;
+import de.polygonal.core.math.Recti;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.render.effect.ColorEffect;

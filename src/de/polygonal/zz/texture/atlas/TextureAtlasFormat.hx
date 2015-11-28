@@ -19,8 +19,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas;
 
 import de.polygonal.zz.data.Size.Sizei;
-import de.polygonal.core.math.Rect.Recti;
-import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Recti;
+import de.polygonal.core.math.Coord2i;
 
 typedef TextureAtlasFrameDef =
 {

@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
-import de.polygonal.core.math.Rect.Rectf;
+import de.polygonal.core.math.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.effect.TileMapEffect;

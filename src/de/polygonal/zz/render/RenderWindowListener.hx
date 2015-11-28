@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render;
 
-import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Coord2i;
 import de.polygonal.zz.data.Size.Sizei;
 
 enum InputType { Press; Release; Move; Select; }

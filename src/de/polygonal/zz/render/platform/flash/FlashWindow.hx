@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash;
 
-import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Coord2i;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.render.platform.flash.legacy.DisplayListUtil;
 import de.polygonal.zz.render.RenderWindowListener;

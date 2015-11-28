@@ -19,9 +19,10 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Coord2f;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.util.Assert.assert;
+import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.AlphaMultiplierState;
 import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.GlobalStateType;
@@ -127,8 +128,7 @@ class SpriteBase
 	public function getRoot():SpriteGroup
 	{
 		var p = this;
-		while (p.parent != null)
-			p = p.parent;
+		while (p.parent != null) p = p.parent;
 		return as(p, SpriteGroup);
 	}
 	
@@ -228,7 +228,7 @@ class SpriteBase
 		assert(mFlags & HINT_UNIFORM_SCALE != 0, "scaling is not uniform");
 		return mScaleX;
 	}
-	inline function set_scale(value:Float):Float
+	function set_scale(value:Float):Float
 	{
 		if (mScaleX != value || mScaleY != value)
 		{
@@ -246,10 +246,8 @@ class SpriteBase
 	**/
 	public var scaleX(get_scaleX, set_scaleX):Float;
 	inline function get_scaleX():Float return mScaleX;
-	inline function set_scaleX(value:Float):Float
+	function set_scaleX(value:Float):Float
 	{
-		assert(!mSpatial.isNode(), "A SpriteGroup object only supports uniform scaling.");
-		
 		if (mScaleX != value)
 		{
 			mScaleX = value;
@@ -266,10 +264,8 @@ class SpriteBase
 	**/
 	public var scaleY(get_scaleY, set_scaleY):Float;
 	inline function get_scaleY():Float return mScaleY;
-	inline function set_scaleY(value:Float):Float
+	function set_scaleY(value:Float):Float
 	{
-		assert(!mSpatial.isNode(), "A SpriteGroup object only supports uniform scaling.");
-		
 		if (mScaleY != value)
 		{
 			mScaleY = value;
@@ -480,9 +476,12 @@ class SpriteBase
 	
 	inline public function setPosition(x:Float, y:Float)
 	{
-		mX = x;
-		mY = y;
-		setDirty();
+		if (mX != x || mY != y)
+		{
+			mX = x;
+			mY = y;
+			setDirty();
+		}
 	}
 	
 	inline public function setScale(x:Float, y:Float)

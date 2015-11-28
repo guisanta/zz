@@ -18,8 +18,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.texture.atlas.format;
 
-import de.polygonal.core.math.Coord2.Coord2i;
-import de.polygonal.core.math.Rect.Recti;
+import de.polygonal.core.math.Coord2i;
+import de.polygonal.core.math.Recti;
 import de.polygonal.ds.Array2;
 import de.polygonal.ds.Array2.Array2Cell;
 import de.polygonal.ds.ArrayConvert;

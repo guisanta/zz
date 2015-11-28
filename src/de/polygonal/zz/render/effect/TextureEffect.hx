@@ -18,8 +18,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.effect;
 
-import de.polygonal.core.math.Rect.Rectf;
-import de.polygonal.core.math.Rect.Recti;
+import de.polygonal.core.math.Rectf;
+import de.polygonal.core.math.Recti;
 import de.polygonal.zz.render.effect.Effect;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.Renderer;

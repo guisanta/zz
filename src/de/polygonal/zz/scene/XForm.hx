@@ -24,7 +24,7 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Coord2f;
 import de.polygonal.core.math.Mat33;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
@@ -235,7 +235,7 @@ class Xform
 	inline public function setIdentity()
 	{
 		mMatrix.setIdentity();
-		mTranslate.zero();
+		mTranslate.makeZero();
 		mScale.x = 1;
 		mScale.y = 1;
 		mScale.z = 1;
