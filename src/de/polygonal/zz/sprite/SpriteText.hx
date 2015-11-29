@@ -34,147 +34,60 @@ import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 
-@:enum
-abstract TextAlign(Int)
-{
-	var Left = 1;
-	var Center = 2;
-	var Right = 3;
-}
+enum TextAlign { Left; Center; Right; }
 
-@:allow(de.polygonal.zz.sprite.SpriteText)
-class SpriteTextSettings
+//bakeDown()
+
+typedef SpriteTextProperties =
 {
-	var mText = null;
-	var mAlign = TextAlign.Left;
-	var mMultiline = true;
-	var mKerning = true;
-	var mSize = 12;
-	var mWidth = 100.;
-	var mHeight = 100.;
-	var mTracking = 0.;
-	var mLeading = 0.;
-	var mPixelSnapping = false;
-	
-	var mChanged = true;
-	
-	function new()
-	{
-	}
-	
-	public var text(get_text, set_text):String;
-	inline function get_text():String return mText;
-	function set_text(value:String):String
-	{
-		assert(value != null);
-		mChanged = mChanged || (mText != value);
-		return mText = value;
-	}
-	
-	public var size(get_size, set_size):Int;
-	inline function get_size():Int return mSize;
-	function set_size(value:Int):Int
-	{
-		mChanged = mChanged || (mSize != value);
-		return mSize = value;
-	}
-	
-	public var width(get_width, set_width):Float;
-	inline function get_width():Float return mWidth;
-	function set_width(value:Float):Float
-	{
-		mChanged = mChanged || (mWidth != value);
-		mChanged = true;
-		return mWidth = value;
-	}
-	
-	public var height(get_height, set_height):Float;
-	inline function get_height():Float return mHeight;
-	function set_height(value:Float):Float
-	{
-		mChanged = mChanged || (mHeight != value);
-		return mHeight = value;
-	}
-	
-	public var align(get_align, set_align):TextAlign;
-	inline function get_align():TextAlign return mAlign;
-	function set_align(value:TextAlign):TextAlign
-	{
-		mChanged = mChanged || (mAlign != value);
-		return mAlign = value;
-	}
-	
-	public var multiline(get_multiline, set_multiline):Bool;
-	inline function get_multiline():Bool return mMultiline;
-	function set_multiline(value:Bool):Bool
-	{
-		mChanged = mChanged || (mMultiline != value);
-		return mMultiline = value;
-	}
-	
-	public var kerning(get_kerning, set_kerning):Bool;
-	inline function get_kerning():Bool return mKerning;
-	function set_kerning(value:Bool):Bool
-	{
-		mChanged = mChanged || (mKerning != value);
-		return mKerning = value;
-	}
-	
-	public var tracking(get_tracking, set_tracking):Float;
-	inline function get_tracking():Float return mTracking;
-	function set_tracking(value:Float):Float
-	{
-		mChanged = mChanged || (mTracking != value);
-		return mTracking = value;
-	}
-	
-	public var leading(get_leading, set_leading):Float;
-	inline function get_leading():Float return mLeading;
-	function set_leading(value:Float):Float
-	{
-		mChanged = mChanged || (mLeading != value);
-		return mLeading = value;
-	}
-	
-	public var pixelSnapping(get_pixelSnapping, set_pixelSnapping):Bool;
-	inline function get_pixelSnapping():Bool return mPixelSnapping;
-	function set_pixelSnapping(value:Bool):Bool
-	{
-		mChanged = mChanged || (mPixelSnapping != value);
-		return mPixelSnapping = value;
-	}
+	text:String, size:Int, align:TextAlign, width:Float, height:Float,
+	kerning:Bool, multiline:Bool, tracking:Float, leading:Float
 }
 
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteText extends SpriteBase
 {
-	public var settings(default, null) = new SpriteTextSettings();
-	public var overflow(default, null):Bool;
+	/**
+		True if the entire text does not fit.
+		Only valid after calling `commit()`.
+	**/
+	public var isOverflowing(default, null):Bool;
 	
-	public var bounds(default, null) = new Aabb2(0, 0, 0, 0);
+	/**
+		Exact bounding box encapsulting all characters in local space.
+		Only valid after calling `commit()`.
+	**/
+	public var charBounds(default, null) = new Aabb2(0, 0, 0, 0);
 	
 	var mNode:Node;
 	var mTexture:Texture;
 	var mAtlas:TextureAtlas;
 	var mShaper:Shaper;
-	
 	var mTextureChanged:Bool;
+	var mHasSleepingQuads:Bool;
+	
+	var mChanged = true;
+	var mProperties:SpriteTextProperties =
+	{
+		text: "", size: 10, align: TextAlign.Left, width: 100., height: 100.,
+		kerning: true, multiline: true, tracking: 0., leading: 0.
+	}
 	
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
 	{
-		var spatial = new Node();
+		var spatial = new Node("SpriteText");
 		super(spatial);
-		
-		mSpatial.mFlags &= ~Spatial.IS_COMPOSITE_LOCKED;
-		spatial.arbiter = this;
-		mSpatial.mFlags |= Spatial.IS_COMPOSITE_LOCKED;
 		
 		mNode = cast mSpatial;
 		
 		mShaper = new Shaper();
 		
 		if (parent != null) parent.addChild(this);
-		if (textureId != null) setTexture(textureId);
+		if (textureId != null)
+		{
+			setTexture(textureId);
+			mProperties.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
+		}
 	}
 	
 	override public function free()
@@ -191,8 +104,68 @@ class SpriteText extends SpriteBase
 		super.free();
 		
 		mNode = null;
+		mTexture = null;
 		mAtlas = null;
-		bounds = null;
+		mProperties = null;
+		charBounds = null;
+	}
+	
+	public function setText(value:String):SpriteText
+	{
+		mChanged = mChanged || (mProperties.text != value);
+		mProperties.text = value;
+		return this;
+	}
+	
+	public function setFontSize(value:Int):SpriteText
+	{
+		mChanged = mChanged || (mProperties.size != value);
+		mProperties.size = value;
+		return this;
+	}
+	
+	public function setTextBox(width:Float, height:Float):SpriteText
+	{
+		mChanged = mChanged || (mProperties.width != width);
+		mChanged = mChanged || (mProperties.height != height);
+		mProperties.width = width;
+		mProperties.height = height;
+		return this;
+	}
+	
+	public function setAlign(value:TextAlign):SpriteText
+	{
+		mChanged = mChanged || (mProperties.align != value);
+		mProperties.align = value;
+		return this;
+	}
+	
+	public function setMultiline(value:Bool):SpriteText
+	{
+		mChanged = mChanged || (mProperties.multiline != value);
+		mProperties.multiline = value;
+		return this;
+	}
+	
+	public function setKerning(value:Bool):SpriteText
+	{
+		mChanged = mChanged || (mProperties.kerning != value);
+		mProperties.kerning = value;
+		return this;
+	}
+	
+	public function setLeading(value:Float):SpriteText
+	{
+		mChanged = mChanged || (mProperties.leading != value);
+		mProperties.leading = value;
+		return this;
+	}
+	
+	public function setTracking(value:Float):SpriteText
+	{
+		mChanged = mChanged || (mProperties.tracking != value);
+		mProperties.tracking = value;
+		return this;
 	}
 	
 	public function setTexture(textureId:Int)
@@ -204,16 +177,18 @@ class SpriteText extends SpriteBase
 	
 	public function setToRenderedSize()
 	{
-		settings.size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
+		var size = cast(mAtlas.userData, BitmapCharSet).renderedSize;
+		mChanged = mChanged || (mProperties.size != size);
+		mProperties.size = size;
 	}
 	
 	public function autoFit(minSize:Int, maxSize:Int)
 	{
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 		
-		var currentSize = settings.size, bestSize;
+		var currentSize = mProperties.size, bestSize;
 		
-		if (overflow)
+		if (isOverflowing)
 		{
 			if (currentSize < minSize) return;
 			
@@ -226,34 +201,260 @@ class SpriteText extends SpriteBase
 			bestSize = bsearch(currentSize, maxSize + 1);
 		}
 		
-		settings.size = bestSize;
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		mProperties.size = bestSize;
+		mChanged = true;
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 	}
 	
 	public function shrinkToFit(minSize:Int)
 	{
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 		
-		if (!overflow) return;
+		if (!isOverflowing) return;
 		
-		var currentSize = settings.size;
+		var currentSize = mProperties.size;
 		if (currentSize < minSize) return;
 		
-		settings.size = bsearch(minSize, currentSize - 1);
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		mProperties.size = bsearch(minSize, currentSize - 1);
+		mChanged = true;
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 	}
 	
 	public function growToFit(maxSize:Int)
 	{
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 		
-		if (overflow) return;
+		if (isOverflowing) return;
 		
-		var currentSize = settings.size;
+		var currentSize = mProperties.size;
 		if (currentSize > maxSize) return;
 		
-		settings.size = bsearch(currentSize, maxSize + 1);
-		overflow = mShaper.shape(mAtlas.userData, settings);
+		mProperties.size = bsearch(currentSize, maxSize + 1);
+		mChanged = true;
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+	}
+	
+	public function align(bounds:Aabb2, horAlign:TextAlign, verAlign:TextAlign)
+	{
+		switch (horAlign)
+		{
+			case Left:
+				x = bounds.minX;
+			case Center:
+				x = bounds.cx - (charBounds.w / 2);
+			case Right:
+				x = bounds.maxX - charBounds.w;
+		}
+		
+		switch (verAlign)
+		{
+			case Left:
+				y = bounds.minY;
+			case Center:
+				y = bounds.cy - (charBounds.h / 2);
+			case Right:
+				y = bounds.maxY - charBounds.h;
+		}
+		
+		x -= charBounds.minX;
+		y -= charBounds.minY;
+	}
+	
+	//TODO
+	public function getOutputText():String //TODO include whitespace?
+	{
+		var s = "";
+		for (i in 0...mShaper.numChars)
+			s += String.fromCharCode(Std.int(mShaper.data[i * 5]));
+		return s;
+	}
+	
+	//TODO optimize
+	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	{
+		if (getDirty()) commit();
+		return mSpatial.getBoundingBox(targetSpace.sgn, output);
+	}
+	
+	override public function centerPivot()
+	{
+		commit();
+		mPivotX = charBounds.cx;
+		mPivotY = charBounds.cy;
+		setDirty();
+	}
+	
+	override public function tick(timeDelta:Float)
+	{
+		super.tick(timeDelta);
+		
+		//remove culled glyphs after x seconds
+		if (!mHasSleepingQuads) return;
+		
+		var numSleeping = 0;
+		var c = mNode.child, g;
+		while (c != null)
+		{
+			if (c.mFlags & Spatial.CULL_ALWAYS > 0)
+			{
+				g = Spatial.as(c, Glyph);
+				g.idleTime += timeDelta;
+				if (g.idleTime > 10)
+				{
+					var next = c.mSibling;
+					mNode.removeChild(c);
+					c.free();
+					c = next;
+					continue;
+				}
+				else
+					numSleeping++;
+			}
+			c = c.mSibling;
+		}
+		
+		mHasSleepingQuads = numSleeping > 0;
+	}
+	
+	override public function commit():SpriteBase
+	{
+		if (getDirty()) super.commit();
+		
+		clrDirty();
+		
+		if (mTexture == null) return this;
+		if (mProperties.text == null) return this;
+		if (!mChanged && !mTextureChanged) return this;
+		
+		L.e('pdate');
+		
+		mChanged = false;
+		
+		if (mTextureChanged)
+		{
+			mTextureChanged = false;
+			
+			var c = mNode.child, next;
+			while (c != null)
+			{
+				next = c.mSibling;
+				mNode.removeChild(c);
+				c.free();
+				c = next;
+			}
+		}
+		
+		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		
+		var minX = M.POSITIVE_INFINITY;
+		var minY = M.POSITIVE_INFINITY;
+		var maxX = M.NEGATIVE_INFINITY;
+		var maxY = M.NEGATIVE_INFINITY;
+		
+		var c, x, y, w, h, g, e, next;
+		
+		var v = mNode.child;
+		var a = mShaper.data;
+		var z = 0;
+		var i = 0;
+		var k = mShaper.numChars * 5;
+		while (i < k)
+		{
+			c = Std.int(a[i++]);
+			x = a[i++];
+			y = a[i++];
+			w = a[i++];
+			h = a[i++];
+			
+			if (v != null)
+			{
+				//reuse existing visual
+				g = Spatial.as(v, Glyph);
+				g.name = String.fromCharCode(c);
+				g.cullingMode = CullingMode.CullDynamic;
+				mNode.setChildIndex(g, z++);
+				v = v.mSibling;
+			}
+			else
+			{
+				//create new visual
+				g = new Glyph(String.fromCharCode(c));
+				e = new TextureEffect().setTexture(mTexture, mAtlas);
+				g.effect = e;
+				mNode.addChildAt(g, z++);
+			}
+			
+			//set position and frame
+			g.local.setTranslate2(x, y);
+			g.local.setScale2(w, h);
+			g.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY; //TODO why?? force updateGeometricState()
+			g.effect.as(TextureEffect).setFrameIndex(c);
+			
+			//compute local bounding box on-the-fly
+			minX = M.fmin(minX, x);
+			minY = M.fmin(minY, y);
+			maxX = M.fmax(maxX, x + w);
+			maxY = M.fmax(maxY, y + h);
+		}
+		
+		charBounds.set(minX, minY, maxX, maxY);
+		
+		//cull/remove unused quads
+		i = 0;
+		while (v != null)
+		{
+			if (i++ < 100) //keep no more than
+			{
+				mHasSleepingQuads = true;
+				Spatial.as(v, Glyph).idleTime = 0;
+				v.cullingMode = CullingMode.CullAlways;
+				v = v.mSibling;
+			}
+			else
+			{
+				//remove
+				next = v.mSibling;
+				mNode.removeChild(v);
+				v.free();
+				v = next;
+			}
+		}
+		
+		return this;
+	}
+	
+	override function get_width():Float
+	{
+		return charBounds.w;
+	}
+	
+	override function get_height():Float
+	{
+		return charBounds.h;
+	}
+	
+	override function set_width(value:Float):Float
+	{
+		return throw "unsupported operation";
+	}
+	
+	override function set_height(value:Float):Float
+	{
+		return throw "unsupported operation";
+	}
+	
+	override function set_scaleX(value:Float):Float
+	{
+		assert(!mSpatial.isNode(), "A SpriteText object only supports uniform scaling.");
+		
+		return value;
+	}
+	
+	override function set_scaleY(value:Float):Float
+	{
+		assert(!mSpatial.isNode(), "A SpriteText object only supports uniform scaling.");
+		
+		return value;
 	}
 	
 	function bsearch(lo:Int, hi:Int):Int
@@ -262,8 +463,8 @@ class SpriteText extends SpriteBase
 		var m = l + ((h - l) >> 1);
 		while (true)
 		{
-			settings.size = m;
-			if (mShaper.shape(mAtlas.userData, settings))
+			mProperties.size = m;
+			if (mShaper.shape(mAtlas.userData, mProperties))
 			{
 				//decrease size
 				h = m;
@@ -282,210 +483,6 @@ class SpriteText extends SpriteBase
 		
 		if (s < 0) return lo;
 		
-		return s;
-	}
-	
-	override function get_width():Float
-	{
-		commit();
-		return bounds.w * M.fabs(scaleX);
-	}
-	
-	override function get_height():Float
-	{
-		commit();
-		return bounds.h * M.fabs(scaleY);
-	}
-	
-	override public function centerPivot()
-	{
-		commit();
-		mPivotX = bounds.x + bounds.w / 2;
-		mPivotY = bounds.y + bounds.h / 2;
-		setDirty();
-		super.commit();
-	}
-	
-	override public function tick(timeDelta:Float)
-	{
-		//remove culled glyphs after an idle time of 10 seconds
-		var child = mNode.child;
-		var g:Glyph;
-		while (child != null)
-		{
-			if (child.mFlags & Spatial.CULL_ALWAYS > 0)
-			{
-				g = cast child;
-				
-				g.idleTime += timeDelta;
-				if (g.idleTime > 10)
-				{
-					var next = child.mSibling;
-					mNode.removeChild(child);
-					child.free();
-					child = next;
-					continue;
-				}
-			}
-			child = child.mSibling;
-		}
-		
-		super.tick(timeDelta);
-	}
-	
-	override public function commit():SpriteBase
-	{
-		if (getDirty()) super.commit();
-		
-		clrDirty();
-		
-		if (mTexture == null) return this;
-		
-		if (settings.text == null) return this;
-		
-		if (!settings.mChanged && !mTextureChanged) return this;
-		
-		if (mTextureChanged)
-		{
-			mTextureChanged = false;
-			
-			var c = mNode.child, next;
-			while (c != null)
-			{
-				next = c.mSibling;
-				mNode.removeChild(c);
-				c.free();
-				c = next;
-			}
-		}
-		
-		settings.mChanged = false;
-		
-		overflow = mShaper.shape(mAtlas.userData, settings);
-		
-		var pixelSnapping = settings.pixelSnapping;
-		
-		var minX = M.POSITIVE_INFINITY;
-		var minY = M.POSITIVE_INFINITY;
-		var maxX = M.NEGATIVE_INFINITY;
-		var maxY = M.NEGATIVE_INFINITY;
-		
-		//cull existing quads
-		var numExisting = 0;
-		var c = mNode.child;
-		while (c != null)
-		{
-			numExisting++;
-			c.cullingMode = CullingMode.CullAlways;
-			c = c.mSibling;
-		}
-		c = mNode.child;
-		
-		var data = mShaper.data;
-		var i = 0;
-		var j = 0;
-		var code, x, y, w, h;
-		var g, e;
-		while (i++ < mShaper.numChars)
-		{
-			code = Std.int(data[j++]);
-			if (code == Ascii.SPACE) //don't draw whitespace characters
-			{
-				j += 4;
-				continue;
-			}
-			
-			x = data[j++];
-			y = data[j++];
-			w = data[j++];
-			h = data[j++];
-			
-			if (numExisting > 0)
-			{
-				//reuse existing visual
-				g =
-				#if flash
-				flash.Lib.as(c, Glyph);
-				#else
-				cast(c, Glyph);
-				#end
-				
-				c = c.mSibling;
-				numExisting--;
-				
-				g.name = String.fromCharCode(code);
-				g.cullingMode = CullingMode.CullDynamic;
-			}
-			else
-			{
-				//create new visual
-				g = new Glyph(String.fromCharCode(code));
-				e = new TextureEffect();
-				e.setTexture(mTexture, mAtlas);
-				g.effect = e;
-				
-				mNode.addChildAt(g, 0); //draw in reverse order
-			}
-			
-			//set position and frame
-			if (pixelSnapping)
-			{
-				x = Std.int(x);
-				y = Std.int(y);
-				w = Std.int(w);
-				h = Std.int(h);
-			}
-			
-			g.local.setTranslate2(x, y);
-			g.local.setScale2(w, h);
-			g.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY; //enforce updateGeometricState()
-			g.effect.as(TextureEffect).setFrameIndex(code);
-			
-			minX = M.fmin(minX, x);
-			minY = M.fmin(minY, y);
-			maxX = M.fmax(maxX, x + w);
-			maxY = M.fmax(maxY, y + h);
-		}
-		
-		bounds.set(minX, minY, maxX, maxY);
-		
-		//reset idle time on unused visuals
-		while (numExisting > 0)
-		{
-			g = cast c;
-			g.idleTime = 0;
-			c = c.mSibling;
-			numExisting--;
-		}
-		assert(c == null);
-		
-		//only keep 100 inactive glyphs alive
-		var inactiveCount = 0, c = mNode.child, next;
-		while (c != null)
-		{
-			if (c.mFlags & Spatial.CULL_ALWAYS > 0)
-			{
-				if (++inactiveCount == 100)
-					break;
-			}
-			c = c.mSibling;
-		}
-		while (c != null)
-		{
-			next = c.mSibling;
-			mNode.removeChild(c);
-			c.free();
-			c = next;
-		}
-		
-		return this;
-	}
-	
-	public function getOutputText():String //TODO includes whitespace?
-	{
-		var s = "";
-		for (i in 0...mShaper.numChars)
-			s += String.fromCharCode(Std.int(mShaper.data[i * 5]));
 		return s;
 	}
 }
@@ -511,30 +508,32 @@ private class Shaper
 	{
 	}
 	
-	public function shape(charSet:BitmapCharSet, settings:SpriteTextSettings):Bool
+	public function shape(charSet:BitmapCharSet, properties:SpriteTextProperties):Bool
 	{
 		numChars = 0;
 		
-		var str = settings.text;
+		var str = properties.text;
+		
+		if (str.length == 0) return false;
 		
 		var numInputChars = str.length;
 		for (i in 0...numInputChars)
 			mCharCodes.set(i, str.charCodeAt(i));
 		
-		var boxW     = settings.width;
-		var boxH     = settings.height;
-		var kerning  = settings.kerning;
-		var tracking = settings.tracking;
-		var align    = settings.align;
+		var boxW     = properties.width;
+		var boxH     = properties.height;
+		var kerning  = properties.kerning;
+		var tracking = properties.tracking;
+		var align    = properties.align;
 		
 		var bmpCharLut = charSet.characters;
 		var kerningLut = charSet.kerning;
 		
-		var scale = settings.size / charSet.renderedSize;
-		var stepY = (charSet.lineHeight + settings.leading) * scale;
+		var scale = properties.size / charSet.renderedSize;
+		var stepY = (charSet.lineHeight + properties.leading) * scale;
 		var numLines = Std.int(boxH / stepY);
 		if (numLines == 0) return true;
-		if (!settings.multiline) numLines = 1;
+		if (!properties.multiline) numLines = 1;
 		
 		var codes = mCharCodes, code, lastCode = 0;
 		var kerningAmount = 0;
@@ -562,7 +561,12 @@ private class Shaper
 		
 		inline function isWhiteSpace(x:Int) return x == Ascii.NEWLINE || x == Ascii.SPACE;
 		
-		inline function getKerning(first:Int, second:Int):Int return kerningLut.hasKey(second << 16 | first) ? kerningLut.get(second << 16 | first) : 0;
+		inline function getKerning(first:Int, second:Int):Int
+		{
+			//var x = kerningLut.hasKey(second << 16 | first) ? kerningLut.get(second << 16 | first) : 0;
+			//trace('kern ${String.fromCharCode(first)} -> ${String.fromCharCode(second)}  = $x');
+			return kerningLut.hasKey(second << 16 | first) ? kerningLut.get(second << 16 | first) : 0;
+		}
 		
 		inline function nextLine()
 		{
@@ -676,7 +680,7 @@ private class Shaper
 				charCountSegment++;
 			}
 			
-			//scan forward, test if the segment fits into the current line
+			//scan forward, testing if the segment fits into the current line
 			j = i;
 			charCountCurrent = 0;
 			x = cursorX;
@@ -684,7 +688,7 @@ private class Shaper
 			code = codes[j];
 			bc = bmpCharLut[code];
 			
-			segmentMinX = (x + (bc.offsetX * scale));
+			segmentMinX = x + bc.offsetX * scale;
 			segmentMaxX = 0.;
 			
 			while (j < i + charCountSegment)
@@ -701,7 +705,7 @@ private class Shaper
 					lastCode = code;
 				}
 				
-				if (segmentMaxX > boxW) break; //horizontal overflow?
+				if (segmentMaxX > boxW) break; //horizontal isOverflowing?
 				
 				charCountCurrent++;
 				
@@ -718,6 +722,7 @@ private class Shaper
 			}
 			else
 			{
+				lastCode = 0;
 				//entire segment fits into the current line
 				j = i + charCountCurrent;
 				while (i < j)
@@ -762,7 +767,7 @@ private class Shaper
 						}
 						cursorX += bc.advanceX * scale + tracking;
 						
-						if (cursorX > boxW) //horizontal overflow?
+						if (cursorX > boxW) //horizontal isOverflowing?
 						{
 							//trim trailing spaces before breaking the line
 							while (i + 1 < k && codes[i + 1] == Ascii.SPACE) i++;
