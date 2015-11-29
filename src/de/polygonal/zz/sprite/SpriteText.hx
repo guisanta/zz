@@ -27,13 +27,13 @@ import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.Quad;
+import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapChar;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapCharSet;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
-import de.polygonal.zz.sprite.SpriteBase.*;
 
 enum TextAlign { Left; Center; Right; }
 
