@@ -356,6 +356,19 @@ class SpriteGroup extends SpriteBase
 		return k;
 	}
 	
+	override public function tick(timeDelta:Float)
+	{
+		if (tickable) super.tick(timeDelta);
+		
+		var c = mNode.child, s;
+		while (c != null)
+		{
+			s = as(c.arbiter, SpriteBase);
+			s.tick(timeDelta);
+			c = c.mSibling;
+		}
+	}
+	
 	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
 		var r = getRoot().commit();
@@ -401,7 +414,6 @@ class SpriteGroup extends SpriteBase
 		
 		return value;
 	}
-	
 	override function set_scaleY(value:Float):Float
 	{
 		assert(!mSpatial.isNode(), "A SpriteGroup object only supports uniform scaling.");
