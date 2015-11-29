@@ -33,6 +33,7 @@ import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapCharSet;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
+import de.polygonal.zz.sprite.SpriteBase.*;
 
 enum TextAlign { Left; Center; Right; }
 
@@ -297,7 +298,7 @@ class SpriteText extends SpriteBase
 		{
 			if (c.mFlags & Spatial.CULL_ALWAYS > 0)
 			{
-				g = Spatial.as(c, Glyph);
+				g = as(c, Glyph);
 				g.idleTime += timeDelta;
 				if (g.idleTime > 10)
 				{
@@ -369,7 +370,7 @@ class SpriteText extends SpriteBase
 			if (v != null)
 			{
 				//reuse existing visual
-				g = Spatial.as(v, Glyph);
+				g = as(v, Glyph);
 				g.name = String.fromCharCode(c);
 				g.cullingMode = CullingMode.CullDynamic;
 				mNode.setChildIndex(g, z++);
@@ -406,7 +407,7 @@ class SpriteText extends SpriteBase
 			if (i++ < 100) //keep no more than
 			{
 				mHasSleepingQuads = true;
-				Spatial.as(v, Glyph).idleTime = 0;
+				as(v, Glyph).idleTime = 0;
 				v.cullingMode = CullingMode.CullAlways;
 				v = v.mSibling;
 			}

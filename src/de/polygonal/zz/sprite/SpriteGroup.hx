@@ -21,6 +21,7 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2f;
 import de.polygonal.core.util.Assert.assert;
+import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
 import de.polygonal.zz.scene.Spatial;
@@ -388,6 +389,20 @@ class SpriteGroup extends SpriteBase
 	override function set_height(value:Float):Float
 	{
 		return throw "unsupported operation (a SpriteGroup object only supports uniform scaling)";
+	}
+	
+	override function set_scaleX(value:Float):Float
+	{
+		assert(!mSpatial.isNode(), "A SpriteGroup object only supports uniform scaling.");
+		
+		return value;
+	}
+	
+	override function set_scaleY(value:Float):Float
+	{
+		assert(!mSpatial.isNode(), "A SpriteGroup object only supports uniform scaling.");
+		
+		return value;
 	}
 	
 	/**
