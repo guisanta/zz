@@ -334,10 +334,14 @@ class SpriteBase
 	**/
 	public var originX(get_originX, set_originX):Float;
 	inline function get_originX():Float return mOriginX;
-	inline function set_originX(value:Float):Float
+	function set_originX(value:Float):Float
 	{
-		mOriginX = value;
-		setDirty();
+		if (mOriginX != value)
+		{
+			mOriginX = value;
+			setDirty();
+		}
+		
 		return value;
 	}
 	
@@ -347,11 +351,15 @@ class SpriteBase
 		although its x,y position remains the same.
 	**/
 	public var originY(get_originY, set_originY):Float;
-	inline function get_originY():Float return mOriginX;
-	inline function set_originY(value:Float):Float
+	inline function get_originY():Float return mOriginY;
+	function set_originY(value:Float):Float
 	{
-		mOriginY = value;
-		setDirty();
+		if (mOriginY != value)
+		{
+			mOriginY = value;
+			setDirty();
+		}
+		
 		return value;
 	}
 	
@@ -365,10 +373,14 @@ class SpriteBase
 	**/
 	public var pivotX(get_pivotX, set_pivotX):Float;
 	inline function get_pivotX():Float return mPivotX;
-	inline function set_pivotX(value:Float):Float
+	function set_pivotX(value:Float):Float
 	{
-		mPivotX = value;
-		setDirty();
+		if (mPivotX != value)
+		{
+			mPivotX = value;
+			setDirty();
+		}
+		
 		return value;
 	}
 	
@@ -383,8 +395,12 @@ class SpriteBase
 	inline function get_pivotY():Float return mPivotY;
 	inline function set_pivotY(value:Float):Float
 	{
-		mPivotY = value;
-		setDirty();
+		if (mPivotY != value)
+		{
+			mPivotY = value;
+			setDirty();
+		}
+		
 		return value;
 	}
 	
