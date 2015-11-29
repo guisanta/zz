@@ -316,19 +316,15 @@ class SpriteBase
 		return value;
 	}
 	
-	function get_size():Float
+	public function getSize():Sizef
 	{
-		assert(mSizeX == mSizeY, "rectangle is not a square");
-		return mSizeX;
+		return new Sizef(width, height);
 	}
-	function set_size(value:Float):Float
+	
+	public function setSize(x:Float, y:Float)
 	{
-		assert(mSizeX != 0, "use setColor() or setTexture() to define an initial size");
-		assert(mSizeX == mSizeY, "rectangle is not a square");
-		mScaleX = mScaleY = value / mSizeX;
-		mFlags &= ~HINT_UNIT_SCALE;
-		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_DIRTY);
-		return value;
+		set_width(x);
+		set_height(y);
 	}
 	
 	/**
