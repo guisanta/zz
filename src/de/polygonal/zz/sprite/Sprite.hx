@@ -661,6 +661,24 @@ class Sprite extends SpriteBase
 		return output;
 	}
 	
+	public var uniformSize(get_uniformSize, set_uniformSize):Float;
+	inline function get_uniformSize():Float
+	{
+		assert(mSizeX == mSizeY, "rectangle is not a square");
+		
+		return mSizeX;
+	}
+	function set_uniformSize(value:Float):Float
+	{
+		assert(mSizeX != 0, "no size defined");
+		assert(mSizeX == mSizeY, "rectangle is not a square");
+		
+		mScaleX = mScaleY = value / mSizeX;
+		mFlags &= ~HINT_UNIT_SCALE;
+		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_DIRTY);
+		return value;
+	}
+	
 	inline function setSquareHint(sx:Float, sy:Float) sx == sy ? mFlags |= HINT_SQUARE_SIZE : mFlags &= ~HINT_SQUARE_SIZE;
 	
 	inline function getVisual():Visual return mVisual;
