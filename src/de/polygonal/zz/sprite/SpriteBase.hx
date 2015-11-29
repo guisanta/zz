@@ -462,17 +462,6 @@ class SpriteBase
 		setDirty();
 	}
 	
-	public function centerPivotAndOrigin()
-	{
-		var cx = mSizeX / 2;
-		var cy = mSizeY / 2;
-		mPivotX = cx;
-		mPivotY = cy;
-		originX =-cx;
-		originY =-cy;
-		setDirty();
-	}
-	
 	inline public function setPosition(x:Float, y:Float)
 	{
 		if (mX != x || mY != y)

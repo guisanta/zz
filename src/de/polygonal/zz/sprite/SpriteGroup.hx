@@ -413,16 +413,4 @@ class SpriteGroup extends SpriteBase
 		originY = -bound.h / 2;
 		setDirty();
 	}
-	
-	override public function centerPivotAndOrigin()
-	{
-		var bound = getBounds(this, mBoundOut);
-		var cx = bound.w / 2;
-		var cy = bound.h / 2;
-		mPivotX = cx;
-		mPivotY = cy;
-		originX =-cx;
-		originY =-cy;
-		setDirty();
-	}
 }
