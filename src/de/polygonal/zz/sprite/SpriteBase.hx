@@ -278,10 +278,9 @@ class SpriteBase
 	/**
 		The width of this sprite.
 		Changing the width affects the scaling factor, e.g. if scaleX equals 1.0 and width equals 100,
-		changing the witdh to 50 will set the scaling factor to 0.5. If not desired call bakeDownScale()
-		afterwards.
+		changing the witdh to 50 will set the scaling factor to 0.5.
 		
-		If scaleX == 1, width equals the unscaled texture width in pixels.
+		If scaleX == 1, `width` equals the unscaled texture width in pixels.
 	**/
 	public var width(get_width, set_width):Float;
 	function get_width():Float
@@ -299,13 +298,8 @@ class SpriteBase
 	}
 	
 	/**
-		The half-width of this sprite.
-	**/
-	public var radiusX(get_radiusX, never):Float;
-	inline function get_radiusX():Float return width * .5;
-	
-	/**
 		The height of this sprite.
+		
 		If scaleY == 1, height equals the unscaled texture height in pixels.
 	**/
 	public var height(get_height, set_height):Float;
@@ -322,13 +316,6 @@ class SpriteBase
 		return value;
 	}
 	
-	/**
-		The half-height of this sprite.
-	**/
-	public var radiusY(get_radiusY, never):Float;
-	inline function get_radiusY():Float return height * .5;
-	
-	public var size(get_size, set_size):Float;
 	function get_size():Float
 	{
 		assert(mSizeX == mSizeY, "rectangle is not a square");
@@ -407,7 +394,7 @@ class SpriteBase
 	
 	/**
 		Moves the origin point to the center of this sprite.
-		By default, the origin is at the top-left corner.
+		By default, the origin is located at the top-left corner.
 	**/
 	public function centerOrigin()
 	{

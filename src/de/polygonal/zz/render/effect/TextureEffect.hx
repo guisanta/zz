@@ -62,7 +62,7 @@ class TextureEffect extends Effect
 		mCropRectUv = new Rectf(0, 0, 0, 0);
 	}
 	
-	public function setTexture(texture:Texture, ?atlas:TextureAtlas)
+	public function setTexture(texture:Texture, ?atlas:TextureAtlas):TextureEffect
 	{
 		mFrameIndex = -1;
 		
@@ -97,6 +97,8 @@ class TextureEffect extends Effect
 			}
 		}
 		#end
+		
+		return this;
 	}
 	
 	override public function free()
