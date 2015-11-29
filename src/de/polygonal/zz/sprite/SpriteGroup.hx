@@ -358,20 +358,28 @@ class SpriteGroup extends SpriteBase
 	
 	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
-		var r = getRoot();
-		r.commit();
-		TreeUtil.updateGeometricState(as(r.sgn, Node), true);
+		var r = getRoot().commit();
+		var n = as(r.sgn.getRoot(), Node);
+		TreeUtil.updateGeometricState(n, true);
 		
 		return mSpatial.getBoundingBox(targetSpace.sgn, output);
 	}
 	
+	override public function getSize():Sizef
+	{
+		var bounds = getBounds(this, new Aabb2());
+		
+		return new Sizef(bounds.w, bounds.h);
+	}
+	
+	override public function setSize(x:Float, y:Float)
+	{
+		return throw "unsupported operation (a SpriteGroup object only supports uniform scaling)";
+	}
+	
 	override function get_width():Float
 	{
-		var r = getRoot().commit();
-		var n = as(r.sgn.getRoot(), Node);
-		TreeUtil.updateGeometricState(n, false);
-		
-		return mSpatial.getBoundingBox(n, mBoundOut).w;
+		return getBounds(this, mBoundOut).w;
 	}
 	override function set_width(value:Float):Float
 	{
@@ -380,11 +388,7 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_height():Float
 	{
-		var r = getRoot().commit();
-		var n = as(r.sgn.getRoot(), Node);
-		TreeUtil.updateGeometricState(n, false);
-		
-		return mSpatial.getBoundingBox(n, mBoundOut).h;
+		return getBounds(this, mBoundOut).h;
 	}
 	override function set_height(value:Float):Float
 	{
