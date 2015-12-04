@@ -20,24 +20,23 @@ package de.polygonal.zz.sprite;
 
 import de.polygonal.core.fmt.Ascii;
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Vector;
+import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.Quad;
-import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.Spatial;
+import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapChar;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapCharSet;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
+import de.polygonal.core.math.Mathematics;
 
 enum TextAlign { Left; Center; Right; }
-
-//bakeDown()
 
 typedef SpriteTextProperties =
 {
@@ -50,15 +49,8 @@ class SpriteText extends SpriteBase
 {
 	/**
 		True if the entire text does not fit.
-		Only valid after calling `commit()`.
 	**/
 	public var isOverflowing(default, null):Bool;
-	
-	/**
-		Exact bounding box encapsulting all characters in local space.
-		Only valid after calling `commit()`.
-	**/
-	public var charBounds(default, null) = new Aabb2(0, 0, 0, 0);
 	
 	var mNode:Node;
 	var mTexture:Texture;
@@ -66,7 +58,6 @@ class SpriteText extends SpriteBase
 	var mShaper:Shaper;
 	var mTextureChanged:Bool;
 	var mHasSleepingQuads:Bool;
-	
 	var mChanged = true;
 	var mProperties:SpriteTextProperties =
 	{
@@ -108,16 +99,23 @@ class SpriteText extends SpriteBase
 		mTexture = null;
 		mAtlas = null;
 		mProperties = null;
-		charBounds = null;
 	}
 	
-	public function setText(value:String):SpriteText
+	public function getText(?raw = false):String
 	{
-		mChanged = mChanged || (mProperties.text != value);
-		mProperties.text = value;
+		return mProperties.text;
+	}
+	public function setText(value:Dynamic):SpriteText
+	{
+		mChanged = mChanged || (mProperties.text != Std.string(value));
+		mProperties.text = Std.string(value);
 		return this;
 	}
 	
+	public function getFontSize():Int
+	{
+		return mProperties.size;
+	}
 	public function setFontSize(value:Int):SpriteText
 	{
 		mChanged = mChanged || (mProperties.size != value);
@@ -125,6 +123,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getTextBox():Sizef
+	{
+		return new Sizef(mProperties.width, mProperties.height);
+	}
 	public function setTextBox(width:Float, height:Float):SpriteText
 	{
 		mChanged = mChanged || (mProperties.width != width);
@@ -134,6 +136,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getAlign():TextAlign
+	{
+		return mProperties.align;
+	}
 	public function setAlign(value:TextAlign):SpriteText
 	{
 		mChanged = mChanged || (mProperties.align != value);
@@ -141,6 +147,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getMultiline():Bool
+	{
+		return mProperties.multiline;
+	}
 	public function setMultiline(value:Bool):SpriteText
 	{
 		mChanged = mChanged || (mProperties.multiline != value);
@@ -148,6 +158,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getKerning():Bool
+	{
+		return mProperties.kerning;
+	}
 	public function setKerning(value:Bool):SpriteText
 	{
 		mChanged = mChanged || (mProperties.kerning != value);
@@ -155,6 +169,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getLeading():Float
+	{
+		return mProperties.leading;
+	}
 	public function setLeading(value:Float):SpriteText
 	{
 		mChanged = mChanged || (mProperties.leading != value);
@@ -162,6 +180,10 @@ class SpriteText extends SpriteBase
 		return this;
 	}
 	
+	public function getTracking():Float
+	{
+		return mProperties.tracking;
+	}
 	public function setTracking(value:Float):SpriteText
 	{
 		mChanged = mChanged || (mProperties.tracking != value);
@@ -185,6 +207,8 @@ class SpriteText extends SpriteBase
 	
 	public function autoFit(minSize:Int, maxSize:Int)
 	{
+		mProperties.size = (maxSize - minSize) >> 1;
+		
 		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 		
 		var currentSize = mProperties.size, bestSize;
@@ -201,6 +225,8 @@ class SpriteText extends SpriteBase
 			
 			bestSize = bsearch(currentSize, maxSize + 1);
 		}
+		
+		bestSize = M.clamp(bestSize, minSize, maxSize);
 		
 		mProperties.size = bestSize;
 		mChanged = true;
@@ -235,42 +261,37 @@ class SpriteText extends SpriteBase
 		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
 	}
 	
-	public function align(bounds:Aabb2, horAlign:TextAlign, verAlign:TextAlign)
+	public function align9(bounds:Aabb2, horizontal:Int, vertical:Int, baseline = true)
 	{
-		switch (horAlign)
-		{
-			case Left:
-				x = bounds.minX;
-			case Center:
-				x = bounds.cx - (charBounds.w / 2);
-			case Right:
-				x = bounds.maxX - charBounds.w;
-		}
+		var charBounds = baseline ? mShaper.looseBounds : mShaper.tightBounds;
 		
-		switch (verAlign)
-		{
-			case Left:
-				y = bounds.minY;
-			case Center:
-				y = bounds.cy - (charBounds.h / 2);
-			case Right:
-				y = bounds.maxY - charBounds.h;
-		}
+		x =
+		if (horizontal < 0)
+			bounds.minX;
+		else
+		if (horizontal > 0)
+			bounds.maxX - charBounds.w;
+		else
+			bounds.cx - (charBounds.w / 2);
+		
+		y =
+		if (vertical < 0)
+			bounds.minY;
+		else
+		if (vertical > 0)
+			bounds.maxY - charBounds.h;
+		else
+			bounds.cy - (charBounds.h / 2);
 		
 		x -= charBounds.minX;
 		y -= charBounds.minY;
 	}
 	
-	//TODO
-	public function getOutputText():String //TODO include whitespace?
+	public function getCharBounds(tight = true):Aabb2
 	{
-		var s = "";
-		for (i in 0...mShaper.numChars)
-			s += String.fromCharCode(Std.int(mShaper.data[i * 5]));
-		return s;
+		return tight ? mShaper.tightBounds.clone() : mShaper.looseBounds.clone();
 	}
 	
-	//TODO optimize
 	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
 	{
 		if (getDirty()) commit();
@@ -279,7 +300,7 @@ class SpriteText extends SpriteBase
 	
 	override public function centerPivot()
 	{
-		commit();
+		var charBounds = getCharBounds(true);
 		mPivotX = charBounds.cx;
 		mPivotY = charBounds.cy;
 		setDirty();
@@ -327,8 +348,6 @@ class SpriteText extends SpriteBase
 		if (mProperties.text == null) return this;
 		if (!mChanged && !mTextureChanged) return this;
 		
-		L.e('pdate');
-		
 		mChanged = false;
 		
 		if (mTextureChanged)
@@ -346,11 +365,6 @@ class SpriteText extends SpriteBase
 		}
 		
 		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
-		
-		var minX = M.POSITIVE_INFINITY;
-		var minY = M.POSITIVE_INFINITY;
-		var maxX = M.NEGATIVE_INFINITY;
-		var maxY = M.NEGATIVE_INFINITY;
 		
 		var c, x, y, w, h, g, e, next;
 		
@@ -390,15 +404,7 @@ class SpriteText extends SpriteBase
 			g.local.setScale2(w, h);
 			g.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY; //TODO why?? force updateGeometricState()
 			g.effect.as(TextureEffect).setFrameIndex(c);
-			
-			//compute local bounding box on-the-fly
-			minX = M.fmin(minX, x);
-			minY = M.fmin(minY, y);
-			maxX = M.fmax(maxX, x + w);
-			maxY = M.fmax(maxY, y + h);
 		}
-		
-		charBounds.set(minX, minY, maxX, maxY);
 		
 		//cull/remove unused quads
 		i = 0;
@@ -426,12 +432,12 @@ class SpriteText extends SpriteBase
 	
 	override function get_width():Float
 	{
-		return charBounds.w;
+		return getCharBounds(true).w;
 	}
 	
 	override function get_height():Float
 	{
-		return charBounds.h;
+		return getCharBounds(true).h;
 	}
 	
 	override function set_width(value:Float):Float
@@ -500,6 +506,12 @@ private class Glyph extends Quad
 
 private class Shaper
 {
+	public var looseBounds = new Aabb2();
+	public var tightBounds = new Aabb2();
+	
+	public var outQuads = new Array<Float>();
+	public var outCodes = new Array<Int>();
+	
 	public var data = new Array<Float>();
 	public var numChars = 0;
 	
@@ -518,14 +530,13 @@ private class Shaper
 		if (str.length == 0) return false;
 		
 		var numInputChars = str.length;
-		for (i in 0...numInputChars)
-			mCharCodes.set(i, str.charCodeAt(i));
+		for (i in 0...numInputChars) mCharCodes.set(i, str.charCodeAt(i));
 		
-		var boxW     = properties.width;
-		var boxH     = properties.height;
-		var kerning  = properties.kerning;
+		var boxW = properties.width;
+		var boxH = properties.height;
+		var kerning = properties.kerning;
 		var tracking = properties.tracking;
-		var align    = properties.align;
+		var align = properties.align;
 		
 		var bmpCharLut = charSet.characters;
 		var kerningLut = charSet.kerning;
@@ -576,14 +587,30 @@ private class Shaper
 			cursorY += stepY;
 		}
 		
+		looseBounds.empty();
+		tightBounds.empty();
+		
 		inline function output(code:Int, bc:BitmapChar)
 		{
+			var minX = cursorX + bc.offsetX * scale;
+			var minY = cursorY + bc.offsetY * scale;
+			
 			data[next++] = code;
-			data[next++] = cursorX + bc.offsetX * scale;
-			data[next++] = cursorY + bc.offsetY * scale;
+			data[next++] = minX;
+			data[next++] = minY;
 			data[next++] = bc.w * scale;
 			data[next++] = bc.h * scale;
 			numChars++;
+			
+			
+			var maxX = minX + bc.w * scale;
+			var maxY = minY + bc.h * scale;
+			
+			tightBounds.addPoint(minX, minY);
+			tightBounds.addPoint(maxX, maxY);
+			
+			looseBounds.addPoint(minX, minY);
+			looseBounds.addPoint(maxX, cursorY + charSet.base * scale);
 		}
 		
 		function alignLine(minI:Int, maxI:Int)
