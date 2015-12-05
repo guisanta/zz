@@ -53,8 +53,8 @@ import haxe.ds.Vector;
 @:access(de.polygonal.zz.scene.Node)
 class Xform
 {
-	static var mTmpMat1 = new Mat33();
-	static var mTmpMat2 = new Mat33();
+	static var _tmpMat1 = new Mat33();
+	static var _tmpMat2 = new Mat33();
 	
 	var mScale:Vec3;
 	var mMatrix:Mat33;
@@ -342,8 +342,8 @@ class Xform
 		}
 		
 		//M: mA * mB
-		var ma = (a.isRSMatrix()) ? (a.mMatrix.timesDiagonalConst(a.mScale, mTmpMat1)) : a.mMatrix;
-		var mb = (b.isRSMatrix()) ? (b.mMatrix.timesDiagonalConst(b.mScale, mTmpMat2)) : b.mMatrix;
+		var ma = (a.isRSMatrix()) ? (a.mMatrix.timesDiagonalConst(a.mScale, _tmpMat1)) : a.mMatrix;
+		var mb = (b.isRSMatrix()) ? (b.mMatrix.timesDiagonalConst(b.mScale, _tmpMat2)) : b.mMatrix;
 		Mat33.matrixProduct(ma, mb, mMatrix);
 		
 		//T: mA * tB + tA
@@ -461,7 +461,7 @@ class Xform
 		ma = a.mMatrix;
 		if (a.isRSMatrix())
 		{
-			ma = mTmpMat1;
+			ma = _tmpMat1;
 			x = a.mScale.x;
 			y = a.mScale.y;
 			m = a.mMatrix;
@@ -472,7 +472,7 @@ class Xform
 		mb = b.mMatrix;
 		if (b.isRSMatrix())
 		{
-			ma = mTmpMat2;
+			ma = _tmpMat2;
 			x = b.mScale.x;
 			y = b.mScale.y;
 			m = b.mMatrix;
@@ -948,8 +948,8 @@ class Xform
 			else
 			{
 				//X = M^{-1}*(Y - T)
-				mMatrix.inverseConst(mTmpMat1);
-				mTmpMat1.timesVector(output);
+				mMatrix.inverseConst(_tmpMat1);
+				_tmpMat1.timesVector(output);
 			}
 		}
 		
@@ -1057,7 +1057,7 @@ class Xform
 			else
 			{
 				//X = M^{-1}*(Y - T)
-				var inv = mTmpMat1;
+				var inv = _tmpMat1;
 				mMatrix.inverseConst(inv);
 				for (i in 0...numPoints)
 					inv.timesVector(output[i]);
@@ -1188,7 +1188,7 @@ class Xform
 		else
 		{
 			//X = M^{-1}*Y
-			var inv = mTmpMat1;
+			var inv = _tmpMat1;
 			mMatrix.inverseConst(inv);
 			inv.timesVector(output);
 		}

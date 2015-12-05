@@ -29,8 +29,8 @@ import de.polygonal.zz.scene.Spatial.as;
 @:access(de.polygonal.zz.scene.Spatial)
 class TreeUtil
 {
-	static var mStackSpatial = new Array<Spatial>();
-	static var mScratchCoord = new Coord2f();
+	static var _stackSpatial = new Array<Spatial>();
+	static var _scratchCoord = new Coord2f();
 	
 	/**
 		Returns an iterator over all descendants of `root`.
@@ -40,7 +40,7 @@ class TreeUtil
 	//TODO also iterates over groups?
 	public static function descendantsIterator(root:Node):Iterator<Spatial>
 	{
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
 		
 		n = root;
@@ -99,7 +99,7 @@ class TreeUtil
 	public static function updateWorldTransformAt(origin:Spatial)
 	{
 		var top = 0;
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		
 		var p = origin;
 		while (p != null)
@@ -132,7 +132,7 @@ class TreeUtil
 	**/
 	public static function updateGeometricState(origin:Node, updateBound = true)
 	{
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		a[0] = origin;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)
@@ -165,7 +165,7 @@ class TreeUtil
 	public static function updateRenderState(root:Node)
 	{
 		//update global states
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		a[0] = root;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)
@@ -201,7 +201,7 @@ class TreeUtil
 		var maxX = Limits.FLOAT_MIN;
 		var maxY = Limits.FLOAT_MIN;
 		
-		var c = mScratchCoord;
+		var c = _scratchCoord;
 		
 		inline function minMax()
 		{
@@ -214,7 +214,7 @@ class TreeUtil
 			if (c.y > maxY) maxY = c.y;
 		}
 		
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		a[0] = root;
 		var top = 1, s:Spatial, n:Node, c;
 		while (top != 0)

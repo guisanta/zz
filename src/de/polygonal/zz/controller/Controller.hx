@@ -89,6 +89,14 @@ class Controller
 		mObject = object;
 	}
 	
+	public function markForDisposal()
+	{
+		dispose = true;
+		active = false;
+		passedTime = 0;
+		maxTime = DISPOSE_TIMEOUT;
+	}
+	
 	inline public function as<T:Controller>(cl:Class<T>):T
 	{
 		#if flash
@@ -149,13 +157,5 @@ class Controller
 		
 		//the minimum and maximum times are the same, so return the minimum.
 		return minTime;
-	}
-	
-	function disposeAfterTimeout()
-	{
-		dispose = true;
-		active = false;
-		passedTime = 0;
-		maxTime = DISPOSE_TIMEOUT;
 	}
 }

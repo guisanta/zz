@@ -63,7 +63,7 @@ class ControllerType
 	#if macro
 	macro public static function build(name:String = "TYPE"):Array<Field>
 	{
-		mCounter++;
+		_counter++;
 		var p = Context.currentPos();
 		var fields = Context.getBuildFields();
 		fields.push(
@@ -72,12 +72,12 @@ class ControllerType
 			doc: null,
 			meta: [{name: ":keep", pos: p}],
 			access: [APublic, AStatic, AInline],
-			kind: FVar(TPath({pack: [], name: "Int", params: [], sub: null}), {expr: EConst(CInt(Std.string(mCounter))), pos: p}),
+			kind: FVar(TPath({pack: [], name: "Int", params: [], sub: null}), {expr: EConst(CInt(Std.string(_counter))), pos: p}),
 			pos: p
 		});
 		
 		return fields;
 	}
-	static var mCounter = 0;
+	static var _counter = 0;
 	#end
 }

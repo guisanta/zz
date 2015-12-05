@@ -26,7 +26,7 @@ import flash.Vector;
 
 class Stage3dVertexBuffer
 {
-	static var mVertexBufferFormatLut:Vector<Context3DVertexBufferFormat> = null;
+	static var _vertexBufferFormatLut:Vector<Context3DVertexBufferFormat> = null;
 	
 	public var numFloatsPerVertex(default, null):Int;
 	public var handle(default, null):VertexBuffer3D;
@@ -50,14 +50,14 @@ class Stage3dVertexBuffer
 			mAttributes.push(i);
 		}
 		
-		if (mVertexBufferFormatLut == null)
+		if (_vertexBufferFormatLut == null)
 		{
-			mVertexBufferFormatLut = new Vector<Context3DVertexBufferFormat>(5, true);
-			mVertexBufferFormatLut[0] = Context3DVertexBufferFormat.BYTES_4;
-			mVertexBufferFormatLut[1] = Context3DVertexBufferFormat.FLOAT_1;
-			mVertexBufferFormatLut[2] = Context3DVertexBufferFormat.FLOAT_2;
-			mVertexBufferFormatLut[3] = Context3DVertexBufferFormat.FLOAT_3;
-			mVertexBufferFormatLut[4] = Context3DVertexBufferFormat.FLOAT_4;
+			_vertexBufferFormatLut = new Vector<Context3DVertexBufferFormat>(5, true);
+			_vertexBufferFormatLut[0] = Context3DVertexBufferFormat.BYTES_4;
+			_vertexBufferFormatLut[1] = Context3DVertexBufferFormat.FLOAT_1;
+			_vertexBufferFormatLut[2] = Context3DVertexBufferFormat.FLOAT_2;
+			_vertexBufferFormatLut[3] = Context3DVertexBufferFormat.FLOAT_3;
+			_vertexBufferFormatLut[4] = Context3DVertexBufferFormat.FLOAT_4;
 		}
 		
 		mBuffer = new Vector();
@@ -73,7 +73,7 @@ class Stage3dVertexBuffer
 			handle = null;
 		}
 		mContext = null;
-		mVertexBufferFormatLut = null;
+		_vertexBufferFormatLut = null;
 	}
 	
 	public function allocate(numVertices:Int)
@@ -101,7 +101,7 @@ class Stage3dVertexBuffer
 	
 	public function bind()
 	{
-		var formatLut = mVertexBufferFormatLut;
+		var formatLut = _vertexBufferFormatLut;
 		var index = 0;
 		var bufferOffset = 0;
 		for (i in mAttributes)

@@ -44,7 +44,7 @@ class Quad extends Visual
 {
 	inline public static var TYPE = 1;
 	
-	public static var mScratchCoord = new Coord2f();
+	public static var _scratchCoord = new Coord2f();
 	
 	public static var getBvTypeFunc:Void->BvType = null;
 	
@@ -61,7 +61,7 @@ class Quad extends Visual
 	{
 		if (!worldBound.contains(point)) return 0;
 		
-		var model = mScratchCoord;
+		var model = _scratchCoord;
 		model.set(0, 0);
 		world.applyInverse2(point, model);
 		if (PointInsideAabb2.test6(model.x, model.y, 0, 0, 1, 1))
@@ -83,7 +83,7 @@ class Quad extends Visual
 			return output;
 		}
 		
-		var c = mScratchCoord;
+		var c = _scratchCoord;
 		var w0 = world;
 		
 		var minX = Limits.FLOAT_MAX;

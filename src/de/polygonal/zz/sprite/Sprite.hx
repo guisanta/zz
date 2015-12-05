@@ -47,7 +47,7 @@ class Sprite extends SpriteBase
 {
 	var mVisual:Visual;
 	var mTrimRect:Rectf;
-	var mCurrentTexture:Int = -1;
+	var mCurrentTexture = -1;
 	var mCurrentFrame:String;
 	var mSize = new Sizef(0, 0);
 	var mSheetAni:SpriteSheetAni = null;
@@ -208,8 +208,8 @@ class Sprite extends SpriteBase
 		return value;
 	}
 	
-	public var sheet(get_sheet, never):SpriteSheetAni;
-	function get_sheet():SpriteSheetAni
+	public var sheetAni(get_sheetAni, never):SpriteSheetAni;
+	function get_sheetAni():SpriteSheetAni
 	{
 		if (mSheetAni == null) mSheetAni = new SpriteSheetAni(this);
 		return mSheetAni;

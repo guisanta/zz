@@ -67,7 +67,8 @@ class SpriteBase
 	var mVisible:Bool = true;
 	var mFlags:Int = 0;
 	
-	var mTween:SpriteTween = null;
+	var mTweenAni:SpriteTweenAni = null;
+	var mKeyframeAni:SpriteKeyframeAni = null;
 	var mBlending:SpriteBlending;
 	
 	function new(spatial:Spatial)
@@ -82,10 +83,16 @@ class SpriteBase
 	{
 		remove();
 		
-		if (mTween != null)
+		if (mTweenAni != null)
 		{
-			mTween.free();
-			mTween = null;
+			mTweenAni.free();
+			mTweenAni = null;
+		}
+		
+		if (mKeyframeAni != null)
+		{
+			mKeyframeAni.free();
+			mKeyframeAni = null;
 		}
 		
 		if (mBlending != null)
@@ -643,11 +650,18 @@ class SpriteBase
 		return this;
 	}
 	
-	public var tween(get_tween, never):SpriteTween;
-	function get_tween():SpriteTween
+	public var tweenAni(get_tweenAni, never):SpriteTweenAni;
+	function get_tweenAni():SpriteTweenAni
 	{
-		if (mTween == null) mTween = new SpriteTween(this);
-		return mTween;
+		if (mTweenAni == null) mTweenAni = new SpriteTweenAni(this);
+		return mTweenAni;
+	}
+	
+	public var keyframeAni(get_keyframeAni, never):SpriteKeyframeAni;
+	function get_keyframeAni():SpriteKeyframeAni
+	{
+		if (mKeyframeAni == null) mKeyframeAni = new SpriteKeyframeAni(this);
+		return mKeyframeAni;
 	}
 	
 	/**

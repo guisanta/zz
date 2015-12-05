@@ -80,7 +80,7 @@ class TweenController extends Controller
 	public function stop()
 	{
 		onFinish = null;
-		disposeAfterTimeout();
+		markForDisposal();
 	}
 	
 	override function onUpdate(time:Float):Bool
@@ -96,7 +96,7 @@ class TweenController extends Controller
 				onFinish = null;
 			}
 			
-			disposeAfterTimeout();
+			markForDisposal();
 			return false;
 		}
 		

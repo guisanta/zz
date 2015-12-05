@@ -27,26 +27,26 @@ typedef GlobalStateStackList = Vector<ArrayedStack<GlobalState>>;
 @:access(de.polygonal.zz.scene.Spatial)
 class GlobalStateStack
 {
-	static var mStacks:GlobalStateStackList;
-	static var mTmpVector:Vector<Spatial>;
+	static var _stacks:GlobalStateStackList;
+	static var _tmpVector:Vector<Spatial>;
 	
 	inline public static function getStacks():GlobalStateStackList
 	{
-		if (mStacks == null) initStacks();
-		return mStacks;
+		if (_stacks == null) initStacks();
+		return _stacks;
 	}
 	
 	public static function clrStacks()
 	{
 		for (i in 0...GlobalState.NUM_STATES)
-			mStacks[i].clear();
+			_stacks[i].clear();
 	}
 	
 	public static function dumpStacks():String
 	{
 		var s = "";
 		for (i in 0...GlobalState.NUM_STATES)
-			s += '[$i] => [${mStacks[i].toArray().join("")}]';
+			s += '[$i] => [${_stacks[i].toArray().join("")}]';
 		return s;
 	}
 	
@@ -56,7 +56,7 @@ class GlobalStateStack
 		
 		//traverse to root and push states from root to this node
 		//push parents, then pop and push their state
-		var v = mTmpVector;
+		var v = _tmpVector;
 		var k = 0;
 		var p = spatial;
 		while (p.parent != null)
@@ -78,8 +78,8 @@ class GlobalStateStack
 	static function initStacks()
 	{
 		var k = GlobalState.NUM_STATES;
-		mStacks = new Vector<ArrayedStack<GlobalState>>(k);
-		for (i in 0...k) mStacks[i] = new ArrayedStack<GlobalState>();
-		mTmpVector = new Vector<Spatial>(1024);
+		_stacks = new Vector<ArrayedStack<GlobalState>>(k);
+		for (i in 0...k) _stacks[i] = new ArrayedStack<GlobalState>();
+		_tmpVector = new Vector<Spatial>(1024);
 	}
 }

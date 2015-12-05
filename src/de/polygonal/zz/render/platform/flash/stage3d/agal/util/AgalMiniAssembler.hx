@@ -41,8 +41,8 @@ using de.polygonal.zz.render.platform.flash.stage3d.agal.util.AgalMiniAssemblerH
 class AgalMiniAssembler
 {
 	public static var instance(get_instance, never):AgalMiniAssembler;
-	static function get_instance():AgalMiniAssembler return mInstance == null ? (mInstance = new AgalMiniAssembler()) : mInstance;
-	static var mInstance:AgalMiniAssembler = null;
+	static function get_instance():AgalMiniAssembler return _instance == null ? (_instance = new AgalMiniAssembler()) : _instance;
+	static var _instance:AgalMiniAssembler = null;
 	
 	public static var debugEnabled = false;
 	public static var verbose = false;

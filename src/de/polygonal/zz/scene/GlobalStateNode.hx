@@ -25,18 +25,18 @@ class GlobalStateNode
 	//TODO use pool from ds lib
 	inline static var POOL_CAPACITY = 4096;
 	
-	static var mPool:Vector<GlobalStateNode>;
-	static var mSize:Int = 0;
+	static var _pool:Vector<GlobalStateNode>;
+	static var _size:Int = 0;
 	
 	inline public static function get(state:GlobalState):GlobalStateNode
 	{
-		if (mPool == null)
-			mPool = new Vector<GlobalStateNode>(POOL_CAPACITY);
+		if (_pool == null)
+			_pool = new Vector<GlobalStateNode>(POOL_CAPACITY);
 		
-		if (mSize > 0)
+		if (_size > 0)
 		{
-			var node = mPool[--mSize];
-			mPool[mSize] = null;
+			var node = _pool[--_size];
+			_pool[_size] = null;
 			node.state = state;
 			node.type = state.type;
 			return node;
@@ -48,7 +48,7 @@ class GlobalStateNode
 	inline public static function put(node:GlobalStateNode)
 	{
 		node.state = null;
-		if (mSize < POOL_CAPACITY) mPool[mSize++] = node;
+		if (_size < POOL_CAPACITY) _pool[_size++] = node;
 	}
 	
 	public var state:GlobalState;

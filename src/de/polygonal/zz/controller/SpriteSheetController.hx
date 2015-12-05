@@ -46,7 +46,7 @@ interface SpriteSheetControllerListener
 @:access(de.polygonal.zz.controller.SpriteSheetControllerListener)
 class SpriteSheetController extends Controller
 {
-	static var mDataCache:StringMap<AniData> = null;
+	static var _dataCache:StringMap<AniData> = null;
 	
 	public var onFinish:SheetAnimation->Void;
 	
@@ -75,13 +75,13 @@ class SpriteSheetController extends Controller
 	
 	public function play(animation:SheetAnimation, startTime:Float = 0)
 	{
-		if (mDataCache == null)
-			mDataCache = new StringMap();
-		mData = mDataCache.get(animation.name);
+		if (_dataCache == null)
+			_dataCache = new StringMap();
+		mData = _dataCache.get(animation.name);
 		if (mData == null)
 		{
 			mData = new AniData(animation);
-			mDataCache.set(animation.name, mData);
+			_dataCache.set(animation.name, mData);
 		}
 		
 		repeat = animation.loop ? RepeatType.Wrap : RepeatType.Clamp;
@@ -112,7 +112,7 @@ class SpriteSheetController extends Controller
 	{
 		mData = null;
 		onFinish = null;
-		disposeAfterTimeout();
+		markForDisposal();
 	}
 	
 	override function onUpdate(time:Float):Bool
@@ -188,7 +188,7 @@ class SpriteSheetController extends Controller
 				}
 				
 				mData = null;
-				disposeAfterTimeout();
+				markForDisposal();
 			}
 		}
 		

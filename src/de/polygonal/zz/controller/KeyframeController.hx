@@ -19,32 +19,46 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.math.Interpolation;
-import de.polygonal.core.math.Mat33;
 import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.tween.ease.EaseFactory;
 import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Animation;
 import de.polygonal.zz.scene.Spatial;
-import de.polygonal.zz.scene.Xform;
 import haxe.ds.StringMap;
+import haxe.EnumFlags;
 import de.polygonal.core.math.Mathematics;
 
 using Reflect;
 
-/**
-	Keyable Parameters.
-**/
-typedef KeyframeParameters = { ?sx:Float, ?sy:Float, ?tx:Float, ?ty:Float, ?r:Float, ?a:Float, ?easing:Ease }
+typedef KeyableParameters = { ?sx:Float, ?sy:Float, ?x:Float, ?y:Float, ?r:Float, ?a:Float, ?easing:Ease }
 
 /**
 	The "important" frames of an animation, such as the starting and ending position of an object.
 	The contoller then smoothly translates ("tweens") the object from the starting point to the ending point.
 **/
-typedef KeyframeAnimation = Animation<KeyframeParameters>;
+typedef KeyframeAnimation = Animation<KeyableParameters>;
 
 interface KeyframeControllerListener
 {
-	private function onKeyFrameUpdate(xform:Xform):Void;
+	private function onKeyframeUpdate(keyValues:KeyValues):Void;
+}
+
+enum KeyValue
+{
+	ScaleX; ScaleY; Rotate; TranslateX; TranslateY; Alpha;
+}
+
+@:publicFields
+class KeyValues
+{
+	var scaleX:Float = 1;
+	var scaleY:Float = 1;
+	var rotation:Float = 0;
+	var translateX:Float = 0;
+	var translateY:Float = 0;
+	var alpha:Float = 1;
+	
+	function new() {}
 }
 
 /**
@@ -54,48 +68,76 @@ interface KeyframeControllerListener
 @:access(de.polygonal.zz.controller.KeyframeControllerListener)
 class KeyframeController extends Controller
 {
-	static var mDataCache:StringMap<Data> = null;
+	static var _dataCache:StringMap<Data> = null;
+	
+	public var onFinish:Void->Void;
 	
 	var mListener:KeyframeControllerListener;
-	
-	var mLastIndex:Int;
-	var mXform:Xform;
-	
+	var mLastIndex:Int = 0;
 	var mData:Data;
+	var mKeyValues = new KeyValues();
 	
 	public function new()
 	{
 		super();
-		mXform = new Xform();
 	}
 	
-	public function play(def:KeyframeAnimation, startTime:Float = 0.)
+	override public function free() 
 	{
-		if (mDataCache == null) mDataCache = new StringMap();
-		mData = mDataCache.get(def.name);
-		if (mData == null) mDataCache.set(def.name, mData = new Data(def));
+		mListener = null;
+		onFinish = null;
 		
-		mLastIndex = 0;
-		repeat = RepeatType.Clamp;
-		passedTime = 0;
-		minTime = 0;
-		maxTime = mData.length;
-		active = true;
-		dispose = false;
+		super.free();
 	}
 	
 	inline public function setListener(listener:KeyframeControllerListener)
 	{
 		mListener = listener;
 	}
-	 
+	
+	public function play(def:KeyframeAnimation, startTime:Float = 0.)
+	{
+		if (_dataCache == null) _dataCache = new StringMap();
+		mData = _dataCache.get(def.name);
+		if (mData == null) _dataCache.set(def.name, mData = new Data(def));
+		
+		mLastIndex = 0;
+		repeat = RepeatType.Clamp;
+		passedTime = startTime;
+		minTime = 0;
+		maxTime = mData.length;
+		active = true;
+		dispose = false;
+		
+		var v = mKeyValues;
+		
+		setKeyframe(0);
+	}
+	
+	public function stop()
+	{
+		onFinish = null;
+		markForDisposal();
+	}
+	
 	override function onUpdate(time:Float):Bool
 	{
+		if (time > maxTime && repeat == RepeatType.Clamp)
+		{
+			if (onFinish != null)
+			{
+				onFinish();
+				onFinish = null;
+			}
+			
+			markForDisposal();
+			return false;
+		}
+		
 		var controlTime = getControlTime();
 		
 		var t = mData.times;
-		var i0, i1;
-		var alpha;
+		var i0, i1, alpha;
 		
 		if (controlTime <= t[0])
 		{
@@ -145,116 +187,103 @@ class KeyframeController extends Controller
 			}
 		}
 		
-		var parameters = mData.parameters;
-		alpha = mData.easing[i0].interpolate(alpha);
-		
-		inline function lerp(channel:Int):Float
-			return M.lerp(parameters[i0 * 6 + channel], parameters[i1 * 6 + channel], alpha);
-		
-		//TODO only lerp active channels
-		/*if (i0 == mLastIndex)
-		{
-			var channels = mData.channels[i0];
-			
-			if (channels & (1 << Data.CHANNEL_SCALE_X) == 0) trace('skip sx');
-			if (channels & (1 << Data.CHANNEL_SCALE_Y) == 0) trace('skip sy');
-			if (channels & (1 << Data.CHANNEL_ROTATE) == 0) trace('skip r');
-			if (channels & (1 << Data.CHANNEL_TRANSLATE_X) == 0) trace('skip tx');
-			if (channels & (1 << Data.CHANNEL_TRANSLATE_Y) == 0) trace('skip ty');
-			if (channels & (1 << Data.CHANNEL_ALPHA) == 0) trace('skip alpha');
-		}*/
-			
-		var scaleX = lerp(0);
-		var scaleY = lerp(1);
-		var rotate = lerp(2);
-		var translateX = lerp(3);
-		var translateY = lerp(4);
-		var alpha = lerp(5);
-		
-		mXform.setTranslate2(translateX, translateY);
-		mXform.setScale2(scaleX, scaleY);
-		var mat = new Mat33(); //TODO optimize
-		mat.setRotate2(rotate * M.DEG_RAD);
-		mXform.setRotate(mat);
-		
-		if (mListener != null)
-			mListener.onKeyFrameUpdate(mXform);
-		else
-		{
-			var local = cast(getObject(), Spatial).local;
-			//local.setTranslate2(translateX, translateY);
-			//local.setScale2
-			//local.setRotate
-		}
+		setKeyframeValues(i0, i1, alpha);
+		mListener.onKeyframeUpdate(mKeyValues);
 		
 		return true;
 	}
 	
-	function lerpDegrees(start:Float, end:Float, amount:Float):Float
-    {
-        var difference = Math.abs(end - start);
-        if (difference > 180)
-        {
-            if (end > start)
-                start += 360;
-            else
-                end += 360;
-        }
-
-        var value = (start + ((end - start) * amount));
-
-        var rangeZero = 360;
-
-		return (value >= 0 && value <= 360) ? value : (value % rangeZero);
-    }
+	public function setKeyframe(frame:Int)
+	{
+		setKeyframeValues(frame, frame, 1);
+		mListener.onKeyframeUpdate(mKeyValues);
+	}
+	
+	function setKeyframeValues(i0:Int, i1:Int, alpha:Float)
+	{
+		var p = mData.parameters;
+		var v = mKeyValues;
+		
+		if (i0 != i1)
+		{
+			alpha = mData.easing[i0].interpolate(alpha);
+			
+			inline function lerp(chnl:KeyValue)
+			{
+				var c = chnl.getIndex();
+				return M.lerp(p[i0 * 6 + c], p[i1 * 6 + c], alpha);
+			}
+			
+			var chnls = mData.chnls[i0];
+			var f:EnumFlags<KeyValue> = EnumFlags.ofInt(chnls);
+			if (f.has(ScaleX)) v.scaleX = lerp(ScaleX);
+			if (f.has(ScaleY)) v.scaleY = lerp(ScaleY);
+			if (f.has(Rotate)) v.rotation = lerp(Rotate);
+			if (f.has(TranslateX)) v.translateX = lerp(TranslateX);
+			if (f.has(TranslateY)) v.translateY = lerp(TranslateY);
+			if (f.has(Alpha)) v.alpha = lerp(Alpha);
+			
+			//v.scaleX = lerp(ScaleX);
+			//v.scaleY = lerp(ScaleY);
+			//v.rotation = lerp(Rotate); //TODO use shortest angle
+			//v.translateX = lerp(TranslateX);
+			//v.translateY = lerp(TranslateY);
+			//v.alpha = lerp(Alpha);
+		}
+		else
+		{
+			inline function get(pos:Int, chnl:KeyValue) return p[pos * 6 + chnl.getIndex()];
+			
+			v.scaleX = get(0, ScaleX);
+			v.scaleY = get(0, ScaleY);
+			v.rotation = get(0, Rotate);
+			v.translateX = get(0, TranslateX);
+			v.translateY = get(0, TranslateY);
+			v.alpha = get(0, Alpha);
+		}
+	}
 }
 
-@:build(de.polygonal.core.macro.IntConsts.build(
-[
-	CHANNEL_SCALE_X,
-	CHANNEL_SCALE_Y,
-	CHANNEL_ROTATE,
-	CHANNEL_TRANSLATE_X,
-	CHANNEL_TRANSLATE_Y,
-	CHANNEL_ALPHA
-], false, true))
+@:publicFields
 private class Data
 {
-	public var totalFrames(default, null):Int;
-	public var length(default, null):Float = 0;
+	var totalFrames(default, null):Int;
+	var length(default, null):Float = 0;
 	
-	public var times:Vector<Float>;
-	public var parameters:Vector<Float>;
-	public var channels:Vector<Int>;
-	public var easing:Vector<Interpolation<Float>>;
+	var times:Vector<Float>;
+	var parameters:Vector<Float>;
+	var chnls:Vector<Int>;
+	var easing:Vector<Interpolation<Float>>;
 	
 	public function new(def:KeyframeAnimation)
 	{
 		totalFrames = def.frames.length;
 		
 		times = new Vector<Float>(totalFrames);
-		parameters = new Vector<Float>(totalFrames * 6); //* #channels
-		channels = new Vector<Int>(totalFrames);
+		parameters = new Vector<Float>(totalFrames * KeyValue.getConstructors().length); //* #chnls
+		chnls = new Vector<Int>(totalFrames);
 		easing = new Vector<Interpolation<Float>>(totalFrames);
 		
 		var linear = EaseFactory.create(Ease.None);
 		
-		inline function getp(i:Int, channel:Int) return parameters[i * 6 + channel];
-		inline function setp(i:Int, channel:Int, x:Float) parameters[i * 6 + channel] = x;
+		inline function get(pos:Int, chnl:KeyValue) return parameters[pos * 6 + chnl.getIndex()];
+		inline function set(pos:Int, chnl:KeyValue, val:Float) parameters[pos * 6 + chnl.getIndex()] = val;
 		
-		var i = 0;
+		var sx = 1., sy = 1., r = 0., x = 0., y = 0., a = 1.;
+		var i = 0, v;
 		for (frame in def.frames)
 		{
 			times[i] = length;
 			length += frame.holdTime;
-			var v = frame.value;
 			
-			setp(i, Data.CHANNEL_SCALE_X, v.hasField("sx") ? v.sx : 1.);
-			setp(i, Data.CHANNEL_SCALE_Y, v.hasField("sy") ? v.sy : 1.);
-			setp(i, Data.CHANNEL_ROTATE, v.hasField("r") ? v.r : 0.);
-			setp(i, Data.CHANNEL_TRANSLATE_X, v.hasField("tx") ? v.tx : 0.);
-			setp(i, Data.CHANNEL_TRANSLATE_Y, v.hasField("ty") ? v.ty : 0.);
-			setp(i, Data.CHANNEL_ALPHA, v.hasField("a") ? v.a : 1.);
+			v = frame.value;
+			
+			set(i, ScaleX, sx = v.hasField("sx") ? v.sx : sx);
+			set(i, ScaleY, sy = v.hasField("sy") ? v.sy : sy);
+			set(i, Rotate, r = v.hasField("r") ? v.r : r);
+			set(i, TranslateX, x = v.hasField("x") ? v.x : x);
+			set(i, TranslateY, y = v.hasField("y") ? v.y : y);
+			set(i, Alpha, a = v.hasField("a") ? v.a : a);
 			
 			easing[i] =
 			if (v.hasField("easing"))
@@ -264,19 +293,16 @@ private class Data
 			i++;
 		}
 		
-		var i = 0;
+		var i = 0, a, b, c = KeyValue.createAll();
 		for (i in 0...totalFrames - 1)
 		{
-			channels[i] = 0;
+			chnls[i] = 0;
+			
 			for (j in 0...6)
 			{
-				if (getp(i, j) != getp(i + 1, j))
-				{
-					var a = getp(i, j);
-					var b = getp(i + 1, j);
-					//trace('set active channel $j on keyframe $i ($a -> $b)');
-					channels[i] |= 1 << j;
-				}
+				a = get(i, c[j]);
+				b = get(i + 1, c[j]);
+				if (a != b) chnls[i] |= 1 << j;
 			}
 		}
 	}

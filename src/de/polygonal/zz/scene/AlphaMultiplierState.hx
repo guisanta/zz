@@ -28,18 +28,18 @@ class AlphaMultiplierState extends GlobalState
 	public static var PRESET_OPAQUE(default, null) = new AlphaMultiplierState(1);
 	public static var PRESET_TRANSPARENT(default, null) = new AlphaMultiplierState(0);
 	
-	static var mPool = new DynamicObjectPool<AlphaMultiplierState>(function() return new AlphaMultiplierState(), 1024);
+	static var _pool = new DynamicObjectPool<AlphaMultiplierState>(function() return new AlphaMultiplierState(), 1024);
 	
 	inline public static function get(alpha:Float):AlphaMultiplierState
 	{
-		var state = mPool.get();
+		var state = _pool.get();
 		state.value = alpha;
 		return state;
 	}
 	
 	inline public static function put(state:AlphaMultiplierState)
 	{
-		mPool.put(state);
+		_pool.put(state);
 	}
 	
 	public var value:Float;

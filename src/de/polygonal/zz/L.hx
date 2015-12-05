@@ -6,12 +6,12 @@ import de.polygonal.core.log.LogSystem;
 #if log
 class L
 {
-	static var mLog:Log;
+	static var _log:Log;
 	public static var log(get_log, never):Log;
 	static function get_log():Log
 	{
-		if (mLog == null) mLog = LogSystem.createLog("zz", true);
-		return mLog;
+		if (_log == null) _log = LogSystem.createLog("zz", true);
+		return _log;
 	}
 	
 	inline public static function d(msg:Dynamic, ?tag:String, ?posInfos:haxe.PosInfos) log.d(msg, tag, posInfos);

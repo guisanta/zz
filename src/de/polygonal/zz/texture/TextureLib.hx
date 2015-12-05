@@ -11,28 +11,28 @@ import haxe.ds.IntMap;
 
 class TextureLib
 {
-	static var mRenderer:Renderer;
-	static var mImageLut = new IntMap<ImageData>();
-	static var mTextureLut = new IntMap<Texture>();
+	static var _renderer:Renderer;
+	static var _imageLut = new IntMap<ImageData>();
+	static var _textureLut = new IntMap<Texture>();
 	
 	public static function setRenderer(renderer:Renderer)
 	{
-		mRenderer = renderer;
+		_renderer = renderer;
 	}
 	
 	public static function allocateTexture(id:Int, image:ImageData, ?pma:Bool = true, ?format:TextureAtlasFormat):Texture
 	{
-		assert(mRenderer != null);
-		assert(!mImageLut.exists(id), "image [$id] was already mapped to the given id");
+		assert(_renderer != null);
+		assert(!_imageLut.exists(id), "image [$id] was already mapped to the given id");
 		
-		mImageLut.set(id, image);
+		_imageLut.set(id, image);
 		
 		var texture = new Texture();
 		texture.isAlphaPremultiplied = pma;
-		texture.setImageData(image, mRenderer.supportsNonPowerOfTwoTextures);
+		texture.setImageData(image, _renderer.supportsNonPowerOfTwoTextures);
 		
-		assert(!mTextureLut.exists(id));
-		mTextureLut.set(id, texture);
+		assert(!_textureLut.exists(id));
+		_textureLut.set(id, texture);
 		
 		L.d('texture [$id] allocated');
 		
@@ -46,14 +46,14 @@ class TextureLib
 	{
 		//TODO 
 		//store for release
-		//assert(!mImageLut.exists(id), "image [$id] was already mapped to the given id");
-		//mImageLut.set(id, image);
+		//assert(!_imageLut.exists(id), "image [$id] was already mapped to the given id");
+		//_imageLut.set(id, image);
 		
 		var texture = new Texture();
 		texture.setAtfData(bytes);
 		
-		assert(!mTextureLut.exists(id));
-		mTextureLut.set(id, texture);
+		assert(!_textureLut.exists(id));
+		_textureLut.set(id, texture);
 		
 		L.d('texture [$id] allocated');
 		
@@ -65,25 +65,25 @@ class TextureLib
 	
 	inline public static function getTexture(id:Int):Texture
 	{
-		assert(mTextureLut.exists(id), 'texture [$id] does not exist, call allocateTexture() first');
-		return mTextureLut.get(id);
+		assert(_textureLut.exists(id), 'texture [$id] does not exist, call allocateTexture() first');
+		return _textureLut.get(id);
 	}
 	
 	inline public static function isTextureAllocated(id:Int):Bool
 	{
-		return mTextureLut.exists(id);
+		return _textureLut.exists(id);
 	}
 	
 	public static function releaseTexture(id:Int)
 	{
-		assert(mTextureLut.exists(id), 'texture [$id] does not exist');
+		assert(_textureLut.exists(id), 'texture [$id] does not exist');
 		
-		assert(mImageLut.exists(id));
-		var imageData = mImageLut.get(id);
-		mImageLut.remove(id);
+		assert(_imageLut.exists(id));
+		var imageData = _imageLut.get(id);
+		_imageLut.remove(id);
 		
 		var texture = getTexture(id);
-		mTextureLut.remove(id);
+		_textureLut.remove(id);
 		texture.free();
 	}
 }

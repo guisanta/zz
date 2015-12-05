@@ -32,15 +32,15 @@ import de.polygonal.zz.scene.Spatial.as;
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteUtil
 {
-	static var mStackTickSpatial:Array<Spatial> = [];
-	static var mStackSpatial:Array<Spatial> = [];
-	static var mTmpCoord = new Coord2f(0, 0);
+	static var _stackTickSpatial:Array<Spatial> = [];
+	static var _stackSpatial:Array<Spatial> = [];
+	static var _tmpCoord = new Coord2f(0, 0);
 	
 	public static function drawScene(renderer:Renderer, root:SpriteGroup)
 	{
 		root.commit();
 		
-		tick(root, Timebase.gameTimeDelta);
+		root.tick(Timebase.gameTimeDelta);
 		
 		var node = as(root.sgn, Node);
 		
@@ -56,7 +56,7 @@ class SpriteUtil
 	**/
 	public static function count(root:SpriteGroup):Int
 	{
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		var top = 1, c = 0, s:Spatial;
 		a[0] = root.mNode;
 		while (top != 0)
@@ -83,7 +83,7 @@ class SpriteUtil
 	**/
 	public static function descendants(root:SpriteGroup):Iterator<SpriteBase>
 	{
-		var a = mStackSpatial;
+		var a = _stackSpatial;
 		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
 		
 		n = root.mNode;
@@ -172,7 +172,7 @@ class SpriteUtil
 	
 	public static function clearFlags(root:SpriteGroup)
 	{
-		var a = mStackTickSpatial;
+		var a = _stackTickSpatial;
 		a[0] = root.mNode;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)

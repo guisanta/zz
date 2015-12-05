@@ -25,7 +25,7 @@ import de.polygonal.zz.controller.TweenController.TweenControllerListener;
 
 enum TweenProperty { X; Y; ScaleX; ScaleY; UniformScale; Rotation; Alpha; }
 
-class SpriteTween implements TweenControllerListener
+class SpriteTweenAni implements TweenControllerListener
 {
 	var mSprite:SpriteBase;
 	var mPropertyBits:Int = 0;
@@ -41,21 +41,21 @@ class SpriteTween implements TweenControllerListener
 		mSprite = null;
 	}
 	
-	public function x(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function x(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(X, target, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function y(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function y(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(Y, target, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function position(targetX:Float, targetY:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function position(targetX:Float, targetY:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		if (onFinish != null)
 		{
@@ -73,35 +73,35 @@ class SpriteTween implements TweenControllerListener
 		return this;
 	}
 	
-	public function scaleX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function scaleX(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(ScaleX, target, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function scaleY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function scaleY(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(ScaleY, target, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function uniformScale(targetScale:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function uniformScale(targetScale:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(UniformScale, targetScale, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function rotation(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function rotation(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(Rotation, target, duration, ease, repeat, onFinish);
 		
 		return this;
 	}
 	
-	public function alpha(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTween
+	public function alpha(target:Float, duration:Float, ?ease:Ease, ?repeat:RepeatType, ?onFinish:Void->Void):SpriteTweenAni
 	{
 		tween(Alpha, target, duration, ease, repeat, onFinish);
 		

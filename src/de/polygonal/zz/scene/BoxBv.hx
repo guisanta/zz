@@ -33,7 +33,7 @@ import haxe.ds.Vector;
 **/
 class BoxBv extends Bv
 {
-	public static var mScratchVec = new Vec3();
+	public static var _scratchVec = new Vec3();
 	
 	public var minX:Float = 0;
 	public var minY:Float = 0;
@@ -184,7 +184,7 @@ class BoxBv extends Bv
 		
 		assert(this != output);
 		
-		var c = mScratchVec;
+		var c = _scratchVec;
 		c.x = minX + (maxX - minX) * .5;
 		c.y = minY + (maxY - minY) * .5;
 		c.z = 0;
