@@ -51,12 +51,12 @@ enum KeyValue
 @:publicFields
 class KeyValues
 {
-	var scaleX:Float = 1;
-	var scaleY:Float = 1;
-	var rotation:Float = 0;
-	var translateX:Float = 0;
-	var translateY:Float = 0;
-	var alpha:Float = 1;
+	var scaleX = 1.;
+	var scaleY = 1.;
+	var rotation = 0.;
+	var translateX = 0.;
+	var translateY = 0.;
+	var alpha = 1.;
 	
 	function new() {}
 }
@@ -122,18 +122,6 @@ class KeyframeController extends Controller
 	
 	override function onUpdate(time:Float):Bool
 	{
-		if (time > maxTime && repeat == RepeatType.Clamp)
-		{
-			if (onFinish != null)
-			{
-				onFinish();
-				onFinish = null;
-			}
-			
-			markForDisposal();
-			return false;
-		}
-		
 		var controlTime = getControlTime();
 		
 		var t = mData.times;
@@ -190,6 +178,18 @@ class KeyframeController extends Controller
 		setKeyframeValues(i0, i1, alpha);
 		mListener.onKeyframeUpdate(mKeyValues);
 		
+		if (time > maxTime && repeat == RepeatType.Clamp)
+		{
+			if (onFinish != null)
+			{
+				onFinish();
+				onFinish = null;
+			}
+			
+			markForDisposal();
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -222,24 +222,17 @@ class KeyframeController extends Controller
 			if (f.has(TranslateX)) v.translateX = lerp(TranslateX);
 			if (f.has(TranslateY)) v.translateY = lerp(TranslateY);
 			if (f.has(Alpha)) v.alpha = lerp(Alpha);
-			
-			//v.scaleX = lerp(ScaleX);
-			//v.scaleY = lerp(ScaleY);
-			//v.rotation = lerp(Rotate); //TODO use shortest angle
-			//v.translateX = lerp(TranslateX);
-			//v.translateY = lerp(TranslateY);
-			//v.alpha = lerp(Alpha);
 		}
 		else
 		{
 			inline function get(pos:Int, chnl:KeyValue) return p[pos * 6 + chnl.getIndex()];
 			
-			v.scaleX = get(0, ScaleX);
-			v.scaleY = get(0, ScaleY);
-			v.rotation = get(0, Rotate);
-			v.translateX = get(0, TranslateX);
-			v.translateY = get(0, TranslateY);
-			v.alpha = get(0, Alpha);
+			v.scaleX = get(i1, ScaleX);
+			v.scaleY = get(i1, ScaleY);
+			v.rotation = get(i1, Rotate);
+			v.translateX = get(i1, TranslateX);
+			v.translateY = get(i1, TranslateY);
+			v.alpha = get(i1, Alpha);
 		}
 	}
 }
