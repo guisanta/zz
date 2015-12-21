@@ -121,7 +121,6 @@ class BitmapCharSet
 	function new()
 	{
 		characters = new Array<BitmapChar>();
-		for (i in 0...256) characters[i] = new BitmapChar();
 		kerning = new IntIntHashTable(4096);
 	}
 	
