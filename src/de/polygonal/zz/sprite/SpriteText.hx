@@ -529,8 +529,16 @@ private class Shaper
 		
 		if (str.length == 0) return false;
 		
-		var numInputChars = str.length;
-		for (i in 0...numInputChars) mCharCodes.set(i, str.charCodeAt(i));
+		var bmpCharLut = charSet.characters;
+		var codes = mCharCodes, code;
+		
+		var numInputChars = 0;
+		for (i in 0...str.length)
+		{
+			code = str.charCodeAt(i);
+			if (bmpCharLut[code] != null)
+				codes.set(numInputChars++, code);
+		}
 		
 		var boxW = properties.width;
 		var boxH = properties.height;
@@ -538,7 +546,6 @@ private class Shaper
 		var tracking = properties.tracking;
 		var align = properties.align;
 		
-		var bmpCharLut = charSet.characters;
 		var kerningLut = charSet.kerning;
 		
 		var scale = properties.size / charSet.renderedSize;
@@ -547,7 +554,7 @@ private class Shaper
 		if (numLines == 0) return true;
 		if (!properties.multiline) numLines = 1;
 		
-		var codes = mCharCodes, code, lastCode = 0;
+		var lastCode = 0;
 		var kerningAmount = 0;
 		var newline = true;
 		
@@ -601,7 +608,6 @@ private class Shaper
 			data[next++] = bc.w * scale;
 			data[next++] = bc.h * scale;
 			numChars++;
-			
 			
 			var maxX = minX + bc.w * scale;
 			var maxY = minY + bc.h * scale;
