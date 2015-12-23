@@ -18,7 +18,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
+import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2f;
+import de.polygonal.core.math.Limits;
 import de.polygonal.core.time.Timebase;
 import de.polygonal.zz.render.Renderer;
 import de.polygonal.zz.scene.*;
@@ -26,37 +28,23 @@ import de.polygonal.zz.scene.Spatial.as;
 
 /**
 	Helper methods to operate on hierarchical sprite structures.
+	
 	Most methods are implemented using a non-allocating, iterative traversal.
 **/
 @:access(de.polygonal.zz.sprite.SpriteBase)
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteUtil
 {
-	static var _stackTickSpatial:Array<Spatial> = [];
-	static var _stackSpatial:Array<Spatial> = [];
+	static var _aSpatial = new Array<Spatial>();
+	static var _aSpriteBase = new Array<SpriteBase>();
 	static var _tmpCoord = new Coord2f(0, 0);
-	
-	public static function drawScene(renderer:Renderer, root:SpriteGroup)
-	{
-		root.commit();
-		
-		root.tick(Timebase.gameTimeDelta);
-		
-		var node = as(root.sgn, Node);
-		
-		TreeUtil.updateGeometricState(node, true);
-		
-		TreeUtil.updateRenderState(node);
-		
-		renderer.drawScene(node);
-	}
 	
 	/**
 		Counts the total number of descendants of root.
 	**/
-	public static function count(root:SpriteGroup):Int
+	public static function countDescendants(root:SpriteGroup):Int
 	{
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		var top = 1, c = 0, s:Spatial;
 		a[0] = root.mNode;
 		while (top != 0)
@@ -74,6 +62,7 @@ class SpriteUtil
 				}
 			}
 		}
+		
 		return c - 1;
 	}
 	
@@ -81,9 +70,9 @@ class SpriteUtil
 		Creates an iterator over all descendants of root.
 		Uses a non-allocating, iterative traversal.
 	**/
-	public static function descendants(root:SpriteGroup):Iterator<SpriteBase>
+	public static function descendantsIterator(root:SpriteGroup):Iterator<SpriteBase>
 	{
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
 		
 		n = root.mNode;
@@ -131,9 +120,51 @@ class SpriteUtil
 						a[p] = null;
 					}
 				}
-				return as(s.arbiter, SpriteBase);
+				return as(s.mArbiter, SpriteBase);
 			}
 		}
+	}
+	
+	/**
+		Stores all descendants of `root` in `output` (or just the leafs if `leafsOnly` is true) and returns the number of elements in `output`.
+	**/
+	public static function descendants(root:SpriteGroup, leafsOnly:Bool, output:Array<SpriteBase>):Int
+	{
+		var k = 0;
+		var a = _aSpatial;
+		
+		var top = 0;
+		var s = as(root.sgn, Node).child;
+		while (s != null)
+		{
+			a[top++] = s;
+			s = s.mSibling;
+		}
+		
+		while (top != 0)
+		{
+			s = a[--top];
+			a[top] = null;
+			
+			if (s.mArbiter == null) continue;
+			
+			if (s.isNode())
+			{
+				if (!leafsOnly)
+					output[k++] = s.mArbiter;
+				
+				s = as(s, Node).child;
+				while (s != null)
+				{
+					a[top++] = s;
+					s = s.mSibling;
+				}
+			}
+			else
+				output[k++] = s.mArbiter;
+		}
+		
+		return k;
 	}
 	
 	/**
@@ -142,37 +173,7 @@ class SpriteUtil
 	**/
 	public static function tick(root:SpriteGroup, timeDelta:Float)
 	{
-		var a = mStackTickSpatial;
-		a[0] = root.mNode;
-		var top = 1, s:Spatial, n:Node, sprite:SpriteBase;
-		while (top != 0)
-		{
-			s = a[--top];
-			a[top] = null;
-			
-			if (s.arbiter == null) continue;
-			
-			sprite = as(s.arbiter, SpriteBase);
-			
-			if (sprite.tickable)
-				sprite.tick(timeDelta);
-			
-			if (s.isNode())
-			{
-				n = as(s, Node);
-				var c = n.child;
-				while (c != null)
-				{
-					a[top++] = c;
-					c = c.mSibling;
-				}
-			}
-		}
-	}
-	
-	public static function clearFlags(root:SpriteGroup)
-	{
-		var a = _stackTickSpatial;
+		var a = _aSpatial;
 		a[0] = root.mNode;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)
@@ -180,7 +181,10 @@ class SpriteUtil
 			s = a[--top];
 			a[top] = null;
 			
-			s.mFlags &= ~Spatial.GS_UPDATED;
+			if (s.mArbiter == null) continue;
+			
+			if (s.controllers != null && s.controllersEnabled)
+				s.updateControllers(timeDelta);
 			
 			if (s.isNode())
 			{
@@ -206,11 +210,63 @@ class SpriteUtil
 			while (c != null)
 			{
 				hook = c.mSibling;
-				freeSubtree(as(c.arbiter, SpriteBase), true);
+				freeSubtree(as(c.mArbiter, SpriteBase), true);
 				c = hook;
 			}
 		}
 		
 		if (includeCaller) sprite.free();
+	}
+	
+	public static function isAncestor(sprite:SpriteBase, target:SpriteBase):Bool
+	{
+		var result = false;
+		var p = sprite.parent;
+		while (p != null)
+		{
+			if (p == target)
+			{
+				result = true;
+				break;
+			}
+			p = p.parent;
+		}
+		
+		return result;
+	}
+	
+	public static function updateWorldTransform(sprite:SpriteBase, propagateToChildren:Bool = false, updateBounds:Bool = false)
+	{
+		var a = _aSpatial, p = sprite.sgn.parent, s, c = 0;
+		while (p != null)
+		{
+			if (p.mArbiter != null)
+			{
+				s = as(p.mArbiter, SpriteBase);
+				if (s.mFlags & SpriteBase.IS_LOCAL_DIRTY > 0)
+					s.updateLocalTransform();
+			}
+			
+			a[c++] = p;
+			p = p.parent;
+		}
+		
+		while (--c > -1)
+		{
+			a[c].updateWorldData(false, false);
+			a[c] = null;
+		}
+		
+		if (sprite.isGroup())
+		{
+			sprite.syncLocal(); //recursive
+			
+			if (propagateToChildren)
+				sprite.sgn.updateGeometricState(true, updateBounds);
+		}
+		else
+		{
+			if (updateBounds) sprite.sgn.propagateBoundToRoot();
+		}
 	}
 }

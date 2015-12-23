@@ -122,14 +122,14 @@ class Renderer
 		mCamera = null;
 	}
 	
-	inline public function setRenderTarget(target:RenderTarget)
+	public function setRenderTarget(target:RenderTarget)
 	{
 		mRenderTarget = target;
 	}
 	
-	inline public function getRenderTarget():RenderTarget return mRenderTarget;
+	public function getRenderTarget():RenderTarget return mRenderTarget;
 	
-	inline public function getCamera():Camera return mCamera;
+	public function getCamera():Camera return mCamera;
 	
 	public function setCamera(value:Camera) mCamera = value;
 	
@@ -289,10 +289,10 @@ class Renderer
 		2. apply view matrix => camera coordinates
 		3. apply projection matrix => homogeneous coordinates
 	**/
-	public function setModelViewProjMatrix(spatial:Spatial):Mat44
+	public function setModelViewProjMatrix(world:Xform):Mat44
 	{
 		//convert transformation to 4x4 matrix
-		spatial.world.getHMatrix(currentMvp);
+		world.getHMatrix(currentMvp);
 		
 		//TODO optimize
 		//concatenate with view and projection matrix

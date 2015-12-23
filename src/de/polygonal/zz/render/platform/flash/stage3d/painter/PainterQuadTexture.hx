@@ -88,7 +88,7 @@ class PainterQuadTexture extends PainterQuad
 		
 		//setup constants
 		var crop = effect.cropRectUv;
-		var mvp = renderer.setModelViewProjMatrix(visual);
+		var mvp = renderer.setModelViewProjMatrix(visual.world);
 		mvp.m13 = alpha;
 		mvp.m23 = 1; //op.zw
 		mvp.m31 = crop.w * effect.uvScaleX;

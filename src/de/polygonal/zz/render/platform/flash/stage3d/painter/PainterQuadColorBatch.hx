@@ -319,7 +319,7 @@ class PainterQuadColorBatch extends PainterQuad
 							
 							effect = v.effect.as(ColorEffect);
 							
-							mvp = renderer.setModelViewProjMatrix(v);
+							mvp = renderer.setModelViewProjMatrix(v.world);
 							//crop = effect.cropRectUv;
 							
 							//use 2 constant registers (each 4 floats) for mvp matrix and alpha (+2 constant registers for color transform)
@@ -384,7 +384,7 @@ class PainterQuadColorBatch extends PainterQuad
 							renderer.setGlobalState(v);
 							alpha = renderer.currentAlphaMultiplier;
 							
-							mvp = renderer.setModelViewProjMatrix(v);
+							mvp = renderer.setModelViewProjMatrix(v.world);
 							offset = (mNumSharedRegisters * NUM_FLOATS_PER_REGISTER) + i * (mNumRegistersPerQuad * NUM_FLOATS_PER_REGISTER);
 							cr[offset +  0] = mvp.m11;
 							cr[offset +  1] = mvp.m12;

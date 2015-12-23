@@ -122,7 +122,7 @@ class BitmapDataRenderer extends Renderer
 	override function clear()
 	{
 		var target = getRenderTarget();
-		if (target == null) return;
+		if (target == null || mContext == null) return;
 		
 		if (mContext != null)
 			mContext.fillRect(mContext.rect, target.color | 0xff000000);
@@ -209,7 +209,7 @@ class BitmapDataRenderer extends Renderer
 		
 		var w = uv.w;
 		var h = uv.h;
-			
+		
 		var key = effect.getFrameIndex() << 16 | effect.texture.key;
 		var tile = mTileLookup.get(key);
 		if (tile == null)

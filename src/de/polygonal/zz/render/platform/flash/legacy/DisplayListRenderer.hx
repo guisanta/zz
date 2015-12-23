@@ -133,16 +133,16 @@ class DisplayListRenderer extends Renderer
 		/*var atlas = RenderSystem.getAtlasByName(imageName);
 		if (atlas != null)
 		{
-			var scratchEffect =new TextureEffect();
+			var tmpEffect =new TextureEffect();
 			for (i in 0...atlas.numFrames)
 			{
-				scratchEffect.setFrameIndex(i);
+				tmpEffect.setFrameIndex(i);
 				
 				var crop = atlas.getFrameAtIndex(i).texCoordPx;
 				if (crop.w == 0 && crop.h == 0) continue; //SpriteText doesn't support character (index eq. charcode)
 				
-				var tex = scratchEffect.texture;
-				getBitmapData(scratchEffect.getFrameIndex() << 16 | tex.key, tex, scratchEffect);
+				var tex = tmpEffect.texture;
+				getBitmapData(tmpEffect.getFrameIndex() << 16 | tex.key, tex, tmpEffect);
 			}
 		}*/
 	}
@@ -219,7 +219,7 @@ class DisplayListRenderer extends Renderer
 			if (!o.rendered)
 				o.visible = false;
 			
-			//remove idle bitmaps that haven't been redrawn for more than one second.
+			//remove bitmaps that have been idle (not redrawn) for more than one second
 			o.idleTime += Timebase.timeDelta;
 			if (o.hasParent && o.idleTime > 1)
 			{
@@ -550,13 +550,10 @@ class DisplayListRenderer extends Renderer
 	inline function getBitmap(spatial:Spatial):SpatialBitmap
 	{
 		var bmp = mBitmapLookup.get(spatial.key);
-		if (bmp == null)
-			return initDisplayListObject(spatial);
-		else
-			return bmp;
+		return bmp == null ? initSpatialBitmap(spatial) : bmp;
 	}
 	
-	inline function getBitmapData(key:Int, tex:Texture, effect:Effect):SpatialBitmapData
+	inline function getBitmapData(key:Int, tex:Texture, effect:TextureEffect):SpatialBitmapData
 	{
 		assert(key != -1);
 		
@@ -565,7 +562,7 @@ class DisplayListRenderer extends Renderer
 		
 		var o = mBitmapDataLookup.get(key);
 		if (o == null)
-			return initBitmapDataObject(key, tex, cast effect, transparent);
+			return initBitmapDataObject(key, tex, effect, transparent);
 		else
 			return o;
 	}

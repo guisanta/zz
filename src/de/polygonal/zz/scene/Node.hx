@@ -502,16 +502,19 @@ class Node extends Spatial
 	
 	//}
 	
-	override function updateWorldData(updateBound:Bool)
+	override function updateWorldData(updateBounds:Bool, propagateToChildren:Bool = true)
 	{
-		super.updateWorldData(updateBound);
+		super.updateWorldData(updateBounds);
 		
-		//downward pass: propagate geometric update to children
-		var n = child;
-		while (n != null)
+		if (propagateToChildren)
 		{
-			n.updateGeometricState(false, updateBound);
-			n = n.mSibling;
+			//downward pass: propagate geometric update to children
+			var n = child;
+			while (n != null)
+			{
+				n.updateGeometricState(false, updateBounds);
+				n = n.mSibling;
+			}
 		}
 	}
 	

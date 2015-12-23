@@ -29,18 +29,17 @@ import de.polygonal.zz.scene.Spatial.as;
 @:access(de.polygonal.zz.scene.Spatial)
 class TreeUtil
 {
-	static var _stackSpatial = new Array<Spatial>();
-	static var _scratchCoord = new Coord2f();
+	static var _aSpatial = new Array<Spatial>();
+	static var _tmpCoord = new Coord2f();
 	
 	/**
 		Returns an iterator over all descendants of `root`.
 		
 		_Uses a non-allocating, iterative traversal._
 	**/
-	//TODO also iterates over groups?
 	public static function descendantsIterator(root:Node):Iterator<Spatial>
 	{
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
 		
 		n = root;
@@ -93,13 +92,40 @@ class TreeUtil
 		}
 	}
 	
+	public static function descendants(root:Node, output:Array<Spatial>):Int
+	{
+		var k = 0;
+		var a = _aSpatial;
+		a[0] = root;
+		var top = 1, s:Spatial;
+		while (top != 0)
+		{
+			s = a[--top];
+			a[top] = null;
+			
+			output[k++] = s;
+			
+			if (s.isNode())
+			{
+				s = as(s, Node).child;
+				while (s != null)
+				{
+					a[top++] = s;
+					s = s.mSibling;
+				}
+			}
+		}
+		
+		return k;
+	}
+	
 	/**
 		Recomputes world transformations of all nodes along the path from `origin` to root.
 	**/
 	public static function updateWorldTransformAt(origin:Spatial)
 	{
 		var top = 0;
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		
 		var p = origin;
 		while (p != null)
@@ -132,7 +158,7 @@ class TreeUtil
 	**/
 	public static function updateGeometricState(origin:Node, updateBound = true)
 	{
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		a[0] = origin;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)
@@ -165,7 +191,7 @@ class TreeUtil
 	public static function updateRenderState(root:Node)
 	{
 		//update global states
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		a[0] = root;
 		var top = 1, s:Spatial, n:Node;
 		while (top != 0)
@@ -201,7 +227,7 @@ class TreeUtil
 		var maxX = Limits.FLOAT_MIN;
 		var maxY = Limits.FLOAT_MIN;
 		
-		var c = _scratchCoord;
+		var c = _tmpCoord;
 		
 		inline function minMax()
 		{
@@ -214,7 +240,7 @@ class TreeUtil
 			if (c.y > maxY) maxY = c.y;
 		}
 		
-		var a = _stackSpatial;
+		var a = _aSpatial;
 		a[0] = root;
 		var top = 1, s:Spatial, n:Node, c;
 		while (top != 0)
@@ -224,7 +250,7 @@ class TreeUtil
 			
 			if (s.isVisual())
 			{
-				as(s, Visual).getBoundingBox(targetSpace, output);
+				s.getBoundingBox(targetSpace, output);
 				
 				if (output.minX < minX) minX = output.minX;
 				if (output.minY < minY) minY = output.minY;

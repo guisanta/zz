@@ -69,7 +69,7 @@ class PainterQuadColor extends PainterQuad
 		
 		setShader(PAINTER_FEATURE_COLOR);
 		
-		var mvp = renderer.setModelViewProjMatrix(visual);
+		var mvp = renderer.setModelViewProjMatrix(visual.world);
 		mvp.m13 = 1; //op.zw
 		mvp.toVector(cr);
 		

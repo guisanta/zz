@@ -33,32 +33,36 @@ import de.polygonal.zz.sprite.SpriteBase;
 import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.texture.TextureLib;
 
-//Sets the untransformed size of the node.
-//The contentSize remains the same no matter the node is scaled or rotated. All nodes has a size. Layer and Scene has the same size of the screen.
-//Parameters
-//contentSize	The untransformed size of the node.
-
 /**
 	A Sprite is a rectangular, drawable representation of a texture, with its own transformations, color, etc.
 **/
-@:build(de.polygonal.core.macro.IntConsts.build([HINT_TRIMMED, HAS_SIZE], true, false, "de.polygonal.zz.sprite.SpriteBase"))
+@:build(de.polygonal.core.macro.IntConsts.build(
+[
+	HAS_SIZE,
+	HINT_TRIMMED, HINT_SQUARE_SIZE
+], true, false, "de.polygonal.zz.sprite.SpriteBase"))
 @:access(de.polygonal.zz.scene.Spatial)
 class Sprite extends SpriteBase
 {
-	var mVisual:Visual;
+	public static var TYPE = 1;
+	
+	var mSizeX = 0.;
+	var mSizeY = 0.;
+	
+	var mVisual:Quad;
 	var mTrimRect:Rectf;
 	var mCurrentTexture = -1;
 	var mCurrentFrame:String;
-	var mSize = new Sizef(0, 0);
 	var mSheetAni:SpriteSheetAni = null;
 	
-	public function new(?parent:SpriteGroup, ?texture:Null<Int>, ?frame:String)
+	public function new(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String)
 	{
-		super(new Quad());
+		super(mVisual = new Quad());
 		
-		mVisual = as(mSpatial, Visual);
+		type = TYPE;
+		
 		if (parent != null) parent.addChild(this);
-		if (texture != null) this.texture = texture;
+		if (textureId != null) setTexture(textureId);
 		if (frame != null) this.frame = frame;
 	}
 	
@@ -77,22 +81,142 @@ class Sprite extends SpriteBase
 		mTrimRect = null;
 		mCurrentTexture = -1;
 		mCurrentFrame = null;
-		mSize = null;
+	}
+	
+	/**
+		The width of this sprite.
+		Changing the width affects the scaling factor, e.g. if scaleX equals 1.0 and width equals 100,
+		changing the witdh to 50 will set the scaling factor to 0.5.
+		
+		If scaleX == 1, `width` equals the unscaled texture width in pixels.
+	**/
+	override function get_width():Float
+	{
+		if (mFlags & HINT_ROTATE == 0) return mSizeX * M.fabs(mScaleX);
+		
+		//refit axis-aligned box to oriented box
+		var ex = mSizeX * M.fabs(mScaleX) / 2;
+		var ey = mSizeY * M.fabs(mScaleY) / 2;
+		
+		var r = getAngle();
+		var m12 = -Math.sin(r);
+		var m11 =  Math.cos(r);
+		var min = 0.;
+		var max = 0.;
+		
+		if (m11 > 0)
+		{
+			min -= m11 * ex;
+			max += m11 * ex;
+		}
+		else
+		{
+			min += m11 * ex;
+			max -= m11 * ex;
+		}
+		if (m12 > 0)
+		{
+			min -= m12 * ey;
+			max += m12 * ey;
+		}
+		else
+		{
+			min += m12 * ey;
+			max -= m12 * ey;
+		}
+		
+		return max - min;
+	}
+	override function set_width(value:Float):Float
+	{
+		assert(mSizeX != 0, "width must not be zero, call setTexture() or setColor() first");
+		
+		mScaleX = value / mSizeX;
+		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
+		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+		return value;
+	}
+	
+	/**
+		The height of this sprite.
+		
+		If scaleY == 1, height equals the unscaled texture height in pixels.
+	**/
+	override function get_height():Float
+	{
+		if (mFlags & HINT_ROTATE == 0) return mSizeY * M.fabs(mScaleY);
+		
+		//refit axis-aligned box to oriented box
+		var ex = mSizeX * M.fabs(mScaleX) / 2;
+		var ey = mSizeY * M.fabs(mScaleY) / 2;
+		
+		var r = getAngle();
+		var m21 = Math.sin(r);
+		var m22 = Math.cos(r);
+		var min = 0.;
+		var max = 0.;
+		
+		if (m21 > 0)
+		{
+			min -= m21 * ex;
+			max += m21 * ex;
+		}
+		else
+		{
+			min += m21 * ex;
+			max -= m21 * ex;
+		}
+		if (m22 > 0)
+		{
+			min -= m22 * ey;
+			max += m22 * ey;
+		}
+		else
+		{
+			min += m22 * ey;
+			max -= m22 * ey;
+		}
+		
+		return max - min;
+	}
+	override function set_height(value:Float):Float
+	{
+		assert(mSizeY != 0, "height must not be zero, call setTexture() or setColor() first");
+		mScaleY = value / mSizeY;
+		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
+		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+		return value;
+	}
+	
+	override public function centerPivot()
+	{
+		if (mFlags & HINT_TRIMMED > 0)
+		{
+			mPivotX = mTrimRect.x + mTrimRect.w / 2;
+			mPivotY = mTrimRect.y + mTrimRect.h / 2;
+		}
+		else
+		{
+			mPivotX = mSizeX / 2;
+			mPivotY = mSizeY / 2;
+		}
+		
+		mFlags |= IS_LOCAL_DIRTY;
+	}
+	
+	public function getTexture():Int
+	{
+		return mCurrentTexture;
 	}
 	
 	/**
 		Assigning a new texture clears the current frame.
 	**/
-	public var texture(get_texture, set_texture):Int;
-	function get_texture():Int
+	public function setTexture(textureId:Int, ?frame:String)
 	{
-		return mCurrentTexture;
-	}
-	
-	function set_texture(id:Int):Int
-	{
-		if (mCurrentTexture == id) return id;
-		mCurrentTexture = id;
+		if (mCurrentTexture == textureId) return textureId;
+		
+		mCurrentTexture = textureId;
 		
 		mCurrentFrame = null;
 		
@@ -115,18 +239,18 @@ class Sprite extends SpriteBase
 			}
 		}
 		
-		var texture = TextureLib.getTexture(id);
+		var texture = TextureLib.getTexture(textureId);
 		e.setTexture(texture, texture.atlas);
 		
-		mSize.set(mSizeX, mSizeY);
 		mSizeX = e.texture.sourceSize.x;
 		mSizeY = e.texture.sourceSize.y;
 		setSquareHint(mSizeX, mSizeY);
 		mFlags &= ~HINT_TRIMMED;
-		mFlags |= HAS_SIZE;
-		setDirty();
+		mFlags |= HAS_SIZE | IS_LOCAL_DIRTY;
 		
-		return id;
+		if (frame != null) set_frame(frame);
+		
+		return textureId;
 	}
 	
 	public var frame(get_frame, set_frame):String;
@@ -145,9 +269,8 @@ class Sprite extends SpriteBase
 		var frame = e.atlas.getFrameBy(name);
 		e.setFrameIndex(frame.index); //change uv coordinates
 		
-		var size = frame.untrimmedSize;
-		mSizeX = size.x;
-		mSizeY = size.y;
+		mSizeX = frame.untrimmedSize.x;
+		mSizeY = frame.untrimmedSize.y;
 		
 		if (frame.trimmed)
 		{
@@ -155,7 +278,7 @@ class Sprite extends SpriteBase
 			mFlags |= HINT_TRIMMED;
 			
 			var t = frame.trimOffset;
-			var u = frame.texCoordPx;  //cr e.atlas.getSizeAt(frame);
+			var u = frame.texCoordPx;
 			
 			if (mTrimRect == null)
 				mTrimRect = new Rectf(t.x, t.y, u.w, u.h);
@@ -192,20 +315,46 @@ class Sprite extends SpriteBase
 			}
 		}
 		
-		setDirty();
+		mFlags |= IS_LOCAL_DIRTY;
 		
 		return name;
 	}
 	
-	public var color(get_color, set_color):Int;
-	function get_color():Int
+	public function getColor():Int
 	{
-		return mVisual.effect.as(ColorEffect).color;
+		if (mVisual.effect == null) return -1;
+		
+		var e = mVisual.effect.as(ColorEffect);
+		
+		if (e == null) return -1;
+		
+		return e.color;
 	}
-	function set_color(value:Int):Int
+	
+	public function setColor(value:Int, contentSize:Coord2f)
 	{
-		mVisual.effect = new ColorEffect(value); //todo reuse effect if changing color..
-		return value;
+		mSizeX = contentSize.x;
+		mSizeY = contentSize.y;
+		setSquareHint(mSizeX, mSizeY);
+		mFlags &= ~HINT_TRIMMED;
+		mFlags |= HAS_SIZE | IS_LOCAL_DIRTY;
+		
+		if (mCurrentTexture == -1)
+		{
+			if (mVisual.effect == null)
+				mVisual.effect = new ColorEffect(value);
+			
+			var e = as(mVisual.effect, ColorEffect);
+			e.color = value;
+		}
+		else
+		{
+			mCurrentTexture = -1;
+			mCurrentFrame = null;
+			
+			mVisual.effect.free();
+			mVisual.effect = new ColorEffect(value);
+		}
 	}
 	
 	public var sheetAni(get_sheetAni, never):SpriteSheetAni;
@@ -216,151 +365,112 @@ class Sprite extends SpriteBase
 	}
 	
 	/**
-		The original, unscaled dimensions of this sprite as defined by the texture.
+		The original, untransformed size of this sprite as defined by the texture/color.
 	**/
 	public function getContentSize():Sizef
 	{
-		return mSize.set(mSizeX, mSizeY);
-	}
-	
-	public function setContentSize(width:Float, height:Float)
-	{
-		mSizeX = width;
-		mSizeY = height;
-		setSquareHint(width, height);
-		mFlags &= ~HINT_TRIMMED;
-		
-		if (width == 0 || height == 0)
-			mFlags &= ~HAS_SIZE;
-		else
-			mFlags |= HAS_SIZE;
-		
-		setDirty();
-	}
-	
-	/**
-		Multiplies the size of this sprite with its scale factor and sets the scale to 1.
-	**/
-	public function bakeDownScale()
-	{
-		mSizeX *= M.fabs(mScaleX);
-		mSizeY *= M.fabs(mScaleY);
-		mScaleX = 1;
-		mScaleY = 1;
-		mFlags &= ~HINT_SCALE;
-		mFlags |= (HINT_UNIFORM_SCALE | IS_DIRTY);
+		return new Coord2f(mSizeX, mSizeY);
 	}
 	
 	public function pick(point:Coord2f):Bool
 	{
-		if (getDirty()) commit();
+		SpriteUtil.updateWorldTransform(this);
 		
-		var f = sgn.mFlags;
-		if (f & Spatial.IS_WORLD_XFORM_DIRTY > 0)
-			sgn.updateWorldData(true);
-		else
-		if (f & Spatial.IS_WORLD_BOUND_DIRTY > 0)
-			sgn.updateWorldBound();
+		if (sgn.mFlags & Spatial.IS_WORLD_BOUND_DIRTY > 0) sgn.updateWorldBound();
 		
-		return getVisual().pick(point, null) == 1;
+		return mVisual.pick(point, null) == 1;
 	}
 	
-	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
 	{
-		if (this == targetSpace)
+		if (output == null) output = new Aabb2();
+		
+		//trim transparent region?
+		var trimmed = !trim && (mFlags & HINT_TRIMMED > 0);
+		if (trimmed)
 		{
-			if (hasHint(HINT_TRIMMED))
-			{
-				output.x = originX + mTrimRect.x;
-				output.y = originY + mTrimRect.y;
-				output.w = mTrimRect.w;
-				output.h = mTrimRect.h;
-			}
-			else
-			{
-				output.x = originX;
-				output.y = originY;
-				output.w = mSizeX;
-				output.h = mSizeY;
-			}
-			
-			return output;
+			mFlags |= IS_LOCAL_DIRTY;
+			mFlags &= ~HINT_TRIMMED;
+			setSquareHint(mSizeX, mSizeY);
 		}
 		
-		var r = getRoot();
-		r.commit();
+		//sync local transform and recompute world transformation
+		SpriteUtil.updateWorldTransform(this);
+		if (SpriteUtil.isAncestor(this, targetSpace) == false)
+			SpriteUtil.updateWorldTransform(targetSpace);
 		
-		TreeUtil.updateGeometricState(as(r.sgn, Node), false);
+		var bounds = mSpatial.getBoundingBox(targetSpace.sgn, output);
 		
-		return mSpatial.getBoundingBox(targetSpace.sgn, output);
-		
-		//if this is a descedent of targetSpace
-		
-		//different parent??
-		
-		/*var g = targetSpace.asGroup();
-		
-		var p = parent;
-		while (p != null)
+		if (trimmed)
 		{
-			if (p == g)
-			{
-				SpriteUtil.update(g);
-				NodeUtil.updateGeometricState(as(g.sgn, Node));
-				trace('target space is a parent of $this');
-				break;
-			}
-			p = p.parent;
-		}*/
-		
-		//if this is a node and targetspace is a parent of this, faster update
-		/*var isDescendant = false;
-		var p = targetSpace.parent;
-		while (p != null)
-		{
-			//if (p == this)
-			//{
-				//isDescendant = true;
-				//break;
-			//}
-			p = p.parent;
+			mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
+			setSquareHint(mSizeX, mSizeY);
 		}
-		if (isDescendant)
-		{
-			trace('targetSpace is a child of this!');
-			//optimization possible here?
-		}*/
 		
-		//if targetSpace is a child of this,
+		return bounds;
 	}
 	
-	public function localBound():Rectf
-	{
-		commit();
-		
-		//var bv = new Bv();
-		//getVisual().modelBound.transformBy(mSpatial.local, bv);
-		//trace(bv);
-		
-		return null;
-	}
-	
-	public function worldBound():Rectf
-	{
-		
-		return null;
-	}
-	
-	override public function commit():SpriteBase
+	override public function syncLocal():SpriteBase
 	{
 		if (mFlags & HAS_SIZE == 0) return this;
 		
-		if (!getDirty()) return this;
-		clrDirty();
+		return super.syncLocal();
+	}
+	
+	public function sendToForeground()
+	{
+		if (parent != null) parent.sendToForeground(this);
+	}
+	
+	public function sendToBackground()
+	{
+		if (parent != null) parent.sentToBackground(this);
+	}
+	
+	override public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
+	{
+		var x = input.x;
+		var y = input.y;
+		input.x /= mSizeX;
+		input.y /= mSizeY;
+		super.toWorldSpace(input, output);
+		input.x = x;
+		input.y = y;
 		
-		updateAlphaAndVisibility();
+		return output;
+	}
+	
+	override public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
+	{
+		super.toLocalSpace(input, output);
+		output.x *= mSizeX;
+		output.y *= mSizeY;
 		
-		invalidateWorldTransform();
+		return output;
+	}
+	
+	public var uniformSize(get_uniformSize, set_uniformSize):Float;
+	inline function get_uniformSize():Float
+	{
+		assert(mSizeX == mSizeY, "rectangle is not a square");
+		
+		return mSizeX;
+	}
+	function set_uniformSize(value:Float):Float
+	{
+		assert(mSizeX != 0, "no size defined");
+		assert(mSizeX == mSizeY, "rectangle is not a square");
+		
+		mScaleX = mScaleY = value / mSizeX;
+		mFlags &= ~HINT_UNIT_SCALE;
+		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_LOCAL_DIRTY);
+		return value;
+	}
+	
+	override function updateLocalTransform()
+	{
+		mFlags &= ~IS_LOCAL_DIRTY;
+		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
 		
 		/* SRT update:
 		 -always apply translation and origin
@@ -368,7 +478,6 @@ class Sprite extends SpriteBase
 		 -skip pivot if R=I and S=I
 		 -differ between non-uniform and uniform scaling
 		*/
-		
 		var l = mSpatial.local;
 		
 		if (mFlags & HINT_TRIMMED > 0)
@@ -386,8 +495,7 @@ class Sprite extends SpriteBase
 				|s1x*s2x*c -s1y*s2y*s -s2x*px*c + s2y*py*s + px+x|
 				|s1x*s2x*s  s1y*s2y*c -s2x*px*s - s2y*py*c + py+y|
 				*/
-				
-				var angle = mRotation * M.DEG_RAD;
+				var angle = getAngle();
 				var s = Math.sin(angle);
 				var c = Math.cos(angle);
 				var m = l.getRotate();
@@ -515,7 +623,7 @@ class Sprite extends SpriteBase
 			if (hints & HINT_ROTATE > 0)
 			{
 				//rotate and scale around pivot point
-				var angle = mRotation * M.DEG_RAD;
+				var angle = getAngle();
 				var s = Math.sin(angle);
 				var c = Math.cos(angle);
 				var m = l.getRotate();
@@ -627,59 +735,24 @@ class Sprite extends SpriteBase
 				}
 			}
 		}
+	}
+	
+	function undoTrim()
+	{
+		assert(mVisual.effect.as(TextureEffect).atlas.getFrameBy(mCurrentFrame).trimmed);
 		
-		return this;
+		mFlags |= IS_LOCAL_DIRTY;
+		mFlags &= ~HINT_TRIMMED;
+		setSquareHint(mSizeX, mSizeY);
 	}
 	
-	inline public function sendToForeground()
+	function redoTrim()
 	{
-		if (parent != null) parent.sendToForeground(this);
-	}
-	
-	inline public function sendToBackground()
-	{
-		if (parent != null) parent.sentToBackground(this);
-	}
-	
-	override public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
-	{
-		var x = input.x;
-		var y = input.y;
-		input.x /= mSizeX;
-		input.y /= mSizeY;
-		super.toWorldSpace(input, output);
-		input.x = x;
-		input.y = y;
-		return output;
-	}
-	
-	override public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
-	{
-		super.toLocalSpace(input, output);
-		output.x *= mSizeX;
-		output.y *= mSizeY;
-		return output;
-	}
-	
-	public var uniformSize(get_uniformSize, set_uniformSize):Float;
-	inline function get_uniformSize():Float
-	{
-		assert(mSizeX == mSizeY, "rectangle is not a square");
+		assert(mVisual.effect.as(TextureEffect).atlas.getFrameBy(mCurrentFrame).trimmed);
 		
-		return mSizeX;
-	}
-	function set_uniformSize(value:Float):Float
-	{
-		assert(mSizeX != 0, "no size defined");
-		assert(mSizeX == mSizeY, "rectangle is not a square");
-		
-		mScaleX = mScaleY = value / mSizeX;
-		mFlags &= ~HINT_UNIT_SCALE;
-		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_DIRTY);
-		return value;
+		mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
+		setSquareHint(mSizeX, mSizeY);
 	}
 	
-	inline function setSquareHint(sx:Float, sy:Float) sx == sy ? mFlags |= HINT_SQUARE_SIZE : mFlags &= ~HINT_SQUARE_SIZE;
-	
-	inline function getVisual():Visual return mVisual;
+	inline function setSquareHint(w:Float, h:Float) w == h ? mFlags |= HINT_SQUARE_SIZE : mFlags &= ~HINT_SQUARE_SIZE;
 }

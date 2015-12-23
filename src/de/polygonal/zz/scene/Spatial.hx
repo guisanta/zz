@@ -51,7 +51,6 @@ import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 	IS_RS_DIRTY,
 	IS_NODE,
 	IS_VISUAL,
-	IS_COMPOSITE_LOCKED,
 	IS_FREED,
 	GS_UPDATED
 ], true, false))
@@ -138,19 +137,6 @@ class Spatial extends ControlledObject implements Hashable
 		effect = null;
 		mArbiter = null;
 		mFlags = IS_FREED;
-	}
-	
-	/**
-		An optional, user-defined object that "owns" and modifies the state of this node by composition.
-		Useful when providing a high-level API.
-	**/
-	public var arbiter(get_arbiter, set_arbiter):Dynamic;
-	inline function get_arbiter():Dynamic return mArbiter;
-	inline function set_arbiter(value:Dynamic):Dynamic
-	{
-		assert(mFlags & IS_COMPOSITE_LOCKED == 0, "arbiter must not be locked");
-		mArbiter = value;
-		return value;
 	}
 	
 	public var cullingMode(get_cullingMode, set_cullingMode):CullingMode;
@@ -287,7 +273,7 @@ class Spatial extends ControlledObject implements Hashable
 		if (propagateToRoot) propagateBoundToRoot();
 	}
 	
-	function updateWorldData(updateBound:Bool)
+	function updateWorldData(updateBounds:Bool, propagateToChildren:Bool = true)
 	{
 		mFlags &= ~IS_WORLD_XFORM_DIRTY;
 		
@@ -430,10 +416,11 @@ class Spatial extends ControlledObject implements Hashable
 		mGlobalState = null;
 	}
 	
-	public function getRoot()
+	public function getRoot():Spatial
 	{
 		var p = this;
 		while (p.parent != null) p = p.parent;
+		
 		return p;
 	}
 	

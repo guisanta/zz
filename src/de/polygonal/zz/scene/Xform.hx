@@ -48,7 +48,7 @@ import haxe.ds.Vector;
 **/
 @:build(de.polygonal.core.macro.IntConsts.build(
 [
-	HINT_IDENTITY, HINT_RS_MATRIX, HINT_UNIFORM_SCALE, HINT_IDENTITY_ROTATION, HINT_HMATRIX_DIRTY, HINT_INVERSE_DIRTY
+	HINT_IDENTITY, HINT_RS_MATRIX, HINT_UNIT_SCALE, HINT_UNIFORM_SCALE, HINT_IDENTITY_ROTATION, HINT_HMATRIX_DIRTY, HINT_INVERSE_DIRTY
 ], true, false))
 @:access(de.polygonal.zz.scene.Node)
 class Xform
@@ -66,7 +66,7 @@ class Xform
 		mScale = new Vec3(1, 1, 1);
 		mTranslate = new Vec3(0, 0, 0);
 		mMatrix = new Mat33();
-		mHints = HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE;
+		mHints = HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE;
 		setIdentity();
 	}
 	
@@ -97,6 +97,12 @@ class Xform
 	
 	/**
 		Hint about the structure of the transformation.
+		Returns true if transformation defines S = I.
+	**/
+	inline public function isUnitScale():Bool return mHints & HINT_UNIT_SCALE > 0;
+	
+	/**
+		Hint about the structure of the transformation.
 		Returns true if R = I.
 	**/
 	inline public function isIdentityRotation():Bool return mHints & HINT_IDENTITY_ROTATION > 0;
@@ -104,6 +110,7 @@ class Xform
 	inline public function getScale():Vec3
 	{
 		assert(isRSMatrix(), "matrix is not a rotation-scale");
+		
 		return mScale;
 	}
 	
@@ -114,7 +121,7 @@ class Xform
 		mScale.x = x;
 		mScale.y = y;
 		mScale.z = z;
-		mHints &= ~(HINT_IDENTITY | HINT_UNIFORM_SCALE);
+		mHints &= ~(HINT_IDENTITY | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE);
 		mHints |= HINT_HMATRIX_DIRTY;
 	}
 	
@@ -124,7 +131,7 @@ class Xform
 		assert(x != 0 && y != 0, "scales must be non-zero");
 		mScale.x = x;
 		mScale.y = y;
-		mHints &= ~(HINT_IDENTITY | HINT_UNIFORM_SCALE);
+		mHints &= ~(HINT_IDENTITY | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE);
 		mHints |= HINT_HMATRIX_DIRTY;
 	}
 	
@@ -132,6 +139,7 @@ class Xform
 	{
 		assert(isRSMatrix(), "matrix is not a rotation-scale");
 		assert(isUniformScale(), "scales are not uniform");
+		
 		return mScale.x;
 	}
 	
@@ -140,8 +148,8 @@ class Xform
 		assert(isRSMatrix(), "matrix is not a rotation");
 		assert(scale != 0, "scale must be non-zero");
 		mScale.x = mScale.y = mScale.z = scale;
-		mHints &= ~HINT_IDENTITY;
-		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints &= ~(HINT_IDENTITY | HINT_UNIT_SCALE);
+		mHints |= HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function setUniformScale2(scale:Float)
@@ -149,13 +157,14 @@ class Xform
 		assert(isRSMatrix(), "matrix is not a rotation");
 		assert(scale != 0, "scale must be non-zero");
 		mScale.x = mScale.y = scale;
-		mHints &= ~HINT_IDENTITY;
-		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints &= ~(HINT_IDENTITY | HINT_UNIT_SCALE);
+		mHints |= HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function getRotate():Mat33
 	{
 		assert(isRSMatrix(), "matrix is not a rotation");
+		
 		return mMatrix;
 	}
 	
@@ -163,13 +172,13 @@ class Xform
 	{
 		if (mMatrix != rotate) mMatrix.of(rotate);
 		mHints &= ~(HINT_IDENTITY | HINT_IDENTITY_ROTATION);
-		mHints |= (HINT_RS_MATRIX | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_RS_MATRIX | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function setIdentityRotation()
 	{
 		mMatrix.setIdentity();
-		mHints |= (HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function getMatrix():Mat33
@@ -239,7 +248,7 @@ class Xform
 		mScale.x = 1;
 		mScale.y = 1;
 		mScale.z = 1;
-		mHints |= (HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	inline public function setIdentity2()
 	{
@@ -250,7 +259,7 @@ class Xform
 		mTranslate.y = 0;
 		mScale.x = 1;
 		mScale.y = 1;
-		mHints |= (HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_IDENTITY | HINT_RS_MATRIX | HINT_IDENTITY_ROTATION | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function setUnitScale()
@@ -259,8 +268,7 @@ class Xform
 		mScale.x = 1;
 		mScale.y = 1;
 		mScale.z = 1;
-		mHints &= ~HINT_IDENTITY;
-		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_UNIT_SCALE | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	
 	inline public function setUnitScale2()
@@ -268,12 +276,11 @@ class Xform
 		assert(mHints & HINT_RS_MATRIX > 0, "matrix is not a rotation");
 		mScale.x = 1;
 		mScale.y = 1;
-		mHints &= ~HINT_IDENTITY;
-		mHints |= (HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY);
+		mHints |= HINT_UNIT_SCALE | HINT_UNIFORM_SCALE | HINT_HMATRIX_DIRTY;
 	}
 	
 	/**
-		 Matrix-matrix multiplication; returns this = `a` * `b`.
+		Matrix-matrix multiplication; returns this = `a` * `b`.
 	**/
 	public function setProduct(a:Xform, b:Xform):Xform
 	{
@@ -379,80 +386,77 @@ class Xform
 		var b21, b22;
 		
 		//both transformations are M = R*S, so matrix can be written as R*S*X + T
-		if (a.isRSMatrix() && b.isRSMatrix())
+		if (a.isRSMatrix() && b.isRSMatrix() && a.isUniformScale())
 		{
-			if (a.isUniformScale())
+			m = mMatrix;
+			
+			//R: rA * rB
+			if (a.isIdentityRotation())
 			{
-				m = mMatrix;
+				mb = b.mMatrix;
+				m.m11 = mb.m11; m.m12 = mb.m12;
+				m.m21 = mb.m21; m.m22 = mb.m22;
 				
-				//R: rA * rB
-				if (a.isIdentityRotation())
-				{
-					mb = b.mMatrix;
-					m.m11 = mb.m11; m.m12 = mb.m12;
-					m.m21 = mb.m21; m.m22 = mb.m22;
-					
-					if (b.isIdentityRotation()) mHints |= HINT_IDENTITY_ROTATION;
-				}
-				else
-				if (b.isIdentityRotation())
-				{
-					ma = a.mMatrix;
-					m.m11 = ma.m11; m.m12 = ma.m12;
-					m.m21 = ma.m21; m.m22 = ma.m22;
-					
-					setRotate(m);
-				}
-				else
-				{
-					ma = a.mMatrix;
-					mb = b.mMatrix;
-					
-					b11 = mb.m11; b12 = mb.m12;
-					b21 = mb.m21; b22 = mb.m22;
-					t1 = ma.m11;
-					t2 = ma.m12;
-					m.m11 = t1 * b11 + t2 * b21;
-					m.m12 = t1 * b12 + t2 * b22;
-					t1 = ma.m21;
-					t2 = ma.m22;
-					m.m21 = t1 * b11 + t2 * b21;
-					m.m22 = t1 * b12 + t2 * b22;
-					
-					setRotate(m);
-				}
-				
-				//T: sA * (rA * tB) + tA
-				t = mTranslate;
-				ta = a.mTranslate;
-				if (a.isIdentityRotation())
-				{
-					t.x = b.mTranslate.x;
-					t.y = b.mTranslate.y;
-				}
-				else
-				{
-					x = b.mTranslate.x;
-					y = b.mTranslate.y;
-					m = a.mMatrix;
-					t.x = m.m11 * x + m.m12 * y;
-					t.y = m.m21 * x + m.m22 * y;
-				}
-				
-				sa = a.getUniformScale();
-				t.x = t.x * sa + ta.x;
-				t.y = t.y * sa + ta.y;
-				
-				//S: sA * sB
-				if (b.isUniformScale())
-					setUniformScale2(sa * b.getUniformScale());
-				else
-				{
-					sb = b.getScale();
-					setScale2(sa * sb.x, sa * sb.y);
-				}
-				return this;
+				if (b.isIdentityRotation()) mHints |= HINT_IDENTITY_ROTATION;
 			}
+			else
+			if (b.isIdentityRotation())
+			{
+				ma = a.mMatrix;
+				m.m11 = ma.m11; m.m12 = ma.m12;
+				m.m21 = ma.m21; m.m22 = ma.m22;
+				
+				setRotate(m);
+			}
+			else
+			{
+				ma = a.mMatrix;
+				mb = b.mMatrix;
+				
+				b11 = mb.m11; b12 = mb.m12;
+				b21 = mb.m21; b22 = mb.m22;
+				t1 = ma.m11;
+				t2 = ma.m12;
+				m.m11 = t1 * b11 + t2 * b21;
+				m.m12 = t1 * b12 + t2 * b22;
+				t1 = ma.m21;
+				t2 = ma.m22;
+				m.m21 = t1 * b11 + t2 * b21;
+				m.m22 = t1 * b12 + t2 * b22;
+				
+				setRotate(m);
+			}
+			
+			//T: sA * (rA * tB) + tA
+			t = mTranslate;
+			ta = a.mTranslate;
+			if (a.isIdentityRotation())
+			{
+				t.x = b.mTranslate.x;
+				t.y = b.mTranslate.y;
+			}
+			else
+			{
+				x = b.mTranslate.x;
+				y = b.mTranslate.y;
+				m = a.mMatrix;
+				t.x = m.m11 * x + m.m12 * y;
+				t.y = m.m21 * x + m.m22 * y;
+			}
+			
+			sa = a.getUniformScale();
+			t.x = t.x * sa + ta.x;
+			t.y = t.y * sa + ta.y;
+			
+			//S: sA * sB
+			if (b.isUniformScale())
+				setUniformScale2(sa * b.getUniformScale());
+			else
+			{
+				sb = b.getScale();
+				setScale2(sa * sb.x, sa * sb.y);
+			}
+			return this;
 		}
 		
 		//the matrix cannot be written as R*S*X+T.
@@ -505,7 +509,6 @@ class Xform
 		
 		//set hints manually as we skip calling setMatrix() or setTranslate()
 		mHints &= ~(HINT_IDENTITY | HINT_RS_MATRIX | HINT_UNIFORM_SCALE);
-		
 		mHints |= HINT_HMATRIX_DIRTY;
 		
 		return this;

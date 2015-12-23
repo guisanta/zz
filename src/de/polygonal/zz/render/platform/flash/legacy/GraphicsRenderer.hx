@@ -53,7 +53,7 @@ class GraphicsRenderer extends Renderer
 	var mTmpRect:Rectangle;
 	var mTmpPoint:Point;
 	var mTmpColorTransform:ColorTransform;
-	var mScratchBitmap:BitmapData;
+	var mTmpBitmap:BitmapData;
 	
 	var mViewport:Recti;
 	
@@ -80,8 +80,8 @@ class GraphicsRenderer extends Renderer
 	{
 		super.free();
 		
-		if (mScratchBitmap != null) mScratchBitmap.dispose();
-		mScratchBitmap = null;
+		if (mTmpBitmap != null) mTmpBitmap.dispose();
+		mTmpBitmap = null;
 	}
 	
 	override function onInitRenderContext(handle:Dynamic)
@@ -110,7 +110,7 @@ class GraphicsRenderer extends Renderer
 	{
 		//TODO color transformation, alpha, blendMode
 		
-		setModelViewProjMatrix(currentVisual);
+		setModelViewProjMatrix(currentVisual.world);
 		mContext.beginFill(effect.color, currentAlphaMultiplier);
 		mContext.drawTriangles(getScreenQuad(), mQuadIndices, TriangleCulling.NONE);
 		mContext.endFill();
@@ -120,7 +120,7 @@ class GraphicsRenderer extends Renderer
 	{
 		//TODO color transformation, alpha, blendMode
 		
-		setModelViewProjMatrix(currentVisual);
+		setModelViewProjMatrix(currentVisual.world);
 		
 		var uvt = mQuadUvt;
 		var bmd = effect.texture.imageData;
@@ -167,8 +167,8 @@ class GraphicsRenderer extends Renderer
 			r.width = c.w;
 			r.height = c.h;
 			
-			var scratch = mScratchBitmap;
-			if (scratch == null) scratch = mScratchBitmap = new BitmapData(1024, 1024, true, 0);
+			var scratch = mTmpBitmap;
+			if (scratch == null) scratch = mTmpBitmap = new BitmapData(1024, 1024, true, 0);
 			
 			//TODO blend mode
 			
@@ -206,7 +206,7 @@ class GraphicsRenderer extends Renderer
 		var w = effect.numVisTilesX;
 		var h = effect.numVisTilesY;
 		
-		setModelViewProjMatrix(currentVisual);
+		setModelViewProjMatrix(currentVisual.world);
 		
 		//TODO preallocate indices/vertices
 		var indices = [];

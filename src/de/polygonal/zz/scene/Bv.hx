@@ -114,4 +114,13 @@ class Bv
 		var rsum = radius + other.radius;
 		return (dx * dx + dy * dy) <= (rsum * rsum);
 	}
+	
+	inline public function as<T:Bv>(cl:Class<T>):T
+	{
+		#if flash
+		return untyped __as__(this, cl);
+		#else
+		return cast this;
+		#end
+	}
 }

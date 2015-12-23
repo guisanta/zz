@@ -35,6 +35,7 @@ import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 import de.polygonal.core.math.Mathematics;
+import de.polygonal.zz.sprite.SpriteBase.*;
 
 enum TextAlign { Left; Center; Right; }
 
@@ -47,6 +48,8 @@ typedef SpriteTextProperties =
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteText extends SpriteBase
 {
+	inline public static var TYPE = 3;
+	
 	/**
 		True if the entire text does not fit.
 	**/
@@ -68,9 +71,14 @@ class SpriteText extends SpriteBase
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
 	{
 		var spatial = new Node("SpriteText");
+		
 		super(spatial);
 		
+		type = TYPE;
+		
 		mNode = cast mSpatial;
+		mNode.mFlags &= ~Spatial.IS_NODE;
+		mNode.mFlags |= Spatial.IS_VISUAL; //treat as leaf
 		
 		mShaper = new Shaper();
 		
@@ -292,9 +300,13 @@ class SpriteText extends SpriteBase
 		return tight ? mShaper.tightBounds.clone() : mShaper.looseBounds.clone();
 	}
 	
-	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
 	{
-		if (getDirty()) commit();
+		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
+		
+		if (targetSpace == null) targetSpace = this;
+		if (output == null) output = new Aabb2();
+		
 		return mSpatial.getBoundingBox(targetSpace.sgn, output);
 	}
 	
@@ -303,7 +315,7 @@ class SpriteText extends SpriteBase
 		var charBounds = getCharBounds(true);
 		mPivotX = charBounds.cx;
 		mPivotY = charBounds.cy;
-		setDirty();
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	override public function tick(timeDelta:Float)
@@ -338,11 +350,9 @@ class SpriteText extends SpriteBase
 		mHasSleepingQuads = numSleeping > 0;
 	}
 	
-	override public function commit():SpriteBase
+	override public function syncLocal():SpriteBase
 	{
-		if (getDirty()) super.commit();
-		
-		clrDirty();
+		super.syncLocal();
 		
 		if (mTexture == null) return this;
 		if (mProperties.text == null) return this;

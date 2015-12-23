@@ -25,6 +25,8 @@ class ControlledObject
 {
 	public var controllers(default, null):Controller;
 	
+	public var controllersEnabled:Bool = true;
+	
 	function new()
 	{
 		controllers = null;
@@ -120,19 +122,17 @@ class ControlledObject
 	
 	public function updateControllers(dt:Float):Bool
 	{
-		if (controllers != null)
-		{
-			var someoneUpdated = false;
-			var c = controllers, hook;
-			while (c != null)
-			{
-				hook = c.next;
-				if (c.update(dt)) someoneUpdated = true;
-				c = hook;
-			}
-			return someoneUpdated;
-		}
+		if (controllers == null) return false;
+		if (!controllersEnabled) return false;
 		
-		return false;
+		var someoneUpdated = false;
+		var c = controllers, hook;
+		while (c != null)
+		{
+			hook = c.next;
+			if (c.update(dt)) someoneUpdated = true;
+			c = hook;
+		}
+		return someoneUpdated;
 	}
 }

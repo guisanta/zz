@@ -20,6 +20,7 @@ package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2f;
+import de.polygonal.core.math.Limits;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.Node;
@@ -28,8 +29,8 @@ import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.sprite.SpriteBase.*;
+import de.polygonal.zz.sprite.Sprite.*;
 import de.polygonal.zz.sprite.SpriteUtil;
-import haxe.ds.Vector;
 import de.polygonal.core.math.Mathematics;
 
 /**
@@ -40,15 +41,18 @@ import de.polygonal.core.math.Mathematics;
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteGroup extends SpriteBase
 {
-	var mNode:Node;
-	var mDescendants:Vector<SpriteBase>;
-	var mBoundOut:Aabb2;
+	inline public static var TYPE = 2;
 	
+	var mNode:Node;
+	var mBoundOut:Aabb2;
 	var mResult:PickResult;
 	
 	public function new(?name:String, ?parent:SpriteGroup, ?children:Array<SpriteBase>)
 	{
 		super(new Node(name));
+		
+		type = TYPE;
+		
 		mNode = cast(mSpatial, Node);
 		if (parent != null) parent.addChild(this);
 		if (children != null)
@@ -57,127 +61,22 @@ class SpriteGroup extends SpriteBase
 		mBoundOut = new Aabb2();
 	}
 	
-	override public function commit():SpriteBase
+	override public function syncLocal():SpriteBase
 	{
-		if (getDirty())
-		{
-			clrDirty();
-			
-			invalidateWorldTransform();
-			
-			updateAlphaAndVisibility();
-			
-			//same as Sprite.update() but ignores (mSizeX, mSizeY)
-			
-			var l = mSpatial.local;
-			
-			var px = mPivotX;
-			var py = mPivotY;
-			
-			var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-			assert(hints & (HINT_ROTATE | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE) > 0);
-			if (hints & HINT_ROTATE > 0)
-			{
-				var angle = mRotation * M.DEG_RAD;
-				var s = Math.sin(angle);
-				var c = Math.cos(angle);
-				var m = l.getRotate();
-				m.m11 = c; m.m12 =-s;
-				m.m21 = s; m.m22 = c;
-				l.setRotate(m);
-				
-				if (hints & HINT_UNIT_SCALE > 0)
-				{
-					//R, S = I
-					l.setTranslate2
-					(
-						-(px * c) + (py * s) + px + x + mOriginX,
-						-(px * s) - (py * c) + py + y + mOriginY
-					);
-				}
-				else
-				{
-					if (hints & HINT_UNIFORM_SCALE > 0)
-					{
-						//R, S = cI
-						var su = clampScale(mScaleX);
-						var spx = su * px;
-						var spy = su * py;
-						
-						l.setUniformScale2(su);
-						
-						l.setTranslate2
-						(
-							-(spx * c) + (spy * s) + px + x + mOriginX,
-							-(spx * s) - (spy * c) + py + y + mOriginY
-						);
-					}
-					else
-					{
-						//R, S
-						var sx = clampScale(mScaleX);
-						var sy = clampScale(mScaleY);
-						var spx = sx * px;
-						var spy = sy * py;
-						
-						l.setScale2(sx, sy);
-						
-						l.setTranslate2
-						(
-							-(spx * c) + (spy * s) + px + x + mOriginX,
-							-(spx * s) - (spy * c) + py + y + mOriginY
-						);
-					}
-				}
-			}
-			else
-			{
-				if (hints & HINT_UNIT_SCALE > 0)
-				{
-					//R = I, S = I
-					l.setTranslate2
-					(
-						x + mOriginX,
-						y + mOriginY
-					);
-				}
-				else
-				{
-					if (hints & HINT_UNIFORM_SCALE > 0)
-					{
-						//R = I, S = cI
-						var su = clampScale(mScaleX);
-						
-						l.setUniformScale2(su);
-						
-						l.setTranslate2
-						(
-							-(su * px) + px + x + mOriginX,
-							-(su * py) + py + y + mOriginY
-						);
-					}
-					else
-					{
-						//S
-						var sx = clampScale(mScaleX);
-						var sy = clampScale(mScaleY);
-						
-						l.setScale2(sx, sy);
-						
-						l.setTranslate2
-						(
-							-(sx * px) + px + x + mOriginX,
-							-(sy * py) + py + y + mOriginY
-						);
-					}
-				}
-			}
-		}
+		super.syncLocal();
 		
-		var c = mNode.child;
+		var c = mNode.child, s;
 		while (c != null)
 		{
-			as(c.arbiter, SpriteBase).commit();
+			s = as(c.mArbiter, SpriteBase);
+			if (s.isGroup())
+			{
+				s.syncLocal();
+				c = c.mSibling;
+				continue;
+			}
+			
+			s.syncLocal();
 			c = c.mSibling;
 		}
 		
@@ -188,13 +87,13 @@ class SpriteGroup extends SpriteBase
 	{
 		assert(numChildren == 0, "children must be removed first before calling free()");
 		mNode = null;
+		
 		super.free();
 	}
 	
 	public function freeDescendants()
 	{
 		SpriteUtil.freeSubtree(this);
-		mDescendants = null;
 	}
 	
 	//{ child management
@@ -234,7 +133,7 @@ class SpriteGroup extends SpriteBase
 
 	public function getChildAt(index:Int):SpriteBase
 	{
-		return as(mNode.getChildAt(index).arbiter, SpriteBase);
+		return as(mNode.getChildAt(index).mArbiter, SpriteBase);
 	}
 
 	public function getChildIndex(x:SpriteBase):Int
@@ -252,21 +151,21 @@ class SpriteGroup extends SpriteBase
 	{
 		var child = mNode.getChildByName(name);
 		if (child == null) return null;
-		return as(child.arbiter, SpriteBase);
+		return as(child.mArbiter, SpriteBase);
 	}
 	
 	public function getDescendantByName(name:String):SpriteBase
 	{
 		var descendant = mNode.getDescendantByName(name);
 		if (descendant == null) return null;
-		return as(SpriteBase, descendant.arbiter);
+		return as(SpriteBase, descendant.mArbiter);
 	}
 
 	public function getAllDescendantsByName(name:String, output:Array<SpriteBase>):Array<SpriteBase>
 	{
 		var a = mNode.getAllDescendantsByName(name, []);
 		for (i in 0...a.length)
-			output[i] = as(a[i].arbiter, SpriteBase);
+			output[i] = as(a[i].mArbiter, SpriteBase);
 		return output;
 	}
 	
@@ -282,12 +181,12 @@ class SpriteGroup extends SpriteBase
 		return this;
 	}
 	
-	public function getChildren(output:Vector<SpriteBase>):Vector<SpriteBase>
+	public function getChildren(output:Array<SpriteBase>):Array<SpriteBase>
 	{
 		var c = mNode.child;
 		for (i in 0...mNode.numChildren)
 		{
-			output[i] = as(c.arbiter, SpriteBase);
+			output[i] = as(c.mArbiter, SpriteBase);
 			c = c.mSibling;
 		}
 		return output;
@@ -330,7 +229,7 @@ class SpriteGroup extends SpriteBase
 			},
 			next: function()
 			{
-				var t = as(e.arbiter, SpriteBase);
+				var t = as(e.mArbiter, SpriteBase);
 				e = e.mSibling;
 				return t;
 			}
@@ -341,7 +240,7 @@ class SpriteGroup extends SpriteBase
 	
 	public function pick(point:Coord2f, result:Array<Sprite>):Int
 	{
-		if (getDirty()) commit();
+		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
 		
 		var f = sgn.mFlags;
 		if (f & Spatial.IS_WORLD_XFORM_DIRTY > 0)
@@ -352,37 +251,138 @@ class SpriteGroup extends SpriteBase
 		
 		if (mResult == null) mResult = new PickResult();	
 		var k = mNode.pick(point, mResult);
-		for (i in 0...k) result[i] = as(mResult.get(i).arbiter, Sprite);
+		for (i in 0...k) result[i] = as(mResult.get(i).mArbiter, Sprite);
 		return k;
 	}
 	
 	override public function tick(timeDelta:Float)
 	{
-		if (tickable) super.tick(timeDelta);
+		super.tick(timeDelta);
 		
 		var c = mNode.child, s;
 		while (c != null)
 		{
-			s = as(c.arbiter, SpriteBase);
+			s = as(c.mArbiter, SpriteBase);
 			s.tick(timeDelta);
 			c = c.mSibling;
 		}
 	}
 	
-	override public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	public function getLocalBounds():Aabb2
 	{
-		var r = getRoot().commit();
+		TreeUtil.updateGeometricState(as(mSpatial, Node), false);
+		
+		return mSpatial.getBoundingBox(mSpatial, mBoundOut);
+	}
+	
+	public function getWorldBounds():Aabb2
+	{
+		var r = getRoot();
+		r.syncLocal();
 		var n = as(r.sgn.getRoot(), Node);
 		TreeUtil.updateGeometricState(n, true);
 		
-		return mSpatial.getBoundingBox(targetSpace.sgn, output);
+		return mSpatial.getBoundingBox(n, mBoundOut);
+	}
+	
+	@:access(de.polygonal.zz.sprite.Sprite)
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
+	{
+		if (output == null) output = new Aabb2();
+		
+		var leafs = null, k = 0, i = 0;
+		if (!trim)
+		{
+			//undo trim
+			leafs = [];
+			k = SpriteUtil.descendants(this, true, leafs);
+			var s;
+			while (i < k)
+			{
+				s = leafs[i];
+				if (s.type == Sprite.TYPE && s.mFlags & HINT_TRIMMED > 0)
+				{
+					as(s, Sprite).undoTrim();
+					i++;
+				}
+				else
+				{
+					k--;
+					leafs[i] = leafs[k];
+					leafs[k] = null;
+				}
+			}
+		}
+		
+		SpriteUtil.updateWorldTransform(this, true);
+		if (SpriteUtil.isAncestor(this, targetSpace) == false)
+			SpriteUtil.updateWorldTransform(targetSpace);
+		
+		var minX = Limits.FLOAT_MAX;
+		var minY = Limits.FLOAT_MAX;
+		var maxX = Limits.FLOAT_MIN;
+		var maxY = Limits.FLOAT_MIN;
+		
+		var c = new Coord2f();
+		var b = new Aabb2();
+		
+		var a = [sgn], top = 1, s, n, c, arbiter;
+		while (top != 0)
+		{
+			s = a[--top];
+			a[top] = null;
+			
+			arbiter = as(s.mArbiter, SpriteBase);
+			if (arbiter == null) continue;
+			
+			if (s.isNode())
+			{
+				n = as(s, Node);
+				c = n.child;
+				while (c != null)
+				{
+					a[top++] = c;
+					c = c.mSibling;
+				}
+			}
+			else
+			{
+				if (arbiter.type == Sprite.TYPE)
+					mSpatial.getBoundingBox(targetSpace.sgn, b);
+				else
+				if (arbiter.type == SpriteText.TYPE)
+					arbiter.getBounds(targetSpace, b, trim);
+				
+				if (b.minX < minX) minX = b.minX;
+				if (b.minY < minY) minY = b.minY;
+				if (b.maxX > maxX) maxX = b.maxX;
+				if (b.maxY > maxY) maxY = b.maxY;
+			}
+		}
+		
+		output.minX = minX;
+		output.minY = minY;
+		output.maxX = maxX;
+		output.maxY = maxY;
+		
+		if (!trim)
+		{
+			//redo trim
+			while (--k > -1)
+			{
+				as(leafs[k], Sprite).redoTrim();
+				leafs[k] = null;
+			}
+		}
+		
+		return output;
 	}
 	
 	override public function getSize():Sizef
 	{
-		var bounds = getBounds(this, new Aabb2());
+		getBounds(parent, mBoundOut);
 		
-		return new Sizef(bounds.w, bounds.h);
+		return new Sizef(mBoundOut.w, mBoundOut.h);
 	}
 	
 	override public function setSize(x:Float, y:Float)
@@ -392,7 +392,7 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_width():Float
 	{
-		return getBounds(this, mBoundOut).w;
+		return getBounds(parent, mBoundOut).w;
 	}
 	override function set_width(value:Float):Float
 	{
@@ -401,7 +401,7 @@ class SpriteGroup extends SpriteBase
 	
 	override function get_height():Float
 	{
-		return getBounds(this, mBoundOut).h;
+		return getBounds(parent, mBoundOut).h;
 	}
 	override function set_height(value:Float):Float
 	{
@@ -428,13 +428,15 @@ class SpriteGroup extends SpriteBase
 	**/
 	override public function centerPivot()
 	{
-		commit();
+		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
+		
 		mNode.updateGeometricState();
 		
 		var bound = getBounds(this, mBoundOut);
 		mPivotX = bound.w / 2;
 		mPivotY = bound.h / 2;
-		setDirty();
+		
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	override public function centerOrigin()
@@ -442,6 +444,7 @@ class SpriteGroup extends SpriteBase
 		var bound = getBounds(this, mBoundOut);
 		originX = -bound.w / 2;
 		originY = -bound.h / 2;
-		setDirty();
+		
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 }

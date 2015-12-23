@@ -405,7 +405,7 @@ class PainterQuadTextureBatch extends PainterQuad
 							
 							effect = v.effect.as(TextureEffect);
 							
-							mvp = renderer.setModelViewProjMatrix(v);
+							mvp = renderer.setModelViewProjMatrix(v.world);
 							crop = effect.cropRectUv;
 							
 							//use 3 constant registers (each 4 floats) for mvp matrix, alpha and uv crop (+2 constant registers for color transform)
@@ -454,7 +454,7 @@ class PainterQuadTextureBatch extends PainterQuad
 							v = batch.get(min++);
 							effect = cast(v.effect, TextureEffect); //TODO cast
 							
-							mvp = renderer.setModelViewProjMatrix(v);
+							mvp = renderer.setModelViewProjMatrix(v.world);
 							crop = effect.cropRectUv;
 							offset = (mNumSharedRegisters * NUM_FLOATS_PER_REGISTER) + i * (mNumRegistersPerQuad * NUM_FLOATS_PER_REGISTER);
 							

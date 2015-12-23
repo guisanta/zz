@@ -26,7 +26,7 @@ import de.polygonal.zz.scene.BoxBv;
 import de.polygonal.zz.scene.Bv.BvType;
 
 /**
-	A Quad represents a rectangle made of two triangles.
+	A Quad represents a unit rectangle made of two triangles.
 	
 	By default, vertices are in the range [0,1].
 	<pre>
@@ -44,13 +44,14 @@ class Quad extends Visual
 {
 	inline public static var TYPE = 1;
 	
-	public static var _scratchCoord = new Coord2f();
+	public static var _tmpCoord = new Coord2f();
 	
 	public static var getBvTypeFunc:Void->BvType = null;
 	
 	public function new(?name:String)
 	{
 		super(name);
+		
 		type = TYPE;
 	}
 	
@@ -61,7 +62,7 @@ class Quad extends Visual
 	{
 		if (!worldBound.contains(point)) return 0;
 		
-		var model = _scratchCoord;
+		var model = _tmpCoord;
 		model.set(0, 0);
 		world.applyInverse2(point, model);
 		if (PointInsideAabb2.test6(model.x, model.y, 0, 0, 1, 1))
@@ -74,18 +75,7 @@ class Quad extends Visual
 	
 	override public function getBoundingBox(targetSpace:Spatial, output:Aabb2):Aabb2
 	{
-		if (this == targetSpace)
-		{
-			output.minX = 0;
-			output.minY = 0;
-			output.maxX = 1;
-			output.maxY = 1;
-			return output;
-		}
-		
-		var c = _scratchCoord;
-		var w0 = world;
-		
+		var c = _tmpCoord;
 		var minX = Limits.FLOAT_MAX;
 		var minY = Limits.FLOAT_MAX;
 		var maxX = Limits.FLOAT_MIN;
@@ -94,54 +84,56 @@ class Quad extends Visual
 		inline function minMax(c)
 		{
 			if (c.x < minX) minX = c.x;
-			else
 			if (c.x > maxX) maxX = c.x;
-			
 			if (c.y < minY) minY = c.y;
-			else
 			if (c.y > maxY) maxY = c.y;
 		}
 		
-		if (targetSpace.parent == null)
+		if (targetSpace == this)
 		{
-			c.set(0, 0);
-			w0.applyForward2(c, c);
-			minMax(c);
-			
-			c.set(1, 0);
-			w0.applyForward2(c, c);
-			minMax(c);
-			
-			c.set(1, 1);
-			w0.applyForward2(c, c);
-			minMax(c);
-			
-			c.set(0, 1);
-			w0.applyForward2(c, c);
-			minMax(c);
+			return output.set(0, 0, 1, 1);
+		}
+		else
+		if (targetSpace == parent) //targetSpace is parent of this
+		{
+			var t = local;
+			c.set(0, 0); t.applyForward2(c, c); minMax(c);
+			c.set(1, 0); t.applyForward2(c, c); minMax(c);
+			c.set(1, 1); t.applyForward2(c, c); minMax(c);
+			c.set(0, 1); t.applyForward2(c, c); minMax(c);
+		}
+		else
+		if (targetSpace.parent == null) //targetSpace is root
+		{
+			var t = world;
+			c.set(0, 0); t.applyForward2(c, c); minMax(c);
+			c.set(1, 0); t.applyForward2(c, c); minMax(c);
+			c.set(1, 1); t.applyForward2(c, c); minMax(c);
+			c.set(0, 1); t.applyForward2(c, c); minMax(c);
 		}
 		else
 		{
-			var w1 = targetSpace.world;
+			var t = world;
+			var u = targetSpace.world;
 			
 			c.set(0, 0);
-			w0.applyForward2(c, c);
-			w1.applyInverse2(c, c);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
 			minMax(c);
 			
 			c.set(1, 0);
-			w0.applyForward2(c, c);
-			w1.applyInverse2(c, c);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
 			minMax(c);
 			
 			c.set(1, 1);
-			w0.applyForward2(c, c);
-			w1.applyInverse2(c, c);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
 			minMax(c);
 			
 			c.set(0, 1);
-			w0.applyForward2(c, c);
-			w1.applyInverse2(c, c);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
 			minMax(c);
 		}
 		

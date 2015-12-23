@@ -34,39 +34,29 @@ import de.polygonal.zz.scene.Spatial.as;
 **/
 @:build(de.polygonal.core.macro.IntConsts.build(
 [
-	IS_DIRTY,
-	HINT_ROTATE,
-	HINT_SCALE,
-	HINT_UNIFORM_SCALE,
-	HINT_UNIT_SCALE,
-	HINT_SQUARE_SIZE,
-	
-	IS_ALPHA_DIRTY,
-	IS_VISIBILITY_DIRTY
+	IS_LOCAL_DIRTY, IS_ALPHA_DIRTY, IS_VISIBILITY_DIRTY,
+	HINT_ROTATE, HINT_SCALE, HINT_UNIFORM_SCALE, HINT_UNIT_SCALE
 ], true, false, "de.polygonal.zz.sprite.SpriteBase"))
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteBase
 {
 	inline static var SCALE_EPS = .001;
 	
-	public var tickable = true;
+	public var type(default, null):Int;
 	
 	var mSpatial:Spatial;
-	var mX:Float = 0;
-	var mY:Float = 0;
-	var mSizeX:Float = 0;
-	var mSizeY:Float = 0;
-	var mScaleX:Float = 1;
-	var mScaleY:Float = 1;
-	var mOriginX:Float = 0;
-	var mOriginY:Float = 0;
-	var mPivotX:Float = 0;
-	var mPivotY:Float = 0;
-	var mRotation:Float = 0;
-	var mAlpha:Float = 1;
-	var mVisible:Bool = true;
-	var mFlags:Int = 0;
-	
+	var mX = 0.;
+	var mY = 0.;
+	var mScaleX = 1.;
+	var mScaleY = 1.;
+	var mOriginX = 0.;
+	var mOriginY = 0.;
+	var mPivotX = 0.;
+	var mPivotY = 0.;
+	var mRotation = 0.;
+	var mAlpha = 1.;
+	var mVisible = true;
+	var mFlags = HINT_UNIFORM_SCALE | HINT_UNIT_SCALE;
 	var mTweenAni:SpriteTweenAni = null;
 	var mKeyframeAni:SpriteKeyframeAni = null;
 	var mBlending:SpriteBlending;
@@ -74,9 +64,7 @@ class SpriteBase
 	function new(spatial:Spatial)
 	{
 		mSpatial = spatial;
-		mFlags = HINT_UNIFORM_SCALE | HINT_UNIT_SCALE;
-		mSpatial.arbiter = this;
-		mSpatial.mFlags |= Spatial.IS_COMPOSITE_LOCKED;
+		mSpatial.mArbiter = this;
 	}
 	
 	public function free()
@@ -123,12 +111,12 @@ class SpriteBase
 	public var parent(get_parent, set_parent):SpriteGroup;
 	inline function get_parent():SpriteGroup
 	{
-		return mSpatial.parent != null ? as(mSpatial.parent.arbiter, SpriteGroup) : null;
+		return mSpatial.parent != null ? as(mSpatial.parent.mArbiter, SpriteGroup) : null;
 	}
 	inline function set_parent(value:SpriteGroup):SpriteGroup
 	{
 		remove();
-		value.addChild(as(mSpatial.arbiter, SpriteBase));
+		value.addChild(as(mSpatial.mArbiter, SpriteBase));
 		return value;
 	}
 	
@@ -156,10 +144,10 @@ class SpriteBase
 	{
 		if (mAlpha != value)
 		{
-			setDirty();
+			mAlpha = Mathematics.fclamp(value, 0, 1);
 			mFlags |= IS_ALPHA_DIRTY;
 		}
-		return mAlpha = Mathematics.fclamp(value, 0, 1);
+		return mAlpha;
 	}
 	
 	/**
@@ -171,10 +159,10 @@ class SpriteBase
 	{
 		if (mVisible != value)
 		{
-			setDirty();
+			mVisible = value;
 			mFlags |= IS_VISIBILITY_DIRTY;
 		}
-		return mVisible = value;
+		return value;
 	}
 	
 	/**
@@ -188,7 +176,7 @@ class SpriteBase
 		if (mX != value)
 		{
 			mX = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -204,7 +192,7 @@ class SpriteBase
 		if (mY != value)
 		{
 			mY = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -220,7 +208,7 @@ class SpriteBase
 		if (mRotation != value)
 		{
 			mRotation = value;
-			mFlags |= (HINT_ROTATE | IS_DIRTY);
+			mFlags |= HINT_ROTATE | IS_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -240,7 +228,7 @@ class SpriteBase
 		if (mScaleX != value || mScaleY != value)
 		{
 			mScaleX = mScaleY = value;
-			mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_DIRTY);
+			mFlags |= HINT_SCALE | HINT_UNIFORM_SCALE | IS_LOCAL_DIRTY;
 			mFlags &= ~HINT_UNIT_SCALE;
 		}
 		return value;
@@ -259,7 +247,7 @@ class SpriteBase
 		{
 			mScaleX = value;
 			mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-			mFlags |= (HINT_SCALE | IS_DIRTY);
+			mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -277,56 +265,39 @@ class SpriteBase
 		{
 			mScaleY = value;
 			mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-			mFlags |= (HINT_SCALE | IS_DIRTY);
+			mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
 		}
 		return value;
 	}
 	
-	/**
-		The width of this sprite.
-		Changing the width affects the scaling factor, e.g. if scaleX equals 1.0 and width equals 100,
-		changing the witdh to 50 will set the scaling factor to 0.5.
-		
-		If scaleX == 1, `width` equals the unscaled texture width in pixels.
-	**/
 	public var width(get_width, set_width):Float;
 	function get_width():Float
 	{
-		return mSizeX * M.fabs(mScaleX);
-	}
-	function set_width(value:Float):Float
-	{
-		assert(mSizeX != 0, "width must not be zero, call setTexture() or setColor() first");
-		
-		mScaleX = value / mSizeX;
-		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= (HINT_SCALE | IS_DIRTY);
-		return value;
+		return throw "override for implementation";
 	}
 	
-	/**
-		The height of this sprite.
-		
-		If scaleY == 1, height equals the unscaled texture height in pixels.
-	**/
+	function set_width(value:Float):Float
+	{
+		return throw "override for implementation";
+	}
+	
 	public var height(get_height, set_height):Float;
 	function get_height():Float
 	{
-		return mSizeY * M.fabs(mScaleY);
+		return throw "override for implementation";
 	}
 	function set_height(value:Float):Float
 	{
-		assert(mSizeY != 0, "height must not be zero, call setTexture() or setColor() first");
-		mScaleY = value / mSizeY;
-		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= (HINT_SCALE | IS_DIRTY);
-		return value;
+		return throw "override for implementation";
 	}
 	
-	public function getSize():Sizef
-	{
-		return new Sizef(width, height);
-	}
+	public var centerX(get_centerX, never):Float;
+	inline function get_centerX():Float return x + width / 2;
+	
+	public var centerY(get_centerY, never):Float;
+	inline function get_centerY():Float return y + height / 2;
+	
+	public function getSize():Sizef return new Sizef(width, height);
 	
 	public function setSize(x:Float, y:Float)
 	{
@@ -346,7 +317,7 @@ class SpriteBase
 		if (mOriginX != value)
 		{
 			mOriginX = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		
 		return value;
@@ -364,7 +335,7 @@ class SpriteBase
 		if (mOriginY != value)
 		{
 			mOriginY = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		
 		return value;
@@ -385,7 +356,7 @@ class SpriteBase
 		if (mPivotX != value)
 		{
 			mPivotX = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		
 		return value;
@@ -405,7 +376,7 @@ class SpriteBase
 		if (mPivotY != value)
 		{
 			mPivotY = value;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 		
 		return value;
@@ -419,25 +390,7 @@ class SpriteBase
 	{
 		originX = -width / 2;
 		originY = -height / 2;
-		setDirty();
-	}
-	
-	/**
-		Horizontally centers the origin point of this sprite.
-	**/
-	public function centerOriginX()
-	{
-		originX = -width / 2;
-		setDirty();
-	}
-	
-	/**
-		Vertically centers the origin point of this sprite.
-	**/
-	public function centerOriginY()
-	{
-		originY = -height / 2;
-		setDirty();
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	/**
@@ -446,27 +399,7 @@ class SpriteBase
 	**/
 	public function centerPivot()
 	{
-		mPivotX = mSizeX / 2;
-		mPivotY = mSizeY / 2;
-		setDirty();
-	}
-	
-	/**
-		Horizontally centers the pivot point of this sprite.
-	**/
-	public function centerPivotX()
-	{
-		mPivotX = mSizeX / 2;
-		setDirty();
-	}
-	
-	/**
-		Vertically centers the pivot point of this sprite.
-	**/
-	public function centerPivotY()
-	{
-		mPivotY = mSizeY / 2;
-		setDirty();
+		throw "override for implementation";
 	}
 	
 	inline public function setPosition(x:Float, y:Float)
@@ -475,7 +408,7 @@ class SpriteBase
 		{
 			mX = x;
 			mY = y;
-			setDirty();
+			mFlags |= IS_LOCAL_DIRTY;
 		}
 	}
 	
@@ -484,26 +417,26 @@ class SpriteBase
 		mScaleX = x;
 		mScaleY = y;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= (HINT_SCALE | IS_DIRTY);
+		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
 	}
 	
 	public function resetOrigin()
 	{
 		mOriginX = mOriginY = 0;
-		setDirty();
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	public function resetPivot()
 	{
 		mPivotX = mPivotY = 0;
-		setDirty();
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	public function resetScale()
 	{
 		mScaleX = mScaleX = 1;
 		mFlags &= ~HINT_SCALE;
-		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_DIRTY;
+		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
 		mSpatial.local.setUnitScale2();
 	}
 	
@@ -511,27 +444,25 @@ class SpriteBase
 	{
 		mRotation = 0;
 		mFlags &= ~HINT_ROTATE;
+		mFlags |= IS_LOCAL_DIRTY;
 		mSpatial.local.setIdentityRotation();
-		setDirty();
 	}
 	
 	public function resetTransformation()
 	{
-		mX = mSizeX = mPivotX = mOriginX = 0.;
-		mY = mSizeY = mPivotY = mOriginY = 0.;
+		mX = mPivotX = mOriginX = 0.;
+		mY = mPivotY = mOriginY = 0.;
 		mScaleX = 1.;
 		mScaleY = 1.;
-		mRotation = 0;
+		mRotation = 0.;
 		mFlags &= ~(HINT_ROTATE | HINT_SCALE);
-		mFlags |= (HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
+		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
 		mSpatial.local.setIdentity2();
 	}
 	
-	public function getBounds(targetSpace:SpriteBase, output:Aabb2):Aabb2
+	public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
 	{
-		if (getDirty()) commit();
-		
-		return mSpatial.getBoundingBox(targetSpace.sgn, output);
+		return throw "override for implementation";
 	}
 	
 	/**
@@ -539,7 +470,7 @@ class SpriteBase
 	**/
 	public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		if (getDirty()) commit();
+		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
 		
 		return mSpatial.world.applyForward2(input, output);
 	}
@@ -549,103 +480,54 @@ class SpriteBase
 	**/
 	public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		if (getDirty()) commit();
+		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
 		
 		return mSpatial.world.applyInverse2(input, output);
 	}
 	
 	public function tick(timeDelta:Float)
 	{
-		if (tickable)
-			if (mSpatial.controllers != null)
-				mSpatial.updateControllers(timeDelta);
+		if (mSpatial.controllers != null && mSpatial.controllersEnabled)
+			mSpatial.updateControllers(timeDelta);
 	}
 	
-	inline function updateAlphaAndVisibility()
+	/**
+		Commit changes (local transformation, alpha, visibility).
+	**/
+	public function syncLocal():SpriteBase
 	{
-		if (mFlags & (IS_ALPHA_DIRTY | IS_VISIBILITY_DIRTY) > 0)
+		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
+		if (mFlags & IS_VISIBILITY_DIRTY > 0)
 		{
 			if (mAlpha == 0)
 				mSpatial.cullingMode = CullingMode.CullAlways; //always skip rendering
 			else
 				mSpatial.cullingMode = mVisible ? CullingMode.CullDynamic : CullingMode.CullAlways;
 			
-			if (mFlags & IS_ALPHA_DIRTY > 0)
+			mFlags &= ~IS_VISIBILITY_DIRTY;
+		}
+		if (mFlags & IS_ALPHA_DIRTY > 0)
+		{
+			if (mAlpha < 1)
 			{
-				if (mAlpha < 1)
-				{
-					var state = mSpatial.getGlobalState(GlobalStateType.AlphaMultiplier);
-					if (state == null) //create new state
-						mSpatial.setGlobalState(new AlphaMultiplierState(mAlpha));
-					else
-					{
-						//update existing state
-						state.as(AlphaMultiplierState).value = mAlpha;
-					}
-				}
+				var state = mSpatial.getGlobalState(GlobalStateType.AlphaMultiplier);
+				if (state == null) //create new state
+					mSpatial.setGlobalState(new AlphaMultiplierState(mAlpha));
 				else
 				{
-					//remove state
-					mSpatial.removeGlobalState(GlobalStateType.AlphaMultiplier);
+					//update existing state
+					state.as(AlphaMultiplierState).value = mAlpha;
 				}
-				
-				mSpatial.mFlags |= Spatial.IS_RS_DIRTY;
+			}
+			else
+			{
+				//remove state
+				mSpatial.removeGlobalState(GlobalStateType.AlphaMultiplier);
 			}
 			
-			mFlags &= ~(IS_ALPHA_DIRTY | IS_VISIBILITY_DIRTY);
+			mFlags &= ~IS_ALPHA_DIRTY;
+			mSpatial.mFlags |= Spatial.IS_RS_DIRTY;
 		}
-	}
-	
-	/**
-		Updates local transformation.
-	**/
-	public function commit():SpriteBase
-	{
-		if (!getDirty()) return this;
-		clrDirty();
-		
-		updateAlphaAndVisibility();
-		
-		invalidateWorldTransform();
-		
-		//simple brute-force SRT update
-		var l = mSpatial.local;
-		
-		var angle = M.wrap(mRotation, 360) * M.DEG_RAD;
-		var s = Math.sin(angle);
-		var c = Math.cos(angle);
-		var sx = mScaleX;
-		var sy = mScaleY;
-		sx = clampScale(sx);
-		sy = clampScale(sy);
-		var spx = sx * mPivotX;
-		var spy = sy * mPivotY;
-		
-		if (isGroup())
-		{
-			if (sx == sy)
-				l.setUniformScale2(sx);
-			else
-				l.setScale2(sx, sy);
-		}
-		else
-		{
-			if (mSizeX == mSizeY && sx == sy)
-				l.setUniformScale2(mSizeX * sx);
-			else
-				l.setScale2(mSizeX * sx, mSizeY * sy);
-		}
-		
-		var m = l.getRotate();
-		m.m11 = c; m.m12 =-s;
-		m.m21 = s; m.m22 = c;
-		l.setRotate(m);
-		
-		l.setTranslate2
-		(
-			-(spx * c) + (spy * s) + mPivotX + x + mOriginX,
-			-(spx * s) - (spy * c) + mPivotY + y + mOriginY
-		);
 		
 		return this;
 	}
@@ -683,16 +565,151 @@ class SpriteBase
 		return value;
 	}
 	
+	function updateLocalTransform()
+	{
+		mFlags &= ~IS_LOCAL_DIRTY;
+		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		
+		/*//simple brute-force SRT update
+		var l = mSpatial.local;
+		
+		var angle = getAngle();
+		var s = Math.sin(angle);
+		var c = Math.cos(angle);
+		var sx = mScaleX;
+		var sy = mScaleY;
+		sx = clampScale(sx);
+		sy = clampScale(sy);
+		var spx = sx * mPivotX;
+		var spy = sy * mPivotY;
+		
+		if (sx == sy)
+			l.setUniformScale2(sx);
+		else
+			l.setScale2(sx, sy);
+		
+		var m = l.getRotate();
+		m.m11 = c; m.m12 =-s;
+		m.m21 = s; m.m22 = c;
+		l.setRotate(m);
+		
+		l.setTranslate2
+		(
+			-(spx * c) + (spy * s) + mPivotX + x + mOriginX,
+			-(spx * s) - (spy * c) + mPivotY + y + mOriginY
+		);*/
+		
+		mFlags &= ~IS_LOCAL_DIRTY;
+		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		
+		var l = mSpatial.local;
+		
+		var px = mPivotX;
+		var py = mPivotY;
+		
+		var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
+		assert(hints & (HINT_ROTATE | HINT_UNIT_SCALE | HINT_UNIFORM_SCALE) > 0);
+		if (hints & HINT_ROTATE > 0)
+		{
+			var angle = getAngle();
+			var s = Math.sin(angle);
+			var c = Math.cos(angle);
+			var m = l.getRotate();
+			m.m11 = c; m.m12 =-s;
+			m.m21 = s; m.m22 = c;
+			l.setRotate(m);
+			
+			if (hints & HINT_UNIT_SCALE > 0)
+			{
+				//R, S = I
+				l.setTranslate2
+				(
+					-(px * c) + (py * s) + px + x + mOriginX,
+					-(px * s) - (py * c) + py + y + mOriginY
+				);
+			}
+			else
+			{
+				if (hints & HINT_UNIFORM_SCALE > 0)
+				{
+					//R, S = cI
+					var su = clampScale(mScaleX);
+					var spx = su * px;
+					var spy = su * py;
+					
+					l.setUniformScale2(su);
+					
+					l.setTranslate2
+					(
+						-(spx * c) + (spy * s) + px + x + mOriginX,
+						-(spx * s) - (spy * c) + py + y + mOriginY
+					);
+				}
+				else
+				{
+					//R, S
+					var sx = clampScale(mScaleX);
+					var sy = clampScale(mScaleY);
+					var spx = sx * px;
+					var spy = sy * py;
+					
+					l.setScale2(sx, sy);
+					
+					l.setTranslate2
+					(
+						-(spx * c) + (spy * s) + px + x + mOriginX,
+						-(spx * s) - (spy * c) + py + y + mOriginY
+					);
+				}
+			}
+		}
+		else
+		{
+			if (hints & HINT_UNIT_SCALE > 0)
+			{
+				//R = I, S = I
+				l.setTranslate2
+				(
+					x + mOriginX,
+					y + mOriginY
+				);
+			}
+			else
+			{
+				if (hints & HINT_UNIFORM_SCALE > 0)
+				{
+					//R = I, S = cI
+					var su = clampScale(mScaleX);
+					
+					l.setUniformScale2(su);
+					
+					l.setTranslate2
+					(
+						-(su * px) + px + x + mOriginX,
+						-(su * py) + py + y + mOriginY
+					);
+				}
+				else
+				{
+					//S
+					var sx = clampScale(mScaleX);
+					var sy = clampScale(mScaleY);
+					
+					l.setScale2(sx, sy);
+					
+					l.setTranslate2
+					(
+						-(sx * px) + px + x + mOriginX,
+						-(sy * py) + py + y + mOriginY
+					);
+				}
+			}
+		}
+	}
+	
 	inline public function asGroup():SpriteGroup return as(this, SpriteGroup);
-	
-	inline function hasHint(x:Int) return (mFlags & x) > 0;
-	inline function clrHint(x:Int) mFlags &= ~x;
-	
-	inline function setDirty() mFlags |= IS_DIRTY;
-	inline function getDirty() return mFlags & IS_DIRTY > 0;
-	inline function clrDirty() mFlags &= ~IS_DIRTY;
 	
 	inline function clampScale(x:Float) return x < 0 ? (x > -SCALE_EPS ? -SCALE_EPS : x) : (x < SCALE_EPS ? SCALE_EPS : x);
 	
-	inline function invalidateWorldTransform() mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+	inline function getAngle() return M.wrap(mRotation, 360) * M.DEG_RAD;
 }
