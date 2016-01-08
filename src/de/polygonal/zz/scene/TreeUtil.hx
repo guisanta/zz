@@ -232,11 +232,8 @@ class TreeUtil
 		inline function minMax()
 		{
 			if (c.x < minX) minX = c.x;
-			else
 			if (c.x > maxX) maxX = c.x;
-			
 			if (c.y < minY) minY = c.y;
-			else
 			if (c.y > maxY) maxY = c.y;
 		}
 		
@@ -276,5 +273,105 @@ class TreeUtil
 		output.maxY = maxY;
 		
 		return output;
+	}
+	
+	public static function transformBoundingBox(spatial:Spatial, targetSpace:Spatial, input:Aabb2, output:Aabb2):Aabb2
+	{
+		var iMinX = input.minX;
+		var iMinY = input.minY;
+		var iMaxX = input.maxX;
+		var iMaxY = input.maxY;
+		
+		var oMinX = Limits.FLOAT_MAX;
+		var oMinY = Limits.FLOAT_MAX;
+		var oMaxX = Limits.FLOAT_MIN;
+		var oMaxY = Limits.FLOAT_MIN;
+		
+		var c = new Coord2f();
+		
+		inline function minMax(c)
+		{
+			if (c.x < oMinX) oMinX = c.x;
+			if (c.x > oMaxX) oMaxX = c.x;
+			if (c.y < oMinY) oMinY = c.y;
+			if (c.y > oMaxY) oMaxY = c.y;
+		}
+		
+		if (targetSpace == spatial)
+			output.of(input);
+		else
+		if (targetSpace == spatial.parent) //targetSpace is parent of this
+		{
+			var t = spatial.local;
+			c.set(iMinX, iMinX); t.applyForward2(c, c); minMax(c);
+			c.set(iMaxX, iMinY); t.applyForward2(c, c); minMax(c);
+			c.set(iMaxX, iMaxY); t.applyForward2(c, c); minMax(c);
+			c.set(iMinX, iMaxY); t.applyForward2(c, c); minMax(c);
+		}
+		else
+		if (targetSpace.parent == null) //targetSpace is root
+		{
+			var t = spatial.world;
+			c.set(iMinX, iMinX); t.applyForward2(c, c); minMax(c);
+			c.set(iMaxX, iMinY); t.applyForward2(c, c); minMax(c);
+			c.set(iMaxX, iMaxY); t.applyForward2(c, c); minMax(c);
+			c.set(iMinX, iMaxY); t.applyForward2(c, c); minMax(c);
+		}
+		else
+		{
+			var t = spatial.world;
+			var u = targetSpace.world;
+			
+			c.set(iMinX, iMinX);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(iMaxX, iMinY);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(iMaxX, iMaxY);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
+			minMax(c);
+			
+			c.set(iMinX, iMaxY);
+			t.applyForward2(c, c);
+			u.applyInverse2(c, c);
+			minMax(c);
+		}
+		
+		output.minX = oMinX;
+		output.minY = oMinY;
+		output.maxX = oMaxX;
+		output.maxY = oMaxY;
+		
+		return output;
+	}
+	
+	public static function clearSpecialFlags(root:Node)
+	{
+		var a = _aSpatial;
+		a[0] = root;
+		var top = 1, s:Spatial, n:Node;
+		while (top != 0)
+		{
+			s = a[--top];
+			a[top] = null;
+			s.mFlags &= ~Spatial.GS_UPDATED;
+			
+			if (s.isNode())
+			{
+				n = as(s, Node);
+				var c = n.child;
+				while (c != null)
+				{
+					a[top++] = c;
+					c = c.mSibling;
+				}
+			}
+		}
 	}
 }

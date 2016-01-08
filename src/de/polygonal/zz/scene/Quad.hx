@@ -90,9 +90,7 @@ class Quad extends Visual
 		}
 		
 		if (targetSpace == this)
-		{
 			return output.set(0, 0, 1, 1);
-		}
 		else
 		if (targetSpace == parent) //targetSpace is parent of this
 		{

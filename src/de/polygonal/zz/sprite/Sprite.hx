@@ -44,7 +44,12 @@ import de.polygonal.zz.texture.TextureLib;
 @:access(de.polygonal.zz.scene.Spatial)
 class Sprite extends SpriteBase
 {
-	public static var TYPE = 1;
+	inline public static var FLAG_TRIM = 0x01;
+	
+	inline static var FLAG_SKIP_UNTRIM = 0x02;
+	inline static var FLAG_SKIP_WORLD_UPDATE = 0x04;
+	
+	inline public static var TYPE = 1;
 	
 	var mSizeX = 0.;
 	var mSizeY = 0.;
@@ -381,27 +386,28 @@ class Sprite extends SpriteBase
 		return mVisual.pick(point, null) == 1;
 	}
 	
-	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?flags:Int = 0):Aabb2
 	{
 		if (output == null) output = new Aabb2();
 		
-		//trim transparent region?
-		var trimmed = !trim && (mFlags & HINT_TRIMMED > 0);
-		if (trimmed)
+		var untrim = (flags & (FLAG_SKIP_UNTRIM | FLAG_TRIM) == 0) && (mFlags & HINT_TRIMMED > 0);
+		if (untrim)
 		{
 			mFlags |= IS_LOCAL_DIRTY;
 			mFlags &= ~HINT_TRIMMED;
 			setSquareHint(mSizeX, mSizeY);
 		}
 		
-		//sync local transform and recompute world transformation
-		SpriteUtil.updateWorldTransform(this);
-		if (SpriteUtil.isAncestor(this, targetSpace) == false)
-			SpriteUtil.updateWorldTransform(targetSpace);
+		if (flags & FLAG_SKIP_WORLD_UPDATE == 0)
+		{
+			SpriteUtil.updateWorldTransform(this);
+			if (SpriteUtil.isAncestor(this, targetSpace) == false)
+				SpriteUtil.updateWorldTransform(targetSpace);
+		}
 		
 		var bounds = mSpatial.getBoundingBox(targetSpace.sgn, output);
 		
-		if (trimmed)
+		if (untrim)
 		{
 			mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
 			setSquareHint(mSizeX, mSizeY);

@@ -29,6 +29,7 @@ import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.Quad;
 import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
+import de.polygonal.zz.scene.TreeUtil;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapChar;
 import de.polygonal.zz.texture.atlas.format.BmFontFormat.BitmapCharSet;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
@@ -300,14 +301,20 @@ class SpriteText extends SpriteBase
 		return tight ? mShaper.tightBounds.clone() : mShaper.looseBounds.clone();
 	}
 	
-	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
+	@:access(de.polygonal.zz.sprite.Sprite)
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?flags:Int = 0):Aabb2
 	{
-		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
-		
 		if (targetSpace == null) targetSpace = this;
 		if (output == null) output = new Aabb2();
 		
-		return mSpatial.getBoundingBox(targetSpace.sgn, output);
+		if (flags & Sprite.FLAG_SKIP_WORLD_UPDATE == 0)
+		{
+			SpriteUtil.updateWorldTransform(this);
+			if (SpriteUtil.isAncestor(this, targetSpace) == false)
+				SpriteUtil.updateWorldTransform(targetSpace);
+		}
+		
+		return TreeUtil.transformBoundingBox(sgn, targetSpace.sgn, getCharBounds(flags & Sprite.FLAG_TRIM > 0), output);
 	}
 	
 	override public function centerPivot()
@@ -836,6 +843,32 @@ private class Shaper
 		
 		if (align != TextAlign.Left)
 			alignLine(firstCharInLineIndex, lastCharInLineIndex);
+		
+		//adjust bounds
+		//TODO track minY, maxY
+		//TODO and track minX, minY separately
+		var minYt = tightBounds.minY;
+		var maxYt = tightBounds.maxY;
+		
+		var minYl = looseBounds.minY;
+		var maxYl = looseBounds.maxY;
+		
+		tightBounds.empty();
+		looseBounds.empty();
+		
+		for (i in 0...numChars)
+		{
+			var pos = i * 5 + 1;
+			
+			var minX = data[pos + 0];
+			var maxX = minX + data[pos + 2];
+			
+			looseBounds.addPoint(minX, minYt);
+			looseBounds.addPoint(maxX, maxYt);
+			
+			tightBounds.addPoint(minX, minYl);
+			tightBounds.addPoint(maxX, maxYl);
+		}
 		
 		return false;
 	}

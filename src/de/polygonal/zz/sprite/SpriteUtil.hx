@@ -237,7 +237,7 @@ class SpriteUtil
 	
 	public static function updateWorldTransform(sprite:SpriteBase, propagateToChildren:Bool = false, updateBounds:Bool = false)
 	{
-		var a = _aSpatial, p = sprite.sgn.parent, s, c = 0;
+		var a = _aSpatial, p = sprite.sgn, s, c = 0;
 		while (p != null)
 		{
 			if (p.mArbiter != null)

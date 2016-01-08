@@ -459,8 +459,8 @@ class SpriteBase
 		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
 		mSpatial.local.setIdentity2();
 	}
-	
-	public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
+
+	public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?flags:Int = 0):Aabb2
 	{
 		return throw "override for implementation";
 	}

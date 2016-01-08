@@ -286,14 +286,15 @@ class SpriteGroup extends SpriteBase
 	}
 	
 	@:access(de.polygonal.zz.sprite.Sprite)
-	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?trim:Bool = false):Aabb2
+	override public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?flags:Int = 0):Aabb2
 	{
 		if (output == null) output = new Aabb2();
 		
 		var leafs = null, k = 0, i = 0;
-		if (!trim)
+		
+		var untrim = flags & Sprite.FLAG_TRIM == 0;
+		if (untrim)
 		{
-			//undo trim
 			leafs = [];
 			k = SpriteUtil.descendants(this, true, leafs);
 			var s;
@@ -347,11 +348,7 @@ class SpriteGroup extends SpriteBase
 			}
 			else
 			{
-				if (arbiter.type == Sprite.TYPE)
-					mSpatial.getBoundingBox(targetSpace.sgn, b);
-				else
-				if (arbiter.type == SpriteText.TYPE)
-					arbiter.getBounds(targetSpace, b, trim);
+				arbiter.getBounds(targetSpace, b, flags | Sprite.FLAG_SKIP_UNTRIM | Sprite.FLAG_SKIP_WORLD_UPDATE);
 				
 				if (b.minX < minX) minX = b.minX;
 				if (b.minY < minY) minY = b.minY;
@@ -365,9 +362,8 @@ class SpriteGroup extends SpriteBase
 		output.maxX = maxX;
 		output.maxY = maxY;
 		
-		if (!trim)
+		if (untrim)
 		{
-			//redo trim
 			while (--k > -1)
 			{
 				as(leafs[k], Sprite).redoTrim();
