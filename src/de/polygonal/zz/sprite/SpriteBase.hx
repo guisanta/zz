@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Coord2f;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizef;

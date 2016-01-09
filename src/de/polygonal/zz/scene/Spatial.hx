@@ -25,7 +25,7 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Aabb2;
-import de.polygonal.core.math.Coord2f;
+import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.core.util.ClassUtil;
 import de.polygonal.ds.Hashable;
@@ -275,6 +275,8 @@ class Spatial extends ControlledObject implements Hashable
 	
 	function updateWorldData(updateBounds:Bool, propagateToChildren:Bool = true)
 	{
+		if (worldTransformCurrent) return;
+		
 		mFlags &= ~IS_WORLD_XFORM_DIRTY;
 		
 		if (worldTransformCurrent) return;

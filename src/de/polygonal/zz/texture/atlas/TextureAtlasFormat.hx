@@ -20,7 +20,7 @@ package de.polygonal.zz.texture.atlas;
 
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.core.math.Recti;
-import de.polygonal.core.math.Coord2i;
+import de.polygonal.core.math.Coord2.Coord2i;
 
 typedef TextureAtlasFrameDef =
 {

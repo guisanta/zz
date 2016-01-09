@@ -51,6 +51,8 @@ class SpriteText extends SpriteBase
 {
 	inline public static var TYPE = 3;
 	
+	inline public static var FLAG_TRIM = 0x01;
+	
 	/**
 		True if the entire text does not fit.
 	**/
