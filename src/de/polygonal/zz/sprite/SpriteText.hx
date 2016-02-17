@@ -21,7 +21,8 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.fmt.Ascii;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.Vector;
+import de.polygonal.ds.ArrayList;
+import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.scene.CullingMode;
@@ -37,6 +38,7 @@ import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.zz.sprite.SpriteBase.*;
+import haxe.ds.Vector;
 
 enum TextAlign { Left; Center; Right; }
 
@@ -44,6 +46,11 @@ typedef SpriteTextProperties =
 {
 	text:String, size:Int, align:TextAlign, width:Float, height:Float,
 	kerning:Bool, multiline:Bool, tracking:Float, leading:Float
+}
+
+typedef TextLayoutResult =
+{
+	overflow:Bool, charCodes:ArrayList<Int>, charRects:ArrayList<Float>, //[x0,y0,w0,h0, x1,y1,w1,h1, ...]
 }
 
 @:access(de.polygonal.zz.scene.Spatial)
@@ -54,21 +61,31 @@ class SpriteText extends SpriteBase
 	inline public static var FLAG_TRIM = 0x01;
 	
 	/**
-		True if the entire text does not fit.
+		True if the given text does not fit.
 	**/
-	public var isOverflowing(default, null):Bool;
+	public var isOverflowing(get, never):Bool;
+	function get_isOverflowing():Bool return mTextLayoutResult.overflow;
 	
 	var mNode:Node;
 	var mTexture:Texture;
 	var mAtlas:TextureAtlas;
 	var mShaper:Shaper;
-	var mTextureChanged:Bool;
-	var mHasSleepingQuads:Bool;
+	
+	var mTextLayout:SingleLineTextLayout;
+	
+	var mTextureChanged = false;
 	var mChanged = true;
+	var mHasSleepingQuads = false;
+	
 	var mProperties:SpriteTextProperties =
 	{
 		text: "", size: 10, align: TextAlign.Left, width: 100., height: 100.,
 		kerning: true, multiline: true, tracking: 0., leading: 0.
+	}
+	
+	var mTextLayoutResult:TextLayoutResult =
+	{
+		overflow: false, charCodes: new ArrayList<Int>(64), charRects: new ArrayList<Float>(256)
 	}
 	
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
@@ -220,7 +237,7 @@ class SpriteText extends SpriteBase
 	{
 		mProperties.size = (maxSize - minSize) >> 1;
 		
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 		
 		var currentSize = mProperties.size, bestSize;
 		
@@ -241,12 +258,13 @@ class SpriteText extends SpriteBase
 		
 		mProperties.size = bestSize;
 		mChanged = true;
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 	}
 	
 	public function shrinkToFit(minSize:Int)
 	{
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 		
 		if (!isOverflowing) return;
 		
@@ -255,13 +273,12 @@ class SpriteText extends SpriteBase
 		
 		mProperties.size = bsearch(minSize, currentSize - 1);
 		mChanged = true;
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 	}
 	
 	public function growToFit(maxSize:Int)
 	{
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
-		
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 		if (isOverflowing) return;
 		
 		var currentSize = mProperties.size;
@@ -269,7 +286,7 @@ class SpriteText extends SpriteBase
 		
 		mProperties.size = bsearch(currentSize, maxSize + 1);
 		mChanged = true;
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 	}
 	
 	public function align9(bounds:Aabb2, horizontal:Int, vertical:Int, baseline = true)
@@ -363,14 +380,15 @@ class SpriteText extends SpriteBase
 	{
 		super.syncLocal();
 		
-		if (mTexture == null) return this;
-		if (mProperties.text == null) return this;
-		if (!mChanged && !mTextureChanged) return this;
+		if (mTexture == null) return this; //no texture defined
+		if (mProperties.text == null) return this; //text undefined
+		if (!mChanged && !mTextureChanged) return this; //no change
 		
 		mChanged = false;
 		
 		if (mTextureChanged)
 		{
+			//start from scratch
 			mTextureChanged = false;
 			
 			var c = mNode.child, next;
@@ -383,22 +401,25 @@ class SpriteText extends SpriteBase
 			}
 		}
 		
-		isOverflowing = mShaper.shape(mAtlas.userData, mProperties);
+		//layout text
+		mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult);
 		
+		mTextLayout.layout(mAtlas.userData, mProperties, mTextLayoutResult);
+		
+		var codes = mTextLayoutResult.charCodes;
+		var rects = mTextLayoutResult.charRects;
+		
+		var v = mNode.child, z = 0, j = 0;
 		var c, x, y, w, h, g, e, next;
-		
-		var v = mNode.child;
-		var a = mShaper.data;
-		var z = 0;
-		var i = 0;
-		var k = mShaper.numChars * 5;
-		while (i < k)
+		for (i in 0...codes.size)
 		{
-			c = Std.int(a[i++]);
-			x = a[i++];
-			y = a[i++];
-			w = a[i++];
-			h = a[i++];
+			c = codes.get(i);
+			
+			j = i << 2;
+			x = rects.get(j + 0);
+			y = rects.get(j + 1);
+			w = rects.get(j + 2);
+			h = rects.get(j + 3);
 			
 			if (v != null)
 			{
@@ -426,10 +447,10 @@ class SpriteText extends SpriteBase
 		}
 		
 		//cull/remove unused quads
-		i = 0;
+		var count = 0;
 		while (v != null)
 		{
-			if (i++ < 100) //keep no more than
+			if (count++ < 100) //keep no more than
 			{
 				mHasSleepingQuads = true;
 				as(v, Glyph).idleTime = 0;
@@ -490,7 +511,7 @@ class SpriteText extends SpriteBase
 		while (true)
 		{
 			mProperties.size = m;
-			if (mShaper.shape(mAtlas.userData, mProperties))
+			if (mShaper.shape(mAtlas.userData, mProperties, mTextLayoutResult))
 			{
 				//decrease size
 				h = m;
@@ -528,10 +549,6 @@ private class Shaper
 	public var looseBounds = new Aabb2();
 	public var tightBounds = new Aabb2();
 	
-	public var outQuads = new Array<Float>();
-	public var outCodes = new Array<Int>();
-	
-	public var data = new Array<Float>();
 	public var numChars = 0;
 	
 	var mCharCodes = new Vector<Int>(4096);
@@ -540,7 +557,7 @@ private class Shaper
 	{
 	}
 	
-	public function shape(charSet:BitmapCharSet, properties:SpriteTextProperties):Bool
+	public function shape(charSet:BitmapCharSet, properties:SpriteTextProperties, result:TextLayoutResult):Bool
 	{
 		numChars = 0;
 		
@@ -555,7 +572,7 @@ private class Shaper
 		for (i in 0...str.length)
 		{
 			code = str.charCodeAt(i);
-			if (bmpCharLut[code] != null)
+			if (bmpCharLut.hasKey(code))
 				codes.set(numInputChars++, code);
 		}
 		
@@ -616,16 +633,23 @@ private class Shaper
 		looseBounds.empty();
 		tightBounds.empty();
 		
-		inline function output(code:Int, bc:BitmapChar)
+		result.charCodes.clear();
+		result.charRects.clear();
+		
+		function output(code:Int, bc:BitmapChar)
 		{
 			var minX = cursorX + bc.offsetX * scale;
 			var minY = cursorY + bc.offsetY * scale;
 			
-			data[next++] = code;
-			data[next++] = minX;
-			data[next++] = minY;
-			data[next++] = bc.w * scale;
-			data[next++] = bc.h * scale;
+			result.charCodes.pushBack(code);
+			
+			result.charRects.pushBack(minX);
+			result.charRects.pushBack(minY);
+			result.charRects.pushBack(bc.w * scale);
+			result.charRects.pushBack(bc.h * scale);
+			
+			next++;
+			
 			numChars++;
 			
 			var maxX = minX + bc.w * scale;
@@ -719,7 +743,7 @@ private class Shaper
 				newline = false;
 				lastCode = 0;
 				
-				bc = bmpCharLut[codes[i]];
+				bc = bmpCharLut.get(codes[i]);
 				if (bc.offsetX < 0) cursorX = -bc.offsetX;
 			}
 			
@@ -739,7 +763,7 @@ private class Shaper
 			x = cursorX;
 			y = cursorY;
 			code = codes[j];
-			bc = bmpCharLut[code];
+			bc = bmpCharLut.get(code);
 			
 			segmentMinX = x + bc.offsetX * scale;
 			segmentMaxX = 0.;
@@ -747,7 +771,7 @@ private class Shaper
 			while (j < i + charCountSegment)
 			{
 				code = codes[j++];
-				bc = bmpCharLut[code];
+				bc = bmpCharLut.get(code);
 				
 				segmentMaxX = (x + (bc.offsetX * scale)) + (bc.w * scale);
 				
@@ -781,7 +805,7 @@ private class Shaper
 				while (i < j)
 				{
 					code = codes[i++];
-					bc = bmpCharLut[code];
+					bc = bmpCharLut.get(code);
 					
 					if (kerning)
 					{
@@ -804,7 +828,7 @@ private class Shaper
 				
 				while (isWhiteSpace(code))
 				{
-					bc = bmpCharLut[code];
+					bc = bmpCharLut.get(code);
 					
 					if (code == Ascii.NEWLINE)
 					{
@@ -837,7 +861,7 @@ private class Shaper
 				
 				if (!newline)
 				{
-					bc = bmpCharLut[code];
+					bc = bmpCharLut.get(code);
 					//for (i in 0...spaceCount) output(Ascii.SPACE, bc);
 				}
 			}
@@ -860,10 +884,13 @@ private class Shaper
 		
 		for (i in 0...numChars)
 		{
-			var pos = i * 5 + 1;
 			
-			var minX = data[pos + 0];
-			var maxX = minX + data[pos + 2];
+			
+			
+			var pos = i * 4;
+			
+			var minX = result.charRects.get(pos);
+			var maxX = minX + result.charRects.get(pos + 2);
 			
 			looseBounds.addPoint(minX, minYt);
 			looseBounds.addPoint(maxX, maxYt);

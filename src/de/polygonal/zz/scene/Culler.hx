@@ -21,7 +21,7 @@ package de.polygonal.zz.scene;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Bits;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.motor.geom.data.Plane2;
 import de.polygonal.zz.render.Renderer;
 
@@ -30,7 +30,7 @@ class Culler
 {
 	var mRenderer:Renderer;
 	
-	var mVisibleSet:Da<Visual>;
+	var mVisibleSet:ArrayList<Visual>;
 	var mPlaneCullState:Int;
 	
 	var mPlanes:Array<Plane2>;
@@ -39,7 +39,8 @@ class Culler
 	public function new(renderer:Renderer)
 	{
 		mRenderer = renderer;
-		mVisibleSet = new Da<Visual>();
+		mVisibleSet = new ArrayList<Visual>();
+		mVisibleSet.reserve(1024);
 		mVisibleSet.reuseIterator = true;
 		mPlanes = [for (i in 0...4) new Plane2()];
 		mRectPoints = [for (i in 0...4) new Vec3()];
@@ -52,7 +53,7 @@ class Culler
 		mPlanes = null;
 	}
 	
-	inline public function getVisibleSet():Da<Visual> return mVisibleSet;
+	inline public function getVisibleSet():ArrayList<Visual> return mVisibleSet;
 	
 	inline public function getPlaneCullState():Int return mPlaneCullState;
 	
@@ -60,7 +61,7 @@ class Culler
 	
 	inline public function insert(visible:Visual) mVisibleSet.pushBack(visible);
 	
-	public function computeVisibleSet(scene:Node, noCull:Bool):Da<Visual>
+	public function computeVisibleSet(scene:Node, noCull:Bool):ArrayList<Visual>
 	{
 		assert(scene != null);
 		

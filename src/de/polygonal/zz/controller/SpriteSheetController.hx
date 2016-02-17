@@ -19,8 +19,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.Vector;
-import de.polygonal.ds.VectorUtil;
+import de.polygonal.ds.ArrayList;
+import de.polygonal.ds.tools.ArrayTools;
+import de.polygonal.ds.tools.NativeArrayTools;
 import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.data.Animation;
 import de.polygonal.zz.scene.Spatial;
@@ -134,8 +135,8 @@ class SpriteSheetController extends Controller
 			var t = mData.times;
 			
 			//exploit temporal coherence by checking passed time since last invocation
-			var t0 = t[mLastIndex];
-			var t1 = t[mLastIndex + 1];
+			var t0 = t.get(mLastIndex);
+			var t1 = t.get(mLastIndex + 1);
 			if (controlTime >= t0 && controlTime <= t1)
 				index = mLastIndex;
 			else
@@ -146,7 +147,7 @@ class SpriteSheetController extends Controller
 					var i = 0;
 					while (i <= k)
 					{
-						if (t[i] > controlTime)
+						if (t.get(i) > controlTime)
 						{
 							index = i - 1;
 							break;
@@ -157,7 +158,7 @@ class SpriteSheetController extends Controller
 				else
 				{
 					//perform binary search
-					index = VectorUtil.bsearchFloat(t, controlTime, 0, k - 1);
+					index = NativeArrayTools.binarySearchf(t.getData(), controlTime, 0, k - 1);
 					if (index < 0)
 					{
 						index = ~index;
@@ -175,7 +176,7 @@ class SpriteSheetController extends Controller
 		{
 			mCurrentIndex = index;
 			
-			mListener.onSpriteSheetAniUpdate(mData.names[index], controlTime, index);
+			mListener.onSpriteSheetAniUpdate(mData.names.get(index), controlTime, index);
 			
 			if (isLastFrame)
 			{
@@ -200,9 +201,9 @@ private class AniData
 {
 	public var animation:SheetAnimation;
 	public var totalFrames:Int;
-	public var length:Float;
-	public var times:Vector<Float>;
-	public var names:Vector<String>;
+	public var length:Float = 0;
+	public var times:ArrayList<Float>;
+	public var names:ArrayList<String>;
 	
 	public function new(animation:SheetAnimation)
 	{
@@ -210,23 +211,21 @@ private class AniData
 		
 		totalFrames = animation.frames.length;
 		
-		times = new Vector<Float>(totalFrames + 1);
-		names = new Vector<String>(totalFrames);
+		times = new ArrayList(totalFrames + 1);
+		names = new ArrayList(totalFrames);
 		
-		length = 0;
 		var i = 0;
-		
 		var k = animation.frames.length;
+		var frame;
 		while (i < k)
 		{
-			var frame = animation.frames[i];
-			
-			times[i] = length;
-			names[i] = frame.value;
-			i++;
+			frame = animation.frames[i];
+			times.set(i, length);
+			names.set(i, frame.value);
 			length += frame.holdTime;
+			i++;
 		}
 		
-		times[k] = length;
+		times.set(k, length);
 	}
 }

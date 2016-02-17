@@ -21,10 +21,10 @@ package de.polygonal.zz.controller;
 import de.polygonal.core.math.Interpolation;
 import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.tween.ease.EaseFactory;
-import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Animation;
 import de.polygonal.zz.scene.Spatial;
 import haxe.ds.StringMap;
+import haxe.ds.Vector;
 import haxe.EnumFlags;
 import de.polygonal.core.math.Mathematics;
 
@@ -252,10 +252,10 @@ private class Data
 	{
 		totalFrames = def.frames.length;
 		
-		times = new Vector<Float>(totalFrames);
-		parameters = new Vector<Float>(totalFrames * KeyValue.getConstructors().length); //* #chnls
-		chnls = new Vector<Int>(totalFrames);
-		easing = new Vector<Interpolation<Float>>(totalFrames);
+		times = new Vector(totalFrames);
+		parameters = new Vector(totalFrames * KeyValue.getConstructors().length); //* #chnls
+		chnls = new Vector(totalFrames);
+		easing = new Vector(totalFrames);
 		
 		var linear = EaseFactory.create(Ease.None);
 		

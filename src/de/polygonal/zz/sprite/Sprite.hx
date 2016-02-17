@@ -134,6 +134,7 @@ class Sprite extends SpriteBase
 	}
 	override function set_width(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		assert(mSizeX != 0, "width must not be zero, call setTexture() or setColor() first");
 		
 		mScaleX = value / mSizeX;
@@ -186,6 +187,7 @@ class Sprite extends SpriteBase
 	}
 	override function set_height(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		assert(mSizeY != 0, "height must not be zero, call setTexture() or setColor() first");
 		mScaleY = value / mSizeY;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
@@ -262,6 +264,7 @@ class Sprite extends SpriteBase
 	inline function get_frame():String return mCurrentFrame;
 	function set_frame(name:String):String
 	{
+		assert(name != null);
 		assert(mCurrentTexture != -1, "no texture assigned");
 		assert(TextureLib.getTexture(mCurrentTexture).atlas != null, "current texture has no texture atlas definition");
 		

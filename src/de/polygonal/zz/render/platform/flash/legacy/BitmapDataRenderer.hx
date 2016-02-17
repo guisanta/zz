@@ -72,7 +72,7 @@ class BitmapDataRenderer extends Renderer
 		mTmpColorTransformAlpha = new FlashColorTransform();
 		mTmpPoint = new Point();
 		mTmpShape = new Shape();
-		mTileLookup = new IntHashTable<Tile>(512, 512, false, 512);
+		mTileLookup = new IntHashTable<Tile>(512, 512);
 		
 		mTmpMat44 = new Mat44();
 	}
@@ -279,7 +279,7 @@ class BitmapDataRenderer extends Renderer
 			var h = effect.numVisTilesY * effect.tileSize;
 			canvas = new BitmapData(w, h, true, 0);
 			
-			mTileMapCanvasLut.clr(effect.key);
+			mTileMapCanvasLut.delete(effect.key);
 			mTileMapCanvasLut.set(effect.key, canvas);
 		}
 		
@@ -292,9 +292,9 @@ class BitmapDataRenderer extends Renderer
 			var atlas = effect.atlas;
 			
 			canvas.lock();
-			for (y in 0...t.getH())
+			for (y in 0...t.rows)
 			{
-				for (x in 0...t.getW())
+				for (x in 0...t.cols)
 				{
 					var gid = t.get(x, y);
 					if (gid > 0)

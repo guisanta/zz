@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureBatchConstant;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureBatchVertex;
@@ -146,7 +146,7 @@ class PainterQuadTextureBatch extends PainterQuad
 		mCurrentShader.unbindTexture(0);
 	}
 	
-	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		//set program & texture
 		mCurrentShader.bindProgram();

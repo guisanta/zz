@@ -25,12 +25,12 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.ds.Vector;
 import de.polygonal.zz.scene.Bv.BvType;
 import de.polygonal.zz.scene.Culler;
 import de.polygonal.zz.scene.GlobalState;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 import haxe.EnumFlags;
+import haxe.ds.Vector;
 
 /**
 	A leaf node in the scene graph hierarchy; the element that is drawn on the screen.

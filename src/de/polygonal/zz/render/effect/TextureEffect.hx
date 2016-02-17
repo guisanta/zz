@@ -94,6 +94,8 @@ class TextureEffect extends Effect
 				
 				case flash.display3D.Context3DTextureFormat.COMPRESSED_ALPHA:
 					hint |= HINT_COMPRESSED_ALPHA;
+				
+				case _:
 			}
 		}
 		#end

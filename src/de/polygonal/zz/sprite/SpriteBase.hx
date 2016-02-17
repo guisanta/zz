@@ -142,6 +142,7 @@ class SpriteBase
 	inline function get_alpha():Float return mAlpha;
 	function set_alpha(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mAlpha != value)
 		{
 			mAlpha = Mathematics.fclamp(value, 0, 1);
@@ -173,6 +174,7 @@ class SpriteBase
 	inline function get_x():Float return mX;
 	inline function set_x(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mX != value)
 		{
 			mX = value;
@@ -189,6 +191,7 @@ class SpriteBase
 	inline function get_y():Float return mY;
 	inline function set_y(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mY != value)
 		{
 			mY = value;
@@ -205,6 +208,7 @@ class SpriteBase
 	inline function get_rotation():Float return mRotation;
 	inline function set_rotation(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mRotation != value)
 		{
 			mRotation = value;
@@ -225,6 +229,7 @@ class SpriteBase
 	}
 	function set_scale(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mScaleX != value || mScaleY != value)
 		{
 			mScaleX = mScaleY = value;
@@ -243,6 +248,7 @@ class SpriteBase
 	inline function get_scaleX():Float return mScaleX;
 	function set_scaleX(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mScaleX != value)
 		{
 			mScaleX = value;
@@ -261,6 +267,7 @@ class SpriteBase
 	inline function get_scaleY():Float return mScaleY;
 	function set_scaleY(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mScaleY != value)
 		{
 			mScaleY = value;
@@ -301,6 +308,7 @@ class SpriteBase
 	
 	public function setSize(x:Float, y:Float)
 	{
+		assert(Math.isFinite(x) && Math.isFinite(y));
 		set_width(x);
 		set_height(y);
 	}
@@ -314,6 +322,7 @@ class SpriteBase
 	inline function get_originX():Float return mOriginX;
 	function set_originX(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mOriginX != value)
 		{
 			mOriginX = value;
@@ -332,6 +341,7 @@ class SpriteBase
 	inline function get_originY():Float return mOriginY;
 	function set_originY(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mOriginY != value)
 		{
 			mOriginY = value;
@@ -353,6 +363,7 @@ class SpriteBase
 	inline function get_pivotX():Float return mPivotX;
 	function set_pivotX(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mPivotX != value)
 		{
 			mPivotX = value;
@@ -373,6 +384,7 @@ class SpriteBase
 	inline function get_pivotY():Float return mPivotY;
 	inline function set_pivotY(value:Float):Float
 	{
+		assert(Math.isFinite(value));
 		if (mPivotY != value)
 		{
 			mPivotY = value;
@@ -404,6 +416,7 @@ class SpriteBase
 	
 	inline public function setPosition(x:Float, y:Float)
 	{
+		assert(Math.isFinite(x) && Math.isFinite(y));
 		if (mX != x || mY != y)
 		{
 			mX = x;
@@ -414,6 +427,7 @@ class SpriteBase
 	
 	inline public function setScale(x:Float, y:Float)
 	{
+		assert(Math.isFinite(x) && Math.isFinite(y));
 		mScaleX = x;
 		mScaleY = y;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);

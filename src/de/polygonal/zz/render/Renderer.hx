@@ -18,18 +18,18 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render;
 
-import de.polygonal.core.math.Coord2f;
-import de.polygonal.core.math.Coord2i;
+import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.core.util.ClassUtil;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.texture.*;
 import haxe.EnumFlags;
+import de.polygonal.core.util.ClassUtil;
 
 @:allow(de.polygonal.zz.render.effect)
 class Renderer
@@ -212,10 +212,10 @@ class Renderer
 	/**
 		Entry point to drawing the visible set of a scene graph.
 	**/
-	public function drawVisibleSet(visibleSet:Da<Visual>)//, ?globalEffect:GlobalEffect)
+	public function drawVisibleSet(visibleSet:ArrayList<Visual>)//, ?globalEffect:GlobalEffect)
 	{
 		//if (globalEffect == null) //TODO for batching?
-		for (i in 0...visibleSet.size())
+		for (i in 0...visibleSet.size)
 			drawVisual(Spatial.as(visibleSet.get(i), Visual));
 		//else
 			//globalEffect.draw(this, visibleSet);

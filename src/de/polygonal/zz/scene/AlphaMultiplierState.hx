@@ -56,7 +56,7 @@ class AlphaMultiplierState extends GlobalState
 	override public function collapse(stack:ArrayedStack<GlobalState>):GlobalState
 	{
 		var combinedValue = 1.;
-		for (i in 0...stack.size())
+		for (i in 0...stack.size)
 			combinedValue *= stack.get(i).as(AlphaMultiplierState).value;
 		
 		if (mCollapsedState == null) mCollapsedState = new AlphaMultiplierState(value); //TODO get from pool

@@ -19,9 +19,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.Da;
-import de.polygonal.ds.Vector;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Color;
+import de.polygonal.zz.data.Colori;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalColorShader;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
@@ -32,7 +32,7 @@ import flash.display3D.Context3DProgramType;
 @:access(de.polygonal.zz.render.Renderer)
 class PainterQuadColor extends PainterQuad
 {
-	var mColorChannels = new Vector<Int>(3);
+	var mColorChannels = new Colori();
 	
 	public function new(renderer:Stage3dRenderer, featureFlags:Int)
 	{
@@ -59,7 +59,7 @@ class PainterQuadColor extends PainterQuad
 		super.bind();
 	}
 	
-	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		assert(visual != null);
 		
@@ -94,9 +94,9 @@ class PainterQuadColor extends PainterQuad
 		{
 			var rgb = mColorChannels;
 			Color.extractR8G8B8(effect.color, rgb); 
-			cr[0] = rgb[0];
-			cr[1] = rgb[1];
-			cr[2] = rgb[2];
+			cr[0] = rgb.r;
+			cr[1] = rgb.g;
+			cr[2] = rgb.b;
 			cr[3] = a;
 		}
 		

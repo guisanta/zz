@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.js;
 
-import de.polygonal.core.math.Coord2i;
+import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.zz.render.RenderWindowListener;
 import haxe.Timer;

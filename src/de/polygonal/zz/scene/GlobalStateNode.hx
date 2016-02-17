@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.ds.Vector;
+import haxe.ds.Vector;
 
 class GlobalStateNode
 {

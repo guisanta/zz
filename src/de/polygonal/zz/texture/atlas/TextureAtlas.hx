@@ -23,11 +23,11 @@ import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.StringHashTable;
-import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
 import de.polygonal.core.math.Mathematics;
+import haxe.ds.Vector;
 
 class TextureAtlas
 {

@@ -22,6 +22,7 @@ import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.zz.data.Color;
+import de.polygonal.zz.data.Colori;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.effect.TextureEffect;
@@ -29,7 +30,6 @@ import de.polygonal.zz.render.effect.TileMapEffect;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.scene.Xform;
 import haxe.ds.IntMap;
-import haxe.ds.Vector;
 import js.Browser;
 import js.html.CanvasElement;
 import js.html.CanvasRenderingContext2D;
@@ -47,7 +47,7 @@ class Canvas2dRenderer extends Renderer
 	var mModel:Mat44;
 	var mTileMapCanvasLut:IntMap<{element:CanvasElement, context:CanvasRenderingContext2D}>;
 	var mSmoothingFlag:String;
-	var mColorChannels = new Vector<Int>(4);
+	var mColorChannels = new Colori();
 	var mAllowBlitting = false;
 	
 	public function new()
@@ -98,9 +98,9 @@ class Canvas2dRenderer extends Renderer
 		}
 		
 		Color.extractR8G8B8(target.color, mColorChannels);
-		var r = mColorChannels[0];
-		var g = mColorChannels[1];
-		var b = mColorChannels[2];
+		var r = mColorChannels.r;
+		var g = mColorChannels.g;
+		var b = mColorChannels.b;
 		context.fillStyle = 'rgb($r,$g,$b)';
 		context.globalCompositeOperation = "copy";
 		context.fillRect(0, 0, w, h);
@@ -152,7 +152,7 @@ class Canvas2dRenderer extends Renderer
 		var rgb = mColorChannels;
 		
 		Color.extractR8G8B8(color, rgb);
-		ctx.fillStyle = 'rgba(${rgb[0]},${rgb[1]},${rgb[2]},1)';
+		ctx.fillStyle = 'rgba(${rgb.r},${rgb.g},${rgb.b},1)';
 		ctx.fillRect(0, 0, s.x, s.y);
 	}
 	
@@ -225,9 +225,9 @@ class Canvas2dRenderer extends Renderer
 			ctx.clearRect(0, 0, o.element.width, o.element.height);
 			setSmoothing(ctx, false);
 			
-			for (y in 0...t.getH())
+			for (y in 0...t.rows)
 			{
-				for (x in 0...t.getW())
+				for (x in 0...t.cols)
 				{
 					gid = t.get(x, y);
 					dx = x * s;

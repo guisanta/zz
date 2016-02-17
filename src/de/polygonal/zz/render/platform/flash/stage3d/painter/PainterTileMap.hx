@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.math.Mat44;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.TileMapEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureBatchVertex;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dIndexBuffer;
@@ -50,7 +50,7 @@ class PainterTileMap extends Painter
 		mVertexBuffer = new Stage3dVertexBuffer(mContext, [2, 2]);
 	}
 	
-	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		var effect = Lib.as(renderer.currentEffect, TileMapEffect);
 		var numTiles = effect.numVisTilesX * effect.numVisTilesY;

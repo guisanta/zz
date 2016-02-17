@@ -146,9 +146,9 @@ class TileMapEffect extends Effect
 		
 		if (mMinIx1 != mMinIx0 || mMinIy1 != mMinIy0 || mMaxIx1 != mMaxIx0 || mMaxIy1 != mMaxIy0 || redraw)
 		{
-			for (y in 0...screenTiles.getH())
+			for (y in 0...screenTiles.rows)
 			{
-				for (x in 0...screenTiles.getW())
+				for (x in 0...screenTiles.cols)
 				{
 					var gid =
 						if (a.inRange(mMinIx1 + x, mMinIy1 + y))

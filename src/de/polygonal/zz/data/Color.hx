@@ -18,8 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.data;
 
-import de.polygonal.ds.Vector;
-
 /**
 	Helper class for working with color values.
 	
@@ -48,11 +46,11 @@ class Color
 		
 		E.g. the color channels of 0xRRGGBB are written to `output` in this order: [0xRR, 0xGG, 0xBB].
 	**/
-	inline public static function extractR8G8B8(color:Int, output:Vector<Int>)
+	inline public static function extractR8G8B8(color:Int, output:Colori)
 	{
-		output[0] = color >> 16 & 0xFF;
-		output[1] = color >> 8 & 0xFF;
-		output[2] = color & 0xFF;
+		output.r = color >> 16 & 0xFF;
+		output.g = color >> 8 & 0xFF;
+		output.b = color & 0xFF;
 	}
 	
 	/**
@@ -60,12 +58,12 @@ class Color
 		
 		E.g. the color channels of 0xAARRGGBB are written to `output` in this order: [0xRR, 0xGG, 0xBB, 0xAA].
 	**/
-	inline public static function extractR8G8B8A8(color:UInt, output:Vector<Int>)
+	inline public static function extractR8G8B8A8(color:UInt, output:Colori)
 	{
-		output[0] = color >> 16 & 0xFF;
-		output[1] = color >> 8 & 0xFF;
-		output[2] = color & 0xFF;
-		output[3] = color >>> 24;
+		output.r = color >> 16 & 0xFF;
+		output.g = color >> 8 & 0xFF;
+		output.b = color & 0xFF;
+		output.a = color >>> 24;
 	}
 	
 	/**

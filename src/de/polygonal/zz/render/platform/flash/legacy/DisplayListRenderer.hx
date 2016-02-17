@@ -223,7 +223,7 @@ class DisplayListRenderer extends Renderer
 			o.idleTime += Timebase.timeDelta;
 			if (o.hasParent && o.idleTime > 1)
 			{
-				var success = mBitmapLookup.clr(o.spatial.key);
+				var success = mBitmapLookup.delete(o.spatial.key);
 				assert(success);
 				o.reset();
 				mPool.push(o);
@@ -327,9 +327,9 @@ class DisplayListRenderer extends Renderer
 			var atlas = effect.atlas;
 			
 			canvas.lock();
-			for (y in 0...t.getH())
+			for (y in 0...t.rows)
 			{
-				for (x in 0...t.getW())
+				for (x in 0...t.cols)
 				{
 					var gid = t.get(x, y);
 					if (gid <= 0)

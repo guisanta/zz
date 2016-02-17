@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.core.util.ClassUtil;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalShader;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;
@@ -82,7 +82,7 @@ class Painter
 		}
 	}
 	
-	public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		throw "override for implementation";
 	}

@@ -34,7 +34,7 @@ import de.polygonal.zz.scene.Spatial.as;
 /**
 	Allows grouping of child nodes.
 **/
-class Node extends Spatial
+class Node extends Spatial implements SpatialWrapper<Node>
 {
 	public static var getBvTypeFunc:Void->BvType = null;
 	
@@ -44,6 +44,8 @@ class Node extends Spatial
 	public var child(default, null):Spatial;
 	
 	public var numChildren(default, null):Int;
+	
+	public var sgn:Node = this;
 	
 	public function new(?name:String)
 	{

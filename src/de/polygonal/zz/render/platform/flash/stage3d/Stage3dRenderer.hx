@@ -21,10 +21,10 @@ package de.polygonal.zz.render.platform.flash.stage3d;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Bits;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.IntHashTable;
-import de.polygonal.ds.Vector;
 import de.polygonal.zz.data.Color;
+import de.polygonal.zz.data.Colori;
 import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.*;
@@ -65,11 +65,11 @@ class Stage3dRenderer extends Renderer
 	var mTextureLut:IntHashTable<Stage3dTexture>;
 	var mSrcBlendFactorLut:Array<Context3DBlendFactor>;
 	var mDstBlendFactorLut:Array<Context3DBlendFactor>;
-	var mColorChannels = new Vector<Int>(4);
+	var mColorChannels = new Colori();
 	
 	var mRenderState1 = new RenderState();
 	var mRenderState2 = new RenderState();
-	var mBatchIntervals = new Da<Int>();
+	var mBatchIntervals = new ArrayList<Int>();
 	
 	var mTextureFlags:Int;
 	var mCurrentPainter:Painter;
@@ -110,8 +110,8 @@ class Stage3dRenderer extends Renderer
 			ONE_MINUS_DESTINATION_ALPHA
 		];
 		
-		mTextureLut = new IntHashTable<Stage3dTexture>(32, 32, false, 32);
-		mPainterLut = new IntHashTable<Painter>(256, 256, false, 256);
+		mTextureLut = new IntHashTable<Stage3dTexture>(32, 32);
+		mPainterLut = new IntHashTable<Painter>(256, 256);
 	}
 	
 	override public function free()
@@ -180,9 +180,9 @@ class Stage3dRenderer extends Renderer
 		if (target == null) return;
 		
 		Color.extractR8G8B8(target.color, mColorChannels);
-		var r = mColorChannels[0] / 0xFF;
-		var g = mColorChannels[1] / 0xFF;
-		var b = mColorChannels[2] / 0xFF;
+		var r = mColorChannels.r / 0xFF;
+		var g = mColorChannels.g / 0xFF;
+		var b = mColorChannels.b / 0xFF;
 		
 		if (mContext != null) mContext.clear(r, g, b, 1);
 		
@@ -262,11 +262,11 @@ class Stage3dRenderer extends Renderer
 				L.w('failed disposing object [${source.key}]', "s3d");
 			}
 			
-			mTextureLut.clr(source.key);
+			mTextureLut.delete(source.key);
 		}
 	}
 	
-	override public function drawVisibleSet(visibleSet:Da<Visual>)
+	override public function drawVisibleSet(visibleSet:ArrayList<Visual>)
 	{
 		mCurrentPainter = null;
 		
@@ -303,7 +303,7 @@ class Stage3dRenderer extends Renderer
 			state2.stateMask = 0xFF;
 		}
 		
-		var itr:DaIterator<Visual> = cast visibleSet.iterator();
+		var itr:ArrayListIterator<Visual> = cast visibleSet.iterator();
 		
 		var a = itr.next(), b;
 		
@@ -355,7 +355,7 @@ class Stage3dRenderer extends Renderer
 		
 		var featureFlags, stateFlags, batching, texture;
 		
-		var i = 0, k = indices.size();
+		var i = 0, k = indices.size;
 		while (i < k)
 		{
 			min = indices.get(i++);

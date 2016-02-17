@@ -19,9 +19,9 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.math.Vec3;
-import de.polygonal.ds.Da;
-import de.polygonal.ds.Vector;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Color;
+import de.polygonal.zz.data.Colori;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.*;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dRenderer;
@@ -40,7 +40,7 @@ class PainterQuadColorBatch extends PainterQuad
 	var mNumRegistersPerQuad:Int;
 	
 	//vertex batching
-	var mColorChannels = new Vector<Int>(3);
+	var mColorChannels = new Colori();
 	var mTmpVertices = [new Vec3(0, 0), new Vec3(1, 0), new Vec3(1, 1), new Vec3(0, 1)]; //TODO needed?
 	var mTmpVec3 = new Vec3();
 	
@@ -124,7 +124,7 @@ class PainterQuadColorBatch extends PainterQuad
 		}
 	}
 	
-	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		//set program & texture
 		mCurrentShader.bindProgram();
@@ -149,9 +149,9 @@ class PainterQuadColorBatch extends PainterQuad
 					var i = 0;
 					var offset, address, size;
 					var effect, world;
-
-					size = batch.size();
-
+					
+					size = batch.size;
+					
 					while (min <= max)
 					{
 						offset = (i << 2) * stride;
@@ -230,9 +230,9 @@ class PainterQuadColorBatch extends PainterQuad
 						
 						var rgb = mColorChannels;
 						Color.extractR8G8B8(effect.color, rgb); 
-						var r = rgb[0];
-						var g = rgb[1];
-						var b = rgb[2];
+						var r = rgb.r;
+						var g = rgb.g;
+						var b = rgb.b;
 						var a = alpha;
 						
 						//if (effect.colorTransform != null)
@@ -340,9 +340,9 @@ class PainterQuadColorBatch extends PainterQuad
 							
 							var rgb = mColorChannels;
 							Color.extractR8G8B8(effect.color, rgb); 
-							var r = rgb[0];
-							var g = rgb[1];
-							var b = rgb[2];
+							var r = rgb.r;
+							var g = rgb.g;
+							var b = rgb.b;
 							var a = alpha;
 							
 							//var c = 0;
@@ -398,9 +398,9 @@ class PainterQuadColorBatch extends PainterQuad
 							
 							var rgb = mColorChannels;
 							Color.extractR8G8B8(effect.color, rgb); 
-							var r = rgb[0];
-							var g = rgb[1];
-							var b = rgb[2];
+							var r = rgb.r;
+							var g = rgb.g;
+							var b = rgb.b;
 							var a = alpha;
 							
 							//if (effect.colorTransform != null)

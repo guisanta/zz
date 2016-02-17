@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.Da;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.TextureEffect;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalTextureShader;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.Painter.*;
@@ -63,7 +63,7 @@ class PainterQuadTexture extends PainterQuad
 		mCurrentShader.unbindTexture(0);
 	}
 	
-	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:Da<Visual>, min = -1, max = -1)
+	override public function draw(renderer:Stage3dRenderer, ?visual:Visual, ?batch:ArrayList<Visual>, min = -1, max = -1)
 	{
 		assert(visual != null);
 		
