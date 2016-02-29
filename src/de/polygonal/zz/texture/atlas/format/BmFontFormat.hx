@@ -20,9 +20,10 @@ package de.polygonal.zz.texture.atlas.format;
 
 import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Recti;
+import de.polygonal.ds.IntHashTable;
 import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.data.Size.Sizei;
-import de.polygonal.zz.texture.atlas.TextureAtlasFormat;
+import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 
 using Std;
 
@@ -50,6 +51,7 @@ class BmFontFormat implements TextureAtlasFormat
 		charSet.base = file.common.base;
 		charSet.textureWidth = file.common.scaleW;
 		charSet.textureHeight = file.common.scaleH;
+		charSet.padding = file.info.padding;
 		
 		data.size.x = charSet.textureWidth;
 		data.size.y = charSet.textureHeight;
@@ -61,7 +63,7 @@ class BmFontFormat implements TextureAtlasFormat
 			var code = char.id;
 			
 			var bc = new BitmapChar();
-			bc.code = char.id;
+			bc.code = code;
 			bc.x = char.x;
 			bc.y = char.y;
 			bc.offsetX = char.xoffset;
@@ -70,7 +72,7 @@ class BmFontFormat implements TextureAtlasFormat
 			bc.w = char.width;
 			bc.h = char.height;
 			
-			charSet.characters[bc.code] = bc;
+			charSet.characters.set(bc.code, bc);
 			
 			if (code == -1) continue;
 			
@@ -110,28 +112,24 @@ class BitmapChar
 @:allow(de.polygonal.zz.texture.atlas.format.BmFontFormat)
 class BitmapCharSet
 {
-	var characters(default, null):Array<BitmapChar>;
-	var kerning(default, null):IntIntHashTable;
+	var characters(default, null) = new IntHashTable<BitmapChar>(1024);
+	var kerning(default, null) = new IntIntHashTable(1024);
 	var renderedSize(default, null):Int;
 	var textureWidth(default, null):Int;
 	var textureHeight(default, null):Int;
 	var lineHeight(default, null):Int;
 	var base(default, null):Int;
+	var padding(default, null):{ up:Int, right:Int, down:Int, left:Int };
 	
-	function new()
-	{
-		characters = new Array<BitmapChar>();
-		kerning = new IntIntHashTable(4096);
-	}
+	function new() {}
 	
 	function free()
 	{
+		characters.free();
 		characters = null;
-		if (kerning != null)
-		{
-			kerning.free();
-			kerning = null;
-		}
+		
+		kerning.free();
+		kerning = null;
 	}
 	
 	function toString():String
@@ -142,7 +140,7 @@ class BitmapCharSet
 
 private typedef FntChar = { id:Int, x:Int, y:Int, width:Int, height:Int, xoffset:Int, yoffset:Int, xadvance:Int }
 private typedef FntKerningPair = { first:Int, second:Int, amount:Int }
-private typedef FntInfo = { size:Int }
+private typedef FntInfo = { size:Int, padding: { up:Int, right:Int, down:Int, left:Int } }
 private typedef FntCommon = { lineHeight:Int, base:Int, scaleW:Int, scaleH:Int }
 
 /**
@@ -215,7 +213,7 @@ private class BmFontFile
 		var outline = input.readByte();
 		var name = input.readString(blockSize - 14);
 		
-		info = {size: fontSize};
+		info = {size: fontSize, padding: {up: paddingUp, right: paddingRight, down: paddingDown, left: paddingLeft}};
 		
 		//Block type 2: common
 		var blockType = input.readByte();
@@ -311,7 +309,14 @@ private class BmFontFile
 	{
 		var fast = new haxe.xml.Fast(Xml.parse(src).firstElement());
 		
-		info = { size: Std.int(Math.abs(fast.node.info.att.size.parseInt())) }
+		var padding = Lambda.array(Lambda.map(fast.node.info.att.padding.split(","),
+			function(e) return Std.parseInt(e)));
+		
+		info =
+		{
+			size: Std.int(Math.abs(fast.node.info.att.size.parseInt())),
+			padding: {up: padding[0], right: padding[1], down: padding[2], left: padding[3]}
+		}
 		
 		common =
 		{
@@ -356,11 +361,18 @@ private class BmFontFile
 		
 		var nextLine = 0;
 		
-		var reInfo =~/^info face=".*?" size=(-?\d+)/;
+		var reInfo =~/^info face=".*?" size=(-?\d+).*?padding="(\d+,\d+,\d+,\d+)"/;
 		
 		reInfo.match(lines[nextLine++]);
 		
-		info = {size: Std.int(Math.abs(reInfo.matched(1).parseInt()))};
+		var padding = Lambda.array(Lambda.map(reInfo.matched(2).split(","),
+			function(e) return Std.parseInt(e)));
+		
+		info =
+		{
+			size: Std.int(Math.abs(reInfo.matched(1).parseInt())),
+			padding: {up: padding[0], right: padding[1], down: padding[2], left: padding[3]}
+		};
 		
 		var reCommon = ~/^common lineHeight=(\d+) base=(\d+) scaleW=(\d+) scaleH=(\d+)/;
 		reCommon.match(lines[nextLine++]);
