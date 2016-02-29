@@ -74,7 +74,6 @@ class Sprite extends SpriteBase
 	override public function free()
 	{
 		super.free();
-		
 		if (mSheetAni != null)
 		{
 			mSheetAni.free();
