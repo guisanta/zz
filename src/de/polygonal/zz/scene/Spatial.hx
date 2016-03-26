@@ -139,7 +139,7 @@ class Spatial extends ControlledObject implements Hashable
 		mFlags = IS_FREED;
 	}
 	
-	public var cullingMode(get_cullingMode, set_cullingMode):CullingMode;
+	public var cullingMode(get, set):CullingMode;
 	function get_cullingMode():CullingMode
 	{
 		return
@@ -177,7 +177,7 @@ class Spatial extends ControlledObject implements Hashable
 		In some situations you might need to set the world transform directly and bypass the updateWorldData() mechanism.
 		If set to true, the world transform isn't updated.
 	**/
-	public var worldTransformCurrent(get_worldTransformCurrent, set_worldTransformCurrent):Bool;
+	public var worldTransformCurrent(get, set):Bool;
 	inline function get_worldTransformCurrent():Bool return mFlags & IS_WORLD_XFORM_CURRENT > 0;
 	inline function set_worldTransformCurrent(value:Bool):Bool
 	{
@@ -189,7 +189,7 @@ class Spatial extends ControlledObject implements Hashable
 		In some situations you might need to set the world bound directly and bypass the updateWordBound() mechanism.
 		If set to true, the world bound isn't updated.
 	**/
-	public var worldBoundCurrent(get_worldBoundCurrent, set_worldBoundCurrent):Bool;
+	public var worldBoundCurrent(get, set):Bool;
 	inline function get_worldBoundCurrent():Bool return mFlags & IS_WORLD_BOUND_CURRENT > 0;
 	inline function set_worldBoundCurrent(value:Bool):Bool
 	{

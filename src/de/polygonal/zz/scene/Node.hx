@@ -193,7 +193,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	}
 	
 	/**
-		Removes all children in the interval [`beginIndex`, `endIndex`&rsqb;.
+		Removes all children in the interval [`beginIndex`, `endIndex`].
 		
 		If `beginIndex` and `endIndex` are omited, all children get removed.
 		If `endIndex` is omited, all children in the interval [`beginIndex`, `numChildren`) get removed.
