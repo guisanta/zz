@@ -93,12 +93,11 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 		return this;
 	}
 	
-	@:access(de.polygonal.zz.sprite.Sprite)
 	function getController():SpriteSheetController
 	{
 		if (mController == null || mController.type < 0)
 		{
-			var spatial = mSprite.mVisual;
+			var spatial = mSprite.sgn;
 			var c:SpriteSheetController = spatial.findControllerOfType(SpriteSheetController.TYPE);
 			if (c == null)
 			{

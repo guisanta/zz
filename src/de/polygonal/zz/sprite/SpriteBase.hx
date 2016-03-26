@@ -94,7 +94,7 @@ class SpriteBase
 	/**
 		Every Sprite object manages a scene graph node via composition.
 	**/
-	public var sgn(get_sgn, never):Spatial;
+	public var sgn(get, never):Spatial;
 	inline function get_sgn():Spatial return mSpatial;
 	
 	/**
@@ -108,7 +108,7 @@ class SpriteBase
 		if (p != null) p.removeChild(mSpatial);
 	}
 	
-	public var parent(get_parent, set_parent):SpriteGroup;
+	public var parent(get, set):SpriteGroup;
 	inline function get_parent():SpriteGroup
 	{
 		return mSpatial.parent != null ? as(mSpatial.parent.mArbiter, SpriteGroup) : null;
@@ -127,7 +127,7 @@ class SpriteBase
 		return as(p, SpriteGroup);
 	}
 	
-	public var name(get_name, set_name):String;
+	public var name(get, set):String;
 	inline function get_name():String return mSpatial.name;
 	inline function set_name(value:String):String
 	{
@@ -138,7 +138,7 @@ class SpriteBase
 	/**
 		The alpha value in the range [0=(fully transparent), 1=(fully opaque)].
 	**/
-	public var alpha(get_alpha, set_alpha):Float;
+	public var alpha(get, set):Float;
 	inline function get_alpha():Float return mAlpha;
 	function set_alpha(value:Float):Float
 	{
@@ -154,7 +154,7 @@ class SpriteBase
 	/**
 		If false, this sprite is not drawn.
 	**/
-	public var visible(get_visible, set_visible):Bool;
+	public var visible(get, set):Bool;
 	inline function get_visible():Bool return mVisible;
 	inline function set_visible(value:Bool):Bool
 	{
@@ -170,7 +170,7 @@ class SpriteBase
 		The x coordinate relative to the local coordinates of the parent object.
 		By default, sprites are positioned relatively to their top-left corner.
 	**/
-	public var x(get_x, set_x):Float;
+	public var x(get, set):Float;
 	inline function get_x():Float return mX;
 	inline function set_x(value:Float):Float
 	{
@@ -187,7 +187,7 @@ class SpriteBase
 		The y coordinate relative to the local coordinates of the parent object.
 		By default, sprites are positioned relatively to their top-left corner.
 	**/
-	public var y(get_y, set_y):Float;
+	public var y(get, set):Float;
 	inline function get_y():Float return mY;
 	inline function set_y(value:Float):Float
 	{
@@ -204,7 +204,7 @@ class SpriteBase
 		The rotation in degrees relative to the local coordinates of the parent object.
 		Positive rotation is clockwise (because the Y axis is pointing down).
 	**/
-	public var rotation(get_rotation, set_rotation):Float;
+	public var rotation(get, set):Float;
 	inline function get_rotation():Float return mRotation;
 	inline function set_rotation(value:Float):Float
 	{
@@ -221,7 +221,7 @@ class SpriteBase
 		The uniform scale of the object relative to its pivot point.
 		Short for using scaleX & scaleY if the scaling values are equal for both axes.
 	**/
-	public var scale(get_scale, set_scale):Float;
+	public var scale(get, set):Float;
 	inline function get_scale():Float
 	{
 		assert(mFlags & HINT_UNIFORM_SCALE != 0, "scaling is not uniform");
@@ -244,7 +244,7 @@ class SpriteBase
 		The default value of 1 means no scale, values < 1 makes the sprite smaller, values > 1makes it bigger.
 		To mirror a sprite along its x-axis, apply a negative scaling value.
 	**/
-	public var scaleX(get_scaleX, set_scaleX):Float;
+	public var scaleX(get, set):Float;
 	inline function get_scaleX():Float return mScaleX;
 	function set_scaleX(value:Float):Float
 	{
@@ -263,7 +263,7 @@ class SpriteBase
 		The default value of 1 means no scale, values < 1 makes the sprite smaller, values > 1makes it bigger.
 		To mirror a sprite along its y-axis, apply a negative scaling value.
 	**/
-	public var scaleY(get_scaleY, set_scaleY):Float;
+	public var scaleY(get, set):Float;
 	inline function get_scaleY():Float return mScaleY;
 	function set_scaleY(value:Float):Float
 	{
@@ -277,7 +277,7 @@ class SpriteBase
 		return value;
 	}
 	
-	public var width(get_width, set_width):Float;
+	public var width(get, set):Float;
 	function get_width():Float
 	{
 		return throw "override for implementation";
@@ -288,7 +288,7 @@ class SpriteBase
 		return throw "override for implementation";
 	}
 	
-	public var height(get_height, set_height):Float;
+	public var height(get, set):Float;
 	function get_height():Float
 	{
 		return throw "override for implementation";
@@ -318,7 +318,7 @@ class SpriteBase
 		Changing the origin also changes the visual position of the sprite,
 		although its x,y position remains the same.
 	**/
-	public var originX(get_originX, set_originX):Float;
+	public var originX(get, set):Float;
 	inline function get_originX():Float return mOriginX;
 	function set_originX(value:Float):Float
 	{
@@ -337,7 +337,7 @@ class SpriteBase
 		Changing the origin also changes the visual position of the sprite,
 		although its x,y position remains the same.
 	**/
-	public var originY(get_originY, set_originY):Float;
+	public var originY(get, set):Float;
 	inline function get_originY():Float return mOriginY;
 	function set_originY(value:Float):Float
 	{
@@ -359,7 +359,7 @@ class SpriteBase
 		and ignore all transformations (position, scale, rotation), e.g. the pivot point coordinates
 		for the bottom-right corner would be (width, height).
 	**/
-	public var pivotX(get_pivotX, set_pivotX):Float;
+	public var pivotX(get, set):Float;
 	inline function get_pivotX():Float return mPivotX;
 	function set_pivotX(value:Float):Float
 	{
@@ -380,7 +380,7 @@ class SpriteBase
 		and ignore all transformations (position, scale, rotation), e.g. the pivot point coordinates
 		for the bottom-right corner would be (width, height).
 	**/
-	public var pivotY(get_pivotY, set_pivotY):Float;
+	public var pivotY(get, set):Float;
 	inline function get_pivotY():Float return mPivotY;
 	inline function set_pivotY(value:Float):Float
 	{
@@ -499,10 +499,10 @@ class SpriteBase
 		return mSpatial.world.applyInverse2(input, output);
 	}
 	
-	public function tick(timeDelta:Float)
+	public function tick(dt:Float)
 	{
 		if (mSpatial.controllers != null && mSpatial.controllersEnabled)
-			mSpatial.updateControllers(timeDelta);
+			mSpatial.updateControllers(dt);
 	}
 	
 	/**
@@ -563,7 +563,7 @@ class SpriteBase
 	/**
 		Specifies which blend mode to use.
 	**/
-	public var blending(get_blending, set_blending):SpriteBlending;
+	public var blending(get, set):SpriteBlending;
 	function get_blending():SpriteBlending
 	{
 		if (mBlending == null) mBlending = new SpriteBlending(this);

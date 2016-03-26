@@ -46,7 +46,7 @@ class Controller
 	public var next:Controller;
 	
 	var mActive = false;
-	public var active(get_active, set_active):Bool;
+	public var active(get, set):Bool;
 	inline function get_active():Bool return mActive;
 	inline function set_active(value:Bool):Bool
 	{
@@ -111,7 +111,6 @@ class Controller
 		if (active)
 		{
 			passedTime += dt * frequency;
-			
 			if (mObject == null) //controller was freed
 				return false;
 			else

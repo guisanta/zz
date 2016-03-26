@@ -55,7 +55,7 @@ class TmxTileMap
 		visual.effect = new TileMapEffect(tiles, tileSize, tilesetTexture, tilesetTexture.atlas);
 	}
 	
-	public var parallax(get_parallax, set_parallax):Float;
+	public var parallax(get, set):Float;
 	function get_parallax():Float
 	{
 		return cast(visual.effect, TileMapEffect).parallax;
@@ -67,7 +67,7 @@ class TmxTileMap
 		return value;
 	}
 	
-	public var smooth(get_smooth, set_smooth):Bool;
+	public var smooth(get, set):Bool;
 	function get_smooth():Bool return cast(visual.effect, TileMapEffect).smooth;
 	function set_smooth(value:Bool):Bool
 	{
@@ -75,7 +75,7 @@ class TmxTileMap
 		return value;
 	}
 	
-	public var visible(get_visible, set_visible):Bool;
+	public var visible(get, set):Bool;
 	function get_visible():Bool
 	{
 		return visual.cullingMode == CullingMode.CullNever;

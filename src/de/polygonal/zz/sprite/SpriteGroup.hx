@@ -255,9 +255,9 @@ class SpriteGroup extends SpriteBase
 		return k;
 	}
 	
-	override public function tick(timeDelta:Float)
+	override public function tick(dt:Float)
 	{
-		super.tick(timeDelta);
+		super.tick(dt);
 		
 		var c = mNode.child, s;
 		while (c != null)
