@@ -509,6 +509,25 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		}
 	}
 	
+	/**
+		The total number of descendants including this node.
+	**/
+	public function size(node:Node = null):Int
+	{
+		if (node == null) node = this;
+		var k = node.numChildren + 1, c;
+		if (node.numChildNodes == 0) return k;
+		
+		c = node.child;
+		while (c != null)
+		{
+			if (c.isNode() || Std.is(c, Node))
+				k += size(as(c, Node));
+			c = c.mSibling;
+		}
+		return k;
+	}
+	
 	//}
 	
 	override function updateWorldData(updateBounds:Bool, propagateToChildren:Bool = true)
