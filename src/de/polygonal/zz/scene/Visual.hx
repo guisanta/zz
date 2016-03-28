@@ -91,7 +91,7 @@ class Visual extends Spatial
 		if (mFlags & (Spatial.IS_WORLD_BOUND_DIRTY | Spatial.IS_MODEL_BOUND_DIRTY) == 0) return;
 		
 		#if profile
-		SceneStats.numBvUpdates++;
+		SceneStats.numWorldBvUpdatesLeaf++;
 		#end
 		
 		//apply world transformation to compute model -> world bounding volume

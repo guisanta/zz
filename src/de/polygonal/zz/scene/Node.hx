@@ -529,7 +529,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		if (child == null) return;
 		
 		#if profile
-		SceneStats.numBvUpdates++;
+		SceneStats.numWorldBvUpdatesNode++;
 		#end
 		
 		//merge world bound with the world bounds of all children
