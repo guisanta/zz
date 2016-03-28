@@ -30,7 +30,7 @@ using de.polygonal.ds.tools.NativeArrayTools;
 	Scene graph helper functions.
 **/
 @:access(de.polygonal.zz.scene.Spatial)
-class TreeUtil
+class TreeTools
 {
 	static var _aSpatial = new Array<Spatial>();
 	static var _tmpCoord = new Coord2f();
