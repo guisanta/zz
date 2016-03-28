@@ -60,7 +60,7 @@ class Camera
 		invalidate();
 	}
 	
-	public var sizeX(get_sizeX, set_sizeX):Int;
+	public var sizeX(get, set):Int;
 	inline function get_sizeX():Int
 	{
 		return mSize.x;
@@ -72,7 +72,7 @@ class Camera
 		return value;
 	}
 	
-	public var sizeY(get_sizeY, set_sizeY):Int;
+	public var sizeY(get, set):Int;
 	inline function get_sizeY():Int
 	{
 		return mSize.y;
@@ -84,7 +84,7 @@ class Camera
 		return value;
 	}
 	
-	public var centerX(get_centerX, set_centerX):Float;
+	public var centerX(get, set):Float;
 	inline function get_centerX():Float
 	{
 		return mCenter.x;
@@ -96,7 +96,7 @@ class Camera
 		return value;
 	}
 	
-	public var centerY(get_centerY, set_centerY):Float;
+	public var centerY(get, set):Float;
 	inline function get_centerY():Float
 	{
 		return mCenter.y;
@@ -130,7 +130,7 @@ class Camera
 	/**
 		The rotation angle of the image plane, in degrees.
 	**/
-	public var rotation(get_rotation, set_rotation):Float;
+	public var rotation(get, set):Float;
 	inline function get_rotation():Float
 	{
 		return mRotation;
@@ -148,7 +148,7 @@ class Camera
 		- a zoom factor < 1 makes the view bigger so objects appear smaller.
 	**/
 	
-	public var zoom(get_zoom, set_zoom):Float;
+	public var zoom(get, set):Float;
 	inline function get_zoom():Float
 	{
 		return mZoom;

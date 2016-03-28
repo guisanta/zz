@@ -129,10 +129,10 @@ class XrayRenderer extends Renderer
 	{
 		super.onBeginScene();
 		
-		/*for (i in TreeUtil.descendants(mCurSceneRoot))
+		/*for (i in TreeTools.descendants(mCurSceneRoot))
 			if (i.isNode()) drawWorldBv(i);
 		
-		for (i in TreeUtil.descendants(mCurSceneRoot))
+		for (i in TreeTools.descendants(mCurSceneRoot))
 		{
 			var c = modelToScreenSpace(i.world, new Vec3());
 			var p = modelToScreenSpace(i.parent.world, new Vec3());

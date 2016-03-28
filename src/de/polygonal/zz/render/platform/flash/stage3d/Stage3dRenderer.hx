@@ -262,7 +262,7 @@ class Stage3dRenderer extends Renderer
 				L.w('failed disposing object [${source.key}]', "s3d");
 			}
 			
-			mTextureLut.delete(source.key);
+			mTextureLut.unset(source.key);
 		}
 	}
 	
@@ -273,7 +273,7 @@ class Stage3dRenderer extends Renderer
 		if (visibleSet.isEmpty()) return;
 		
 		#if (verbose == "extra")
-		L.d('drawing visible set: count=${visibleSet.size()}, strategy=$batchStrategy', "s3d");
+		L.d('drawing visible set: count=${visibleSet.size}, strategy=$batchStrategy', "s3d");
 		#end
 		
 		if (batchStrategy == None)

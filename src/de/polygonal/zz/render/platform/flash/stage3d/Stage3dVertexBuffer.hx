@@ -107,7 +107,7 @@ class Stage3dVertexBuffer
 		for (i in mAttributes)
 		{
 			#if (verbose == "extra")
-			trace('binding buffer to index $index, offset=$bufferOffset, size=$i.');
+			L.d('binding buffer to index $index, offset=$bufferOffset, size=$i.');
 			#end
 			
 			mContext.setVertexBufferAt(index++, handle, bufferOffset, formatLut[i]);
@@ -120,7 +120,7 @@ class Stage3dVertexBuffer
 		for (i in 0...mAttributes.length)
 		{
 			#if (verbose == "extra")
-			trace('unbinding buffer from index $i');
+			L.d('unbinding buffer from index $i');
 			#end
 			
 			mContext.setVertexBufferAt(i, null);

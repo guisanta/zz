@@ -73,7 +73,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	
 	override public function getBoundingBox(targetSpace:Spatial, output:Aabb2):Aabb2
 	{
-		return TreeUtil.getBoundingBox(this, targetSpace, output);
+		return TreeTools.getBoundingBox(this, targetSpace, output);
 	}
 	
 	override public function pick(point:Coord2f, ?result:PickResult):Int

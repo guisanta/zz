@@ -279,7 +279,7 @@ class BitmapDataRenderer extends Renderer
 			var h = effect.numVisTilesY * effect.tileSize;
 			canvas = new BitmapData(w, h, true, 0);
 			
-			mTileMapCanvasLut.delete(effect.key);
+			mTileMapCanvasLut.unset(effect.key);
 			mTileMapCanvasLut.set(effect.key, canvas);
 		}
 		

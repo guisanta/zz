@@ -27,7 +27,7 @@ class Stage3dIndexBuffer
 {
 	public var numIndices(default, null):Int;
 	
-	public var numTriangles(get_numTriangles, never):Int;
+	public var numTriangles(get, never):Int;
 	function get_numTriangles():Int
 	{
 		return Std.int(numIndices / 3);

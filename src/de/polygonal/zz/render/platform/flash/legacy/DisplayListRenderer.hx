@@ -223,7 +223,7 @@ class DisplayListRenderer extends Renderer
 			o.idleTime += Timebase.timeDelta;
 			if (o.hasParent && o.idleTime > 1)
 			{
-				var success = mBitmapLookup.delete(o.spatial.key);
+				var success = mBitmapLookup.unset(o.spatial.key);
 				assert(success);
 				o.reset();
 				mPool.push(o);

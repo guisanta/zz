@@ -215,17 +215,16 @@ private class AniData
 		names = new ArrayList(totalFrames);
 		
 		var i = 0;
-		var k = animation.frames.length;
+		var k = totalFrames;
 		var frame;
 		while (i < k)
 		{
-			frame = animation.frames[i];
-			times.set(i, length);
-			names.set(i, frame.value);
+			frame = animation.frames[i++];
+			times.unsafePushBack(length);
+			names.unsafePushBack(frame.value);
 			length += frame.holdTime;
-			i++;
 		}
 		
-		times.set(k, length);
+		times.unsafePushBack(length);
 	}
 }

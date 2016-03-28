@@ -63,7 +63,6 @@ class Sprite extends SpriteBase
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String)
 	{
 		super(mVisual = new Quad());
-		
 		type = TYPE;
 		
 		if (parent != null) parent.addChild(this);
@@ -256,10 +255,10 @@ class Sprite extends SpriteBase
 		
 		if (frame != null) set_frame(frame);
 		
-		return textureId;
+		return;
 	}
 	
-	public var frame(get_frame, set_frame):String;
+	public var frame(get, set):String;
 	inline function get_frame():String return mCurrentFrame;
 	function set_frame(name:String):String
 	{
@@ -364,7 +363,7 @@ class Sprite extends SpriteBase
 		}
 	}
 	
-	public var sheetAni(get_sheetAni, never):SpriteSheetAni;
+	public var sheetAni(get, never):SpriteSheetAni;
 	function get_sheetAni():SpriteSheetAni
 	{
 		if (mSheetAni == null) mSheetAni = new SpriteSheetAni(this);
@@ -381,7 +380,7 @@ class Sprite extends SpriteBase
 	
 	public function pick(point:Coord2f):Bool
 	{
-		SpriteUtil.updateWorldTransform(this);
+		SpriteTools.updateWorldTransform(this);
 		
 		if (sgn.mFlags & Spatial.IS_WORLD_BOUND_DIRTY > 0) sgn.updateWorldBound();
 		
@@ -402,9 +401,9 @@ class Sprite extends SpriteBase
 		
 		if (flags & FLAG_SKIP_WORLD_UPDATE == 0)
 		{
-			SpriteUtil.updateWorldTransform(this);
-			if (SpriteUtil.isAncestor(this, targetSpace) == false)
-				SpriteUtil.updateWorldTransform(targetSpace);
+			SpriteTools.updateWorldTransform(this);
+			if (SpriteTools.isAncestor(this, targetSpace) == false)
+				SpriteTools.updateWorldTransform(targetSpace);
 		}
 		
 		var bounds = mSpatial.getBoundingBox(targetSpace.sgn, output);
@@ -421,7 +420,6 @@ class Sprite extends SpriteBase
 	override public function syncLocal():SpriteBase
 	{
 		if (mFlags & HAS_SIZE == 0) return this;
-		
 		return super.syncLocal();
 	}
 	
@@ -457,7 +455,7 @@ class Sprite extends SpriteBase
 		return output;
 	}
 	
-	public var uniformSize(get_uniformSize, set_uniformSize):Float;
+	public var uniformSize(get, set):Float;
 	inline function get_uniformSize():Float
 	{
 		assert(mSizeX == mSizeY, "rectangle is not a square");

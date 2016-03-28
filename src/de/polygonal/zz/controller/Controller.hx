@@ -32,7 +32,7 @@ class Controller
 {
 	public static var COUNT = 0;
 	public static var ACTIVE_COUNT = 0;
-	inline static var DISPOSE_TIMEOUT = 10;
+	public static var DISPOSE_TIMEOUT = 10;
 	
 	public var repeat:RepeatType;
 	public var minTime:Float = 0;
@@ -74,17 +74,15 @@ class Controller
 		repeat = null;
 		assert(next == null);
 		type = -1;
-		
-		if (active) ACTIVE_COUNT--;
 		COUNT--;
 	}
 	
-	public function getObject():ControlledObject
+	inline public function getObject():ControlledObject
 	{
 		return mObject;
 	}
 	
-	public function setObject(object:ControlledObject)
+	inline public function setObject(object:ControlledObject)
 	{
 		mObject = object;
 	}

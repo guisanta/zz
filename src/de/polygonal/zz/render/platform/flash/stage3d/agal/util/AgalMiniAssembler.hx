@@ -40,7 +40,7 @@ using de.polygonal.zz.render.platform.flash.stage3d.agal.util.AgalMiniAssemblerH
 
 class AgalMiniAssembler
 {
-	public static var instance(get_instance, never):AgalMiniAssembler;
+	public static var instance(get, never):AgalMiniAssembler;
 	static function get_instance():AgalMiniAssembler return _instance == null ? (_instance = new AgalMiniAssembler()) : _instance;
 	static var _instance:AgalMiniAssembler = null;
 	
