@@ -18,13 +18,12 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
-import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.core.math.Limits;
-import de.polygonal.core.time.Timebase;
-import de.polygonal.zz.render.Renderer;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.Spatial.as;
+
+using de.polygonal.ds.tools.NativeArrayTools;
 
 /**
 	Helper methods to operate on hierarchical sprite structures.
@@ -38,6 +37,8 @@ class SpriteUtil
 	static var _aSpatial = new Array<Spatial>();
 	static var _aSpriteBase = new Array<SpriteBase>();
 	static var _tmpCoord = new Coord2f(0, 0);
+	
+	static var _spatialStack = new ArrayList<Spatial>(256);
 	
 	/**
 		Counts the total number of descendants of root.
@@ -171,32 +172,42 @@ class SpriteUtil
 		Calls tick() on all descendants of root, including root.
 		Uses a non-allocating, iterative traversal.
 	**/
-	public static function tick(root:SpriteGroup, timeDelta:Float)
+	@:access(de.polygonal.zz.scene.Spatial)
+	public static function tick(root:SpriteGroup, dt:Float)
 	{
-		var a = _aSpatial;
-		a[0] = root.mNode;
-		var top = 1, s:Spatial, n:Node;
+		var s:Spatial = root.mNode, n:Node;
+		
+		var a = _spatialStack;
+		a.clear();
+		a.pushBack(s);
+		var top = 1;
 		while (top != 0)
 		{
-			s = a[--top];
-			a[top] = null;
+			s = a.popBack();
+			top--;
 			
 			if (s.mArbiter == null) continue;
 			
 			if (s.controllers != null && s.controllersEnabled)
-				s.updateControllers(timeDelta);
+				s.updateControllers(dt);
 			
 			if (s.isNode())
 			{
 				n = as(s, Node);
+				
+				top += n.numChildren;
+				if (top > a.capacity) a.reserve(top);
+				
 				var c = n.child;
 				while (c != null)
 				{
-					a[top++] = c;
+					a.unsafePushBack(c);
 					c = c.mSibling;
 				}
 			}
 		}
+		
+		a.getData().nullify(top);
 	}
 	
 	/**
