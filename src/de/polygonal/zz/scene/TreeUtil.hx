@@ -124,6 +124,39 @@ class TreeUtil
 		return k;
 	}
 	
+	public static function size(root:Node):Int
+	{
+		var a = _spatialStack, s:Spatial = root, top = 1, k = 0, n, c;
+		a.clear();
+		a.pushBack(s);
+		while (top > 0)
+		{
+			s = a.popBack();
+			top--;
+			
+			if (s.isNode())
+			{
+				n = as(s, Node);
+				k += n.numChildren + 1;
+				
+				if (n.numChildNodes > 0)
+				{
+					top += n.numChildNodes;
+					if (top > a.capacity) a.reserve(top);
+					
+					c = n.child;
+					while (c != null)
+					{
+						if (c.isNode()) a.pushBack(as(c, Node));
+						c = c.mSibling;
+					}
+				}
+			}
+		}
+		a.getData().nullify(top);
+		return k;
+	}
+	
 	/**
 		Recomputes world transformations of all nodes along the path from `origin` to root.
 	**/
