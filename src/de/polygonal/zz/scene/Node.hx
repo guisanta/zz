@@ -41,9 +41,10 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	/**
 		The first child of this node.
 	**/
-	public var child(default, null):Spatial;
+	public var child(default, null):Spatial = null;
 	
-	public var numChildren(default, null):Int;
+	public var numChildren(default, null):Int = 0;
+	public var numChildNodes(default, null):Int = 0;
 	
 	public var sgn:Node = this;
 	
@@ -51,8 +52,6 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	{
 		super(name);
 		mFlags |= Spatial.IS_NODE;
-		child = null;
-		numChildren = 0;
 	}
 	
 	override public function free()
@@ -114,6 +113,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren++;
+		if (x.isNode()) numChildNodes++;
 		return this;
 	}
 	
@@ -139,6 +139,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren++;
+		if (x.isNode()) numChildNodes++;
 		return this;
 	}
 	
@@ -164,6 +165,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = null;
 		numChildren--;
+		if (x.isNode()) numChildNodes--;
 		return this;
 	}
 	
@@ -189,6 +191,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren--;
+		if (x.isNode()) numChildNodes--;
 		return this;
 	}
 	
@@ -212,6 +215,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 			}
 			child = null;
 			numChildren = 0;
+			numChildNodes = 0;
 		}
 		else
 		{
@@ -227,6 +231,8 @@ class Node extends Spatial implements SpatialWrapper<Node>
 				while (i < endIndex)
 				{
 					var hook = c.mSibling;
+					
+					if (c.isNode()) numChildNodes--;
 					c.mSibling = null;
 					c.parent = null;
 					c = hook;
@@ -250,6 +256,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 				while (i <= endIndex)
 				{
 					var hook = b.mSibling;
+					if (b.isNode()) numChildNodes--;
 					b.mSibling = null;
 					b.parent = null;
 					b = hook;
