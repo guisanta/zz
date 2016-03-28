@@ -21,7 +21,10 @@ package de.polygonal.zz.scene;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Limits;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.scene.Spatial.as;
+
+using de.polygonal.ds.tools.NativeArrayTools;
 
 /**
 	Scene graph helper functions.
@@ -31,6 +34,8 @@ class TreeUtil
 {
 	static var _aSpatial = new Array<Spatial>();
 	static var _tmpCoord = new Coord2f();
+	
+	static var _spatialStack = new ArrayList<Spatial>();
 	
 	/**
 		Returns an iterator over all descendants of `root`.
@@ -156,36 +161,43 @@ class TreeUtil
 		
 		_This method uses an efficient iterative algorithm that does minimal work._
 	**/
-	public static function updateGeometricState(origin:Node, updateBound = true)
+	public static function updateGeometricState(root:Node, updateBound = true)
 	{
-		var a = _aSpatial;
-		a[0] = origin;
-		var top = 1, s:Spatial, n:Node;
-		while (top != 0)
+		var a = _spatialStack, s:Spatial = root, top = 1, n, c;
+		a.clear();
+		a.pushBack(s);
+		
+		var mask = Spatial.IS_WORLD_XFORM_DIRTY;
+		if (updateBound) mask |= Spatial.IS_WORLD_BOUND_DIRTY;
+		
+		while (a.size > 0)
 		{
-			s = a[--top];
-			a[top] = null;
+			s = a.popBack();
+			top--;
 			
-			if (s.mFlags & Spatial.IS_WORLD_XFORM_DIRTY != 0 || (updateBound && s.mFlags & Spatial.IS_WORLD_BOUND_DIRTY != 0))
+			if (s.mFlags & mask > 0)
 			{
 				s.updateGeometricState(true, updateBound);
 				
 				//descendants are updated as a "side effect" of the update rooted at this node, so
-				//we can safely skip the subtree.
+				//we can safely the entire subtree rooted at this node.
 				continue;
 			}
-			
 			if (s.isNode())
 			{
 				n = as(s, Node);
-				var c = n.child;
+				top += n.numChildren;
+				if (top > a.capacity) a.reserve(top);
+				c = n.child;
 				while (c != null)
 				{
-					a[top++] = c;
+					a.unsafePushBack(c);
 					c = c.mSibling;
 				}
 			}
 		}
+		
+		a.getData().nullify(top);
 	}
 	
 	public static function updateRenderState(root:Node)
