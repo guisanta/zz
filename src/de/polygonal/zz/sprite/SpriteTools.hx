@@ -32,7 +32,7 @@ using de.polygonal.ds.tools.NativeArrayTools;
 **/
 @:access(de.polygonal.zz.sprite.SpriteBase)
 @:access(de.polygonal.zz.scene.Spatial)
-class SpriteUtil
+class SpriteTools
 {
 	static var _aSpatial = new Array<Spatial>();
 	static var _aSpriteBase = new Array<SpriteBase>();
