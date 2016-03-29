@@ -411,8 +411,6 @@ class SpriteText extends SpriteBase
 		
 		mChanged = false;
 		
-		L.i('CHANGED!');
-		
 		if (mTextureChanged)
 		{
 			//start from scratch
