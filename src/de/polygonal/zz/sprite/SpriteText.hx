@@ -83,7 +83,7 @@ class SpriteText extends SpriteBase
 	var mDef:SpriteTextDef =
 	{
 		text: "", size: 10, align: TextAlign.Left, width: 100., height: 100.,
-		kerning: true, multiline: true, tracking: 0., leading: 0.
+		kerning: true, multiline: false, tracking: 0., leading: 0.
 	}
 	
 	var mTextLayoutResult:TextLayoutData =
