@@ -298,10 +298,10 @@ class SpriteBase
 		return throw "override for implementation";
 	}
 	
-	public var centerX(get_centerX, never):Float;
+	public var centerX(get, never):Float;
 	inline function get_centerX():Float return x + width / 2;
 	
-	public var centerY(get_centerY, never):Float;
+	public var centerY(get, never):Float;
 	inline function get_centerY():Float return y + height / 2;
 	
 	public function getSize():Sizef return new Sizef(width, height);
@@ -542,18 +542,17 @@ class SpriteBase
 			mFlags &= ~IS_ALPHA_DIRTY;
 			mSpatial.mFlags |= Spatial.IS_RS_DIRTY;
 		}
-		
 		return this;
 	}
 	
-	public var tweenAni(get_tweenAni, never):SpriteTweenAni;
+	public var tweenAni(get, never):SpriteTweenAni;
 	function get_tweenAni():SpriteTweenAni
 	{
 		if (mTweenAni == null) mTweenAni = new SpriteTweenAni(this);
 		return mTweenAni;
 	}
 	
-	public var keyframeAni(get_keyframeAni, never):SpriteKeyframeAni;
+	public var keyframeAni(get, never):SpriteKeyframeAni;
 	function get_keyframeAni():SpriteKeyframeAni
 	{
 		if (mKeyframeAni == null) mKeyframeAni = new SpriteKeyframeAni(this);
