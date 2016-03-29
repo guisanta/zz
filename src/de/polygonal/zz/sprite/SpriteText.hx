@@ -675,8 +675,11 @@ class SingleLineTextLayout implements TextLayoutStrategy
 			outCharRects.unsafePushBack(h);
 			
 			//update bounding box
-			bounds.addPoint(l + pl, t + pu);
-			bounds.addPoint(l + w - pr, t + h - pd);
+			if (!Ascii.isWhite(bc.code))
+			{
+				bounds.addPoint(l + pl, t + pu);
+				bounds.addPoint(l + w - pr, t + h - pd);
+			}
 			
 			//advance cursor
 			cursor += bc.advanceX * scale + kerningAmount + tracking;
