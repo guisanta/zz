@@ -44,7 +44,6 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	{
 		if (mController != null)
 		{
-			mController.setListener(null);
 			mController.free();
 			mController = null;
 		}
