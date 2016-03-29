@@ -513,20 +513,20 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	/**
 		The total number of descendants including this node.
 	**/
-	public function size(node:Node = null):Int
+	public function size(initiator = true):Int
 	{
-		if (node == null) node = this;
-		var k = node.numChildren + 1, c;
-		if (node.numChildNodes == 0) return k;
-		
-		c = node.child;
-		while (c != null)
+		var k = numChildren;
+		if (numChildrenOfTypeNode > 0)
 		{
-			if (c.isNode() || Std.is(c, Node))
-				k += size(as(c, Node));
-			c = c.mSibling;
+			var c = child;
+			while (c != null)
+			{
+				if (c.isNode())
+					k += as(c, Node).size(false);
+				c = c.mSibling;
+			}
 		}
-		return k;
+		return k + (initiator ? 1 : 0);
 	}
 	
 	//}
