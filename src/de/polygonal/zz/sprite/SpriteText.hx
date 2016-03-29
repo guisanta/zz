@@ -94,14 +94,11 @@ class SpriteText extends SpriteBase
 	
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
 	{
-		var spatial = new Node("SpriteText");
-		
-		super(spatial);
+		mNode = new Node("SpriteText");
+		mNode.mFlags |= Spatial.SKIP_CHILDREN;
+		super(mNode);
 		
 		type = TYPE;
-		mNode = cast mSpatial;
-		mNode.mFlags &= ~Spatial.IS_NODE;
-		mNode.mFlags |= Spatial.IS_VISUAL; //treat node as leaf
 		
 		if (parent != null) parent.addChild(this);
 		if (textureId != null)

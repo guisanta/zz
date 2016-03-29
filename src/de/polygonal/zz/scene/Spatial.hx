@@ -52,7 +52,8 @@ import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 	IS_NODE,
 	IS_VISUAL,
 	IS_FREED,
-	GS_UPDATED
+	GS_UPDATED,
+	SKIP_CHILDREN
 ], true, false))
 @:access(de.polygonal.zz.scene.Node)
 class Spatial extends ControlledObject implements Hashable
