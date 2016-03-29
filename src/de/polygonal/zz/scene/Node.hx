@@ -44,7 +44,8 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	public var child(default, null):Spatial = null;
 	
 	public var numChildren(default, null):Int = 0;
-	public var numChildNodes(default, null):Int = 0;
+	
+	public var numChildrenOfTypeNode(default, null):Int;
 	
 	public var sgn:Node = this;
 	
@@ -113,7 +114,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren++;
-		if (x.isNode()) numChildNodes++;
+		if (x.isNode()) numChildrenOfTypeNode++;
 		return this;
 	}
 	
@@ -139,7 +140,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren++;
-		if (x.isNode()) numChildNodes++;
+		if (x.isNode()) numChildrenOfTypeNode++;
 		return this;
 	}
 	
@@ -165,7 +166,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = null;
 		numChildren--;
-		if (x.isNode()) numChildNodes--;
+		if (x.isNode()) numChildrenOfTypeNode--;
 		return this;
 	}
 	
@@ -191,7 +192,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		
 		x.parent = this;
 		numChildren--;
-		if (x.isNode()) numChildNodes--;
+		if (x.isNode()) numChildrenOfTypeNode--;
 		return this;
 	}
 	
@@ -201,9 +202,9 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		If `beginIndex` and `endIndex` are omited, all children get removed.
 		If `endIndex` is omited, all children in the interval [`beginIndex`, `numChildren`) get removed.
 	**/
-	public function removeChildren(beginIndex = 0, endIndex = -1):Node
+	public function removeChildren(beginIndex:Int = 0, endIndex:Int = -1):Node
 	{
-		if (beginIndex == 0 && endIndex == -1)
+		if (beginIndex == 0 && endIndex < 0)
 		{
 			var e = child;
 			while (e != null)
@@ -215,7 +216,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 			}
 			child = null;
 			numChildren = 0;
-			numChildNodes = 0;
+			numChildrenOfTypeNode = 0;
 		}
 		else
 		{
@@ -232,7 +233,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 				{
 					var hook = c.mSibling;
 					
-					if (c.isNode()) numChildNodes--;
+					if (c.isNode()) numChildrenOfTypeNode--;
 					c.mSibling = null;
 					c.parent = null;
 					c = hook;
@@ -256,7 +257,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 				while (i <= endIndex)
 				{
 					var hook = b.mSibling;
-					if (b.isNode()) numChildNodes--;
+					if (b.isNode()) numChildrenOfTypeNode--;
 					b.mSibling = null;
 					b.parent = null;
 					b = hook;
