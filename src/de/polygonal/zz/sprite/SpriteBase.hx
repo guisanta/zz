@@ -510,6 +510,8 @@ class SpriteBase
 	**/
 	public function syncLocal():SpriteBase
 	{
+		if (mFlags & (IS_LOCAL_DIRTY | IS_VISIBILITY_DIRTY | IS_ALPHA_DIRTY) == 0) return this;
+		
 		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
 		if (mFlags & IS_VISIBILITY_DIRTY > 0)
 		{
