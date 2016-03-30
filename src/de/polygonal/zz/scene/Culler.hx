@@ -40,7 +40,6 @@ class Culler
 	{
 		mRenderer = renderer;
 		mVisibleSet = new ArrayList<Visual>(1024);
-		mVisibleSet.reserve(1024);
 		mVisibleSet.reuseIterator = true;
 		mPlanes = [for (i in 0...4) new Plane2()];
 		mRectPoints = [for (i in 0...4) new Vec3()];

@@ -22,6 +22,7 @@ import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Limits;
 import de.polygonal.ds.ArrayList;
+import de.polygonal.ds.ArrayedStack;
 import de.polygonal.zz.scene.Spatial.as;
 
 using de.polygonal.ds.tools.NativeArrayTools;
@@ -32,129 +33,193 @@ using de.polygonal.ds.tools.NativeArrayTools;
 @:access(de.polygonal.zz.scene.Spatial)
 class TreeTools
 {
-	static var _aSpatial = new Array<Spatial>();
 	static var _tmpCoord = new Coord2f();
 	
-	static var _spatialStack = new ArrayList<Spatial>();
+	static var _spatialStack1 = new ArrayedStack<Spatial>();
+	static var _spatialStack2 = new ArrayedStack<Spatial>();
 	
 	/**
 		Returns an iterator over all descendants of `root`.
 		
 		_Uses a non-allocating, iterative traversal._
 	**/
-	public static function descendantsIterator(root:Node):Iterator<Spatial>
+	public static function descendantsIterator(root:Node, ordered:Bool = false):Iterator<Spatial>
 	{
-		var a = _aSpatial;
-		var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
-		
-		n = root;
-		k = n.numChildren;
-		p = top + k;
-		c = n.child;
-		while (c != null)
+		if (ordered)
 		{
-			a[p++] = c;
-			c = c.mSibling;
-		}
-		for (i in 0...k)
-		{
-			a[top++] = a[--p];
-			a[p] = null;
-		}
-		
-		return
-		{
-			hasNext: function()
+			var a = [], top = 0;
+			
+			inline function pushChildren(x:Node)
 			{
-				return top > 0;
-			},
-			next: function()
+				var k = x.numChildren;
+				var p = top + k;
+				var c = x.child;
+				while (c != null)
+				{
+					a[p++] = c;
+					c = c.mSibling;
+				}
+				for (i in 0...k)
+					a[top++] = a[--p];
+			}
+			
+			pushChildren(root);
+			
+			return
 			{
-				var s = a[--top];
-				a[top] = null;
+				hasNext: function()
+				{
+					return top > 0;
+				},
+				next: function()
+				{
+					var s = a[--top];
+					if (s.isNode())
+						pushChildren(cast s);
+					return s;
+				}
+			}
+		}
+		else
+		{
+			var a = [], top = 0;
+			
+			inline function pushChildren(x:Node)
+			{
+				var c = x.child;
+				while (c != null)
+				{
+					a[top++] = c;
+					c = c.mSibling;
+				}
+			}
+			
+			pushChildren(root);
+			
+			return
+			{
+				hasNext: function()
+				{
+					return top > 0;
+				},
+				next: function()
+				{
+					var s = a[--top];
+					if (s.isNode())
+						pushChildren(cast s);
+					return s;
+				}
+			}
+		}
+	}
+	
+	//TODO optimize
+	public static function descendants(root:Node, output:Array<Spatial>, ordered:Bool = false):Int
+	{
+		if (ordered)
+		{
+			var s1 = _spatialStack1;
+			var s2 = _spatialStack2;
+			
+			var size = size(root);
+			s2.reserve(size);
+			
+			var s:Spatial = root, top = 1, max = 1, k, n, c;
+			
+			s1.clear();
+			s1.push(s);
+			while (s1.size > 0)
+			{
+				s = s1.pop();
+				
+				s2.unsafePush(s);
 				
 				if (s.isNode())
 				{
 					n = as(s, Node);
-					k = n.numChildren;
-					p = top + k;
+					
+					top += n.numChildren;
+					if (top > s1.capacity) s1.reserve(top);
+					if (top > max) max = top;
 					
 					c = n.child;
 					while (c != null)
 					{
-						a[p++] = c;
+						s1.unsafePush(c);
 						c = c.mSibling;
 					}
+				}
+			}
+			
+			k = s2.size;
+			for (i in 0...k) output[i] = s2.pop();
+			
+			s1.getData().nullify(max);
+			s2.getData().nullify(k);
+			
+			return k;
+		}
+		else
+		{
+			var a = _spatialStack1, top = 1, max = 1, k = 0, s, n, c;
+			a.clear();
+			a.push(root);
+			
+			while (top-- > 0)
+			{
+				s = a.pop();
+				
+				output[k++] = s;
+				
+				if (s.isNode())
+				{
+					n = as(s, Node);
 					
-					for (i in 0...k)
+					top += n.numChildren;
+					if (top > a.capacity) a.reserve(top);
+					if (top > max) max = top;
+					
+					c = n.child;
+					while (c != null)
 					{
-						a[top++] = a[--p];
-						a[p] = null;
+						a.unsafePush(c);
+						c = c.mSibling;
 					}
 				}
-				return s;
 			}
-		}
-	}
-	
-	public static function descendants(root:Node, output:Array<Spatial>):Int
-	{
-		var k = 0;
-		var a = _aSpatial;
-		a[0] = root;
-		var top = 1, s:Spatial;
-		while (top != 0)
-		{
-			s = a[--top];
-			a[top] = null;
 			
-			output[k++] = s;
+			a.getData().nullify(max);
 			
-			if (s.isNode())
-			{
-				s = as(s, Node).child;
-				while (s != null)
-				{
-					a[top++] = s;
-					s = s.mSibling;
-				}
-			}
+			return k;
 		}
-		
-		return k;
 	}
 	
 	public static function size(root:Node):Int
 	{
-		var a = _spatialStack, s:Spatial = root, top = 1, k = 0, n, c;
-		a.clear();
-		a.pushBack(s);
-		while (top > 0)
+		var s = _spatialStack1, top = 1, max = 1, k = 0, n, c;
+		s.clear();
+		s.push(root);
+		while (top-- > 0)
 		{
-			s = a.popBack();
-			top--;
-			
-			if (s.isNode())
+			n = as(s.pop(), Node);
+			k += n.numChildren;
+			if (n.numChildrenOfTypeNode > 0)
 			{
-				n = as(s, Node);
-				k += n.numChildren + 1;
+				top += n.numChildrenOfTypeNode;
+				if (top > s.capacity) s.reserve(top);
+				if (top > max) max = top;
 				
-				if (n.numChildNodes > 0)
+				c = n.child;
+				while (c != null)
 				{
-					top += n.numChildNodes;
-					if (top > a.capacity) a.reserve(top);
-					
-					c = n.child;
-					while (c != null)
-					{
-						if (c.isNode()) a.pushBack(as(c, Node));
-						c = c.mSibling;
-					}
+					if (c.isNode()) s.unsafePush(as(c, Node));
+					c = c.mSibling;
 				}
 			}
 		}
-		a.getData().nullify(top);
-		return k;
+		
+		s.getData().nullify(max);
+		return k + 1;
 	}
 	
 	/**
@@ -162,30 +227,38 @@ class TreeTools
 	**/
 	public static function updateWorldTransformAt(origin:Spatial)
 	{
-		var top = 0;
-		var a = _aSpatial;
+		var a = _spatialStack1, p , c, max = 0;
 		
-		var p = origin;
+		p = origin;
 		while (p != null)
 		{
-			a[top++] = p;
+			max++;
 			p = p.parent;
 		}
 		
-		p = a[--top];
-		a[top] = null;
+		a.clear();
+		a.reserve(max);
+		
+		p = origin;
+		while (p != null)
+		{
+			a.unsafePush(p);
+			p = p.parent;
+		}
+		
+		p = a.pop();
 		p.mFlags &= ~Spatial.IS_WORLD_XFORM_DIRTY;
 		p.world.of(p.local);
-		
-		while (top > 0)
+		while (a.size > 0)
 		{
-			var c = a[--top];
-			a[top] = null;
+			c = a.pop();
 			c.mFlags &= ~Spatial.IS_WORLD_XFORM_DIRTY;
 			if (!c.worldTransformCurrent)
 				c.world.setProduct2(p.world, c.local); //W' = Wp * L
 			p = c;
 		}
+		
+		a.getData().nullify(max);
 	}
 	
 	/**
@@ -196,17 +269,16 @@ class TreeTools
 	**/
 	public static function updateGeometricState(root:Node, updateBound = true)
 	{
-		var a = _spatialStack, s:Spatial = root, top = 1, n, c;
+		var a = _spatialStack1, top = 1, max = 1, s, n, c;
 		a.clear();
-		a.pushBack(s);
+		a.push(root);
 		
 		var mask = Spatial.IS_WORLD_XFORM_DIRTY;
 		if (updateBound) mask |= Spatial.IS_WORLD_BOUND_DIRTY;
 		
-		while (a.size > 0)
+		while (top-- > 0)
 		{
-			s = a.popBack();
-			top--;
+			s = a.pop();
 			
 			if (s.mFlags & mask > 0)
 			{
@@ -219,30 +291,32 @@ class TreeTools
 			if (s.isNode())
 			{
 				n = as(s, Node);
+				
 				top += n.numChildren;
 				if (top > a.capacity) a.reserve(top);
+				if (top > max) max = top;
+				
 				c = n.child;
 				while (c != null)
 				{
-					a.unsafePushBack(c);
+					a.unsafePush(c);
 					c = c.mSibling;
 				}
 			}
 		}
 		
-		a.getData().nullify(top);
+		a.getData().nullify(max);
 	}
 	
 	public static function updateRenderState(root:Node)
 	{
-		//update global states
-		var a = _aSpatial;
-		a[0] = root;
-		var top = 1, s:Spatial, n:Node;
-		while (top != 0)
+		var a = _spatialStack1, top = 1, max = 1, s, n, c;
+		a.clear();
+		a.push(root);
+		
+		while (top-- > 0)
 		{
-			s = a[--top];
-			a[top] = null;
+			s = a.pop();
 			
 			if (s.mFlags & Spatial.IS_RS_DIRTY > 0)
 			{
@@ -251,18 +325,77 @@ class TreeTools
 				s.updateRenderState();
 				continue;
 			}
-			
 			if (s.isNode())
 			{
 				n = as(s, Node);
-				var c = n.child;
+				
+				top += n.numChildren;
+				if (top > a.capacity) a.reserve(top);
+				if (top > max) max = top;
+				
+				c = n.child;
 				while (c != null)
 				{
-					a[top++] = c;
+					a.unsafePush(c);
 					c = c.mSibling;
 				}
 			}
 		}
+		
+		a.getData().nullify(max);
+	}
+	
+	public static function getVisibleSetNoCull(scene:Node, output:ArrayList<Visual>)
+	{
+		var top = 1, max = 1, k, s, n, c;
+		
+		var a = _spatialStack1;
+		var b = _spatialStack2;
+		
+		k = size(scene);
+		a.reserve(k);
+		b.reserve(k);
+		
+		a.clear();
+		a.unsafePush(scene);
+		while (top-- > 0)
+		{
+			s = a.pop();
+			
+			if (s.mFlags & Spatial.CULL_ALWAYS > 0) continue;
+			
+			if (s.isVisual())
+			{
+				if (s.effect != null)
+					b.unsafePush(s);
+			}
+			else
+			if (s.isNode())
+			{
+				n = as(s, Node);
+				
+				top += n.numChildren;
+				if (top > max) max = top;
+				
+				c = n.child;
+				while (c != null)
+				{
+					a.unsafePush(c);
+					c = c.mSibling;
+				}
+			}
+		}
+		
+		//reverse order for correct z-indices
+		k = b.size;
+		output.clear();
+		output.reserve(k);
+		for (i in 0...k) output.unsafePushBack(as(b.pop(), Visual));
+		
+		a.getData().nullify(max);
+		b.getData().nullify(k);
+		
+		return output;
 	}
 	
 	public static function getBoundingBox(root:Node, targetSpace:Spatial, output:Aabb2):Aabb2
@@ -282,13 +415,14 @@ class TreeTools
 			if (c.y > maxY) maxY = c.y;
 		}
 		
-		var a = _aSpatial;
-		a[0] = root;
-		var top = 1, s:Spatial, n:Node, c;
-		while (top != 0)
+		var a = _spatialStack1;
+		a.clear();
+		a.push(root);
+		var top = 1, max = 1, s:Spatial, n:Node, c;
+		while (top > 0)
 		{
-			s = a[--top];
-			a[top] = null;
+			s = a.pop();
+			top--;
 			
 			if (s.isVisual())
 			{
@@ -304,9 +438,14 @@ class TreeTools
 			{
 				n = as(s, Node);
 				c = n.child;
+				
+				top += n.numChildren;
+				if (top > a.capacity) a.reserve(top);
+				if (top > max) max = top;
+				
 				while (c != null)
 				{
-					a[top++] = c;
+					a.unsafePush(c);
 					c = c.mSibling;
 				}
 			}
@@ -316,6 +455,8 @@ class TreeTools
 		output.minY = minY;
 		output.maxX = maxX;
 		output.maxY = maxY;
+		
+		a.getData().nullify(max);
 		
 		return output;
 	}
@@ -392,31 +533,28 @@ class TreeTools
 		output.minY = oMinY;
 		output.maxX = oMaxX;
 		output.maxY = oMaxY;
-		
 		return output;
 	}
 	
-	public static function clearSpecialFlags(root:Node)
+	/**
+		Pretty-prints the scene graph hierarchy starting at `root`.
+	**/
+	public static function print(root:Node, leafs:Bool = true, inset:String = ""):String
 	{
-		var a = _aSpatial;
-		a[0] = root;
-		var top = 1, s:Spatial, n:Node;
-		while (top != 0)
+		var s = inset + root.name + "\n";
+		var c = root.child;
+		while (c != null)
 		{
-			s = a[--top];
-			a[top] = null;
-			s.mFlags &= ~Spatial.GS_UPDATED;
-			
-			if (s.isNode())
+			if (Std.is(c, Node))
 			{
-				n = as(s, Node);
-				var c = n.child;
-				while (c != null)
-				{
-					a[top++] = c;
-					c = c.mSibling;
-				}
+				s += print(cast c, leafs, inset + "\t");
+				c = c.mSibling;
+				continue;
 			}
+			if (leafs)
+				s += inset + "\t" + c.name + "\n";
+			c = c.mSibling;
 		}
+		return s;
 	}
 }
