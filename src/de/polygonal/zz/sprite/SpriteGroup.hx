@@ -259,12 +259,13 @@ class SpriteGroup extends SpriteBase
 	{
 		super.tick(dt);
 		
-		var c = mNode.child, s;
+		var c = mNode.child, s, hook;
 		while (c != null)
 		{
-			s = as(c.mArbiter, SpriteBase);
-			s.tick(timeDelta);
-			c = c.mSibling;
+			hook = c.mSibling; //in case controller removes the spatial
+			s = as(c.arbiter, SpriteBase);
+			s.tick(dt);
+			c = hook;
 		}
 	}
 	
