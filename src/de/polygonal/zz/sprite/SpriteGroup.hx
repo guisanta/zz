@@ -27,10 +27,10 @@ import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
 import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
-import de.polygonal.zz.scene.TreeUtil;
+import de.polygonal.zz.scene.TreeTools;
 import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.Sprite.*;
-import de.polygonal.zz.sprite.SpriteUtil;
+import de.polygonal.zz.sprite.SpriteTools;
 import de.polygonal.core.math.Mathematics;
 
 /**
@@ -68,7 +68,7 @@ class SpriteGroup extends SpriteBase
 		var c = mNode.child, s;
 		while (c != null)
 		{
-			s = as(c.mArbiter, SpriteBase);
+			s = as(c.arbiter, SpriteBase);
 			if (s.isGroup())
 			{
 				s.syncLocal();
@@ -93,12 +93,12 @@ class SpriteGroup extends SpriteBase
 	
 	public function freeDescendants()
 	{
-		SpriteUtil.freeSubtree(this);
+		SpriteTools.freeSubtree(this);
 	}
 	
 	//{ child management
 	
-	public var numChildren(get_numChildren, never):Int;
+	public var numChildren(get, never):Int;
 	inline function get_numChildren():Int return mNode.numChildren;
 	
 	public function addChild(child:SpriteBase):SpriteGroup
@@ -106,61 +106,61 @@ class SpriteGroup extends SpriteBase
 		mNode.addChild(child.mSpatial);
 		return this;
 	}
-
+	
 	public function addChildAt(x:SpriteBase, index:Int):SpriteGroup
 	{
 		mNode.addChildAt(x.mSpatial, index);
 		return this;
 	}
-		
+	
 	public function removeChild(x:SpriteBase):SpriteGroup
 	{
 		mNode.removeChild(x.mSpatial);
 		return this;
 	}
-
+	
 	public function removeChildAt(index:Int):SpriteGroup
 	{
 		mNode.removeChildAt(index);
 		return this;
 	}
-
+	
 	public function removeChildren(beginIndex = 0, endIndex = -1):SpriteGroup
 	{
 		mNode.removeChildren(beginIndex, endIndex);
 		return this;
 	}
-
+	
 	public function getChildAt(index:Int):SpriteBase
 	{
-		return as(mNode.getChildAt(index).mArbiter, SpriteBase);
+		return as(mNode.getChildAt(index).arbiter, SpriteBase);
 	}
-
+	
 	public function getChildIndex(x:SpriteBase):Int
 	{
 		return mNode.getChildIndex(x.mSpatial);
 	}
-
+	
 	public function setChildIndex(x:SpriteBase, index:Int):SpriteGroup
 	{
 		mNode.setChildIndex(x.mSpatial, index);
 		return this;
 	}
-
+	
 	public function getChildByName(name:String):SpriteBase
 	{
 		var child = mNode.getChildByName(name);
 		if (child == null) return null;
-		return as(child.mArbiter, SpriteBase);
+		return as(child.arbiter, SpriteBase);
 	}
 	
 	public function getDescendantByName(name:String):SpriteBase
 	{
 		var descendant = mNode.getDescendantByName(name);
 		if (descendant == null) return null;
-		return as(SpriteBase, descendant.mArbiter);
+		return as(SpriteBase, descendant.arbiter);
 	}
-
+	
 	public function getAllDescendantsByName(name:String, output:Array<SpriteBase>):Array<SpriteBase>
 	{
 		var a = mNode.getAllDescendantsByName(name, []);
@@ -174,7 +174,7 @@ class SpriteGroup extends SpriteBase
 		mNode.swapChildren(x.mSpatial, y.mSpatial);
 		return this;
 	}
-
+	
 	public function swapChildrenAt(i:Int, j:Int):SpriteGroup
 	{
 		mNode.swapChildrenAt(i, j);
@@ -186,7 +186,7 @@ class SpriteGroup extends SpriteBase
 		var c = mNode.child;
 		for (i in 0...mNode.numChildren)
 		{
-			output[i] = as(c.mArbiter, SpriteBase);
+			output[i] = as(c.arbiter, SpriteBase);
 			c = c.mSibling;
 		}
 		return output;
@@ -204,7 +204,7 @@ class SpriteGroup extends SpriteBase
 		mNode.setLast(x.mSpatial);
 		return this;
 	}
-
+	
 	public function sentToBackground(?x:SpriteBase):SpriteGroup
 	{
 		if (x == null)
@@ -229,7 +229,7 @@ class SpriteGroup extends SpriteBase
 			},
 			next: function()
 			{
-				var t = as(e.mArbiter, SpriteBase);
+				var t = as(e.arbiter, SpriteBase);
 				e = e.mSibling;
 				return t;
 			}
@@ -251,7 +251,7 @@ class SpriteGroup extends SpriteBase
 		
 		if (mResult == null) mResult = new PickResult();	
 		var k = mNode.pick(point, mResult);
-		for (i in 0...k) result[i] = as(mResult.get(i).mArbiter, Sprite);
+		for (i in 0...k) result[i] = as(mResult.get(i).arbiter, Sprite);
 		return k;
 	}
 	
@@ -270,7 +270,7 @@ class SpriteGroup extends SpriteBase
 	
 	public function getLocalBounds():Aabb2
 	{
-		TreeUtil.updateGeometricState(as(mSpatial, Node), false);
+		TreeTools.updateGeometricState(as(mSpatial, Node), false);
 		
 		return mSpatial.getBoundingBox(mSpatial, mBoundOut);
 	}
@@ -280,7 +280,7 @@ class SpriteGroup extends SpriteBase
 		var r = getRoot();
 		r.syncLocal();
 		var n = as(r.sgn.getRoot(), Node);
-		TreeUtil.updateGeometricState(n, true);
+		TreeTools.updateGeometricState(n, true);
 		
 		return mSpatial.getBoundingBox(n, mBoundOut);
 	}
@@ -296,7 +296,7 @@ class SpriteGroup extends SpriteBase
 		if (untrim)
 		{
 			leafs = [];
-			k = SpriteUtil.descendants(this, true, leafs);
+			k = SpriteTools.descendants(this, true, leafs);
 			var s;
 			while (i < k)
 			{
@@ -315,9 +315,9 @@ class SpriteGroup extends SpriteBase
 			}
 		}
 		
-		SpriteUtil.updateWorldTransform(this, true);
-		if (SpriteUtil.isAncestor(this, targetSpace) == false)
-			SpriteUtil.updateWorldTransform(targetSpace);
+		SpriteTools.updateWorldTransform(this, true);
+		if (SpriteTools.isAncestor(this, targetSpace) == false)
+			SpriteTools.updateWorldTransform(targetSpace);
 		
 		var minX = Limits.FLOAT_MAX;
 		var minY = Limits.FLOAT_MAX;
@@ -333,7 +333,7 @@ class SpriteGroup extends SpriteBase
 			s = a[--top];
 			a[top] = null;
 			
-			arbiter = as(s.mArbiter, SpriteBase);
+			arbiter = as(s.arbiter, SpriteBase);
 			if (arbiter == null) continue;
 			
 			if (s.isNode())

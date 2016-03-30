@@ -64,7 +64,7 @@ class SpriteBase
 	function new(spatial:Spatial)
 	{
 		mSpatial = spatial;
-		mSpatial.mArbiter = this;
+		mSpatial.arbiter = this;
 	}
 	
 	public function free()
@@ -111,12 +111,12 @@ class SpriteBase
 	public var parent(get, set):SpriteGroup;
 	inline function get_parent():SpriteGroup
 	{
-		return mSpatial.parent != null ? as(mSpatial.parent.mArbiter, SpriteGroup) : null;
+		return mSpatial.parent != null ? as(mSpatial.parent.arbiter, SpriteGroup) : null;
 	}
 	inline function set_parent(value:SpriteGroup):SpriteGroup
 	{
 		remove();
-		value.addChild(as(mSpatial.mArbiter, SpriteBase));
+		value.addChild(as(mSpatial.arbiter, SpriteBase));
 		return value;
 	}
 	

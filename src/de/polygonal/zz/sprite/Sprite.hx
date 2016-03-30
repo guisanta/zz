@@ -193,6 +193,20 @@ class Sprite extends SpriteBase
 		return value;
 	}
 	
+	public var contentWidth(get, never):Float;
+	inline function get_contentWidth():Float return mSizeX;
+	
+	public var contentHeight(get, never):Float;
+	inline function get_contentHeight():Float return mSizeY;
+	
+	/**
+		The original, untransformed size of this sprite as defined by the texture/color.
+	**/
+	public function getContentSize():Sizef
+	{
+		return new Coord2f(mSizeX, mSizeY);
+	}
+	
 	override public function centerPivot()
 	{
 		if (mFlags & HINT_TRIMMED > 0)
@@ -219,7 +233,7 @@ class Sprite extends SpriteBase
 	**/
 	public function setTexture(textureId:Int, ?frame:String)
 	{
-		if (mCurrentTexture == textureId) return textureId;
+		if (mCurrentTexture == textureId) return;
 		
 		mCurrentTexture = textureId;
 		
@@ -368,14 +382,6 @@ class Sprite extends SpriteBase
 	{
 		if (mSheetAni == null) mSheetAni = new SpriteSheetAni(this);
 		return mSheetAni;
-	}
-	
-	/**
-		The original, untransformed size of this sprite as defined by the texture/color.
-	**/
-	public function getContentSize():Sizef
-	{
-		return new Coord2f(mSizeX, mSizeY);
 	}
 	
 	public function pick(point:Coord2f):Bool

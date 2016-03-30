@@ -121,7 +121,7 @@ class SpriteTools
 						a[p] = null;
 					}
 				}
-				return as(s.mArbiter, SpriteBase);
+				return as(s.arbiter, SpriteBase);
 			}
 		}
 	}
@@ -147,12 +147,12 @@ class SpriteTools
 			s = a[--top];
 			a[top] = null;
 			
-			if (s.mArbiter == null) continue;
+			if (s.arbiter == null) continue;
 			
 			if (s.isNode())
 			{
 				if (!leafsOnly)
-					output[k++] = s.mArbiter;
+					output[k++] = s.arbiter;
 				
 				s = as(s, Node).child;
 				while (s != null)
@@ -162,7 +162,7 @@ class SpriteTools
 				}
 			}
 			else
-				output[k++] = s.mArbiter;
+				output[k++] = s.arbiter;
 		}
 		
 		return k;
@@ -186,7 +186,7 @@ class SpriteTools
 			s = a.popBack();
 			top--;
 			
-			if (s.mArbiter == null) continue;
+			if (s.arbiter == null) continue;
 			
 			if (s.controllers != null && s.controllersEnabled)
 				s.updateControllers(dt);
@@ -221,7 +221,7 @@ class SpriteTools
 			while (c != null)
 			{
 				hook = c.mSibling;
-				freeSubtree(as(c.mArbiter, SpriteBase), true);
+				freeSubtree(as(c.arbiter, SpriteBase), true);
 				c = hook;
 			}
 		}
@@ -251,9 +251,9 @@ class SpriteTools
 		var a = _aSpatial, p = sprite.sgn, s, c = 0;
 		while (p != null)
 		{
-			if (p.mArbiter != null)
+			if (p.arbiter != null)
 			{
-				s = as(p.mArbiter, SpriteBase);
+				s = as(p.arbiter, SpriteBase);
 				if (s.mFlags & SpriteBase.IS_LOCAL_DIRTY > 0)
 					s.updateLocalTransform();
 			}

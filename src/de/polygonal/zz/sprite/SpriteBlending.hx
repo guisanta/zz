@@ -32,7 +32,7 @@ class SpriteBlending
 		mSprite = sprite;
 	}
 	
-	public var current(get_current, never):String;
+	public var current(get, never):String;
 	function get_current():String
 	{
 		var o = mSprite.mSpatial.getGlobalState(GlobalStateType.AlphaBlend);
