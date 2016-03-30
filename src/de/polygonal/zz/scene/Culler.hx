@@ -39,7 +39,7 @@ class Culler
 	public function new(renderer:Renderer)
 	{
 		mRenderer = renderer;
-		mVisibleSet = new ArrayList<Visual>();
+		mVisibleSet = new ArrayList<Visual>(1024);
 		mVisibleSet.reserve(1024);
 		mVisibleSet.reuseIterator = true;
 		mPlanes = [for (i in 0...4) new Plane2()];
