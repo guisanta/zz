@@ -64,14 +64,20 @@ class Culler
 	{
 		assert(scene != null);
 		
-		mPlaneCullState = Bits.mask(4);
-		
-		//if the camera has changed, compute a plane for each side of source rectangle in world space
-		//plane normals are pointing into the view frustum
-		updateClipPlanes();
-		
 		mVisibleSet.clear();
-		scene.onGetVisibleSet(this, noCull);
+		
+		if (noCull)
+			TreeTools.getVisibleSetNoCull(scene, mVisibleSet);
+		else
+		{
+			mPlaneCullState = Bits.mask(4);
+			
+			//if the camera has changed, compute a plane for each side of source rectangle in world space
+			//plane normals are pointing into the view frustum
+			updateClipPlanes();
+			
+			scene.onGetVisibleSet(this, noCull);
+		}
 		
 		return mVisibleSet;
 	}
