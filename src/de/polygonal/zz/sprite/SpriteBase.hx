@@ -400,8 +400,8 @@ class SpriteBase
 	**/
 	public function centerOrigin()
 	{
-		originX = -width / 2;
-		originY = -height / 2;
+		originX = width / 2;
+		originY = height / 2;
 		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
@@ -610,8 +610,8 @@ class SpriteBase
 		
 		l.setTranslate2
 		(
-			-(spx * c) + (spy * s) + mPivotX + x + mOriginX,
-			-(spx * s) - (spy * c) + mPivotY + y + mOriginY
+			-(spx * c) + (spy * s) + mPivotX + x - mOriginX,
+			-(spx * s) - (spy * c) + mPivotY + y - mOriginY
 		);*/
 		
 		mFlags &= ~IS_LOCAL_DIRTY;
@@ -639,8 +639,8 @@ class SpriteBase
 				//R, S = I
 				l.setTranslate2
 				(
-					-(px * c) + (py * s) + px + x + mOriginX,
-					-(px * s) - (py * c) + py + y + mOriginY
+					-(px * c) + (py * s) + px + x - mOriginX,
+					-(px * s) - (py * c) + py + y - mOriginY
 				);
 			}
 			else
@@ -656,8 +656,8 @@ class SpriteBase
 					
 					l.setTranslate2
 					(
-						-(spx * c) + (spy * s) + px + x + mOriginX,
-						-(spx * s) - (spy * c) + py + y + mOriginY
+						-(spx * c) + (spy * s) + px + x - mOriginX,
+						-(spx * s) - (spy * c) + py + y - mOriginY
 					);
 				}
 				else
@@ -672,8 +672,8 @@ class SpriteBase
 					
 					l.setTranslate2
 					(
-						-(spx * c) + (spy * s) + px + x + mOriginX,
-						-(spx * s) - (spy * c) + py + y + mOriginY
+						-(spx * c) + (spy * s) + px + x - mOriginX,
+						-(spx * s) - (spy * c) + py + y - mOriginY
 					);
 				}
 			}
@@ -685,8 +685,8 @@ class SpriteBase
 				//R = I, S = I
 				l.setTranslate2
 				(
-					x + mOriginX,
-					y + mOriginY
+					x - mOriginX,
+					y - mOriginY
 				);
 			}
 			else
@@ -700,8 +700,8 @@ class SpriteBase
 					
 					l.setTranslate2
 					(
-						-(su * px) + px + x + mOriginX,
-						-(su * py) + py + y + mOriginY
+						-(su * px) + px + x - mOriginX,
+						-(su * py) + py + y - mOriginY
 					);
 				}
 				else
@@ -714,8 +714,8 @@ class SpriteBase
 					
 					l.setTranslate2
 					(
-						-(sx * px) + px + x + mOriginX,
-						-(sy * py) + py + y + mOriginY
+						-(sx * px) + px + x - mOriginX,
+						-(sy * py) + py + y - mOriginY
 					);
 				}
 			}

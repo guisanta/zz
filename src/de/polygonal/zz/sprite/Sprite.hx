@@ -525,8 +525,8 @@ class Sprite extends SpriteBase
 					
 					l.setTranslate2
 					(
-						-(px * c) + (py * s) + px + x + mOriginX + mTrimRect.x,
-						-(px * s) - (py * c) + py + y + mOriginY + mTrimRect.y
+						-(px * c) + (py * s) + px + x - mOriginX + mTrimRect.x,
+						-(px * s) - (py * c) + py + y - mOriginY + mTrimRect.y
 					);
 				}
 				else
@@ -545,8 +545,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(spx * c) + (spy * s) + px + x + mOriginX + mTrimRect.x,
-							-(spx * s) - (spy * c) + py + y + mOriginY + mTrimRect.y
+							-(spx * c) + (spy * s) + px + x - mOriginX + mTrimRect.x,
+							-(spx * s) - (spy * c) + py + y - mOriginY + mTrimRect.y
 						);
 					}
 					else
@@ -561,8 +561,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(spx * c) + (spy * s) + px + x + mOriginX + mTrimRect.x,
-							-(spx * s) - (spy * c) + py + y + mOriginY + mTrimRect.y
+							-(spx * c) + (spy * s) + px + x - mOriginX + mTrimRect.x,
+							-(spx * s) - (spy * c) + py + y - mOriginY + mTrimRect.y
 						);
 					}
 				}
@@ -579,8 +579,8 @@ class Sprite extends SpriteBase
 					
 					l.setTranslate2
 					(
-						x + mOriginX + mTrimRect.x,
-						y + mOriginY + mTrimRect.y
+						x - mOriginX + mTrimRect.x,
+						y - mOriginY + mTrimRect.y
 					);
 				}
 				else
@@ -605,8 +605,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(su * px) + px + x + mOriginX + mTrimRect.x,
-							-(su * py) + py + y + mOriginY + mTrimRect.y
+							-(su * px) + px + x - mOriginX + mTrimRect.x,
+							-(su * py) + py + y - mOriginY + mTrimRect.y
 						);
 					}
 					else
@@ -619,8 +619,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(sx * px) + px + x + mOriginX + mTrimRect.x,
-							-(sy * py) + py + y + mOriginY + mTrimRect.y
+							-(sx * px) + px + x - mOriginX + mTrimRect.x,
+							-(sy * py) + py + y - mOriginY + mTrimRect.y
 						);
 					}
 				}
@@ -653,8 +653,8 @@ class Sprite extends SpriteBase
 					
 					l.setTranslate2
 					(
-						-(px * c) + (py * s) + px + x + mOriginX,
-						-(px * s) - (py * c) + py + y + mOriginY
+						-(px * c) + (py * s) + px + x - mOriginX,
+						-(px * s) - (py * c) + py + y - mOriginY
 					);
 				}
 				else
@@ -673,8 +673,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(spx * c) + (spy * s) + px + x + mOriginX,
-							-(spx * s) - (spy * c) + py + y + mOriginY
+							-(spx * c) + (spy * s) + px + x - mOriginX,
+							-(spx * s) - (spy * c) + py + y - mOriginY
 						);
 					}
 					else
@@ -689,8 +689,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(spx * c) + (spy * s) + px + x + mOriginX,
-							-(spx * s) - (spy * c) + py + y + mOriginY
+							-(spx * c) + (spy * s) + px + x - mOriginX,
+							-(spx * s) - (spy * c) + py + y - mOriginY
 						);
 					}
 				}
@@ -707,8 +707,8 @@ class Sprite extends SpriteBase
 					
 					l.setTranslate2
 					(
-						x + mOriginX,
-						y + mOriginY
+						x - mOriginX,
+						y - mOriginY
 					);
 				}
 				else
@@ -726,8 +726,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(su * px) + px + x + mOriginX,
-							-(su * py) + py + y + mOriginY
+							-(su * px) + px + x - mOriginX,
+							-(su * py) + py + y - mOriginY
 						);
 					}
 					else
@@ -740,8 +740,8 @@ class Sprite extends SpriteBase
 						
 						l.setTranslate2
 						(
-							-(sx * px) + px + x + mOriginX,
-							-(sy * py) + py + y + mOriginY
+							-(sx * px) + px + x - mOriginX,
+							-(sy * py) + py + y - mOriginY
 						);
 					}
 				}
