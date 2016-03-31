@@ -434,8 +434,8 @@ class SpriteGroup extends SpriteBase
 	override public function centerOrigin()
 	{
 		var bound = getBounds(this, mBoundOut);
-		originX = -bound.w / 2;
-		originY = -bound.h / 2;
+		originX = bound.w / 2;
+		originY = bound.h / 2;
 		mFlags |= IS_LOCAL_DIRTY;
 	}
 }
