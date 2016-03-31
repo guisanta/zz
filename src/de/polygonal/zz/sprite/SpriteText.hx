@@ -334,8 +334,9 @@ class SpriteText extends SpriteBase
 		{
 			if (baseline)
 			{
-				var scale = mDef.size / getBitmapCharSet().renderedSize;
-				var base = getBitmapCharSet().base * scale;
+				var cs = getBitmapCharSet();
+				var scale = mDef.size / cs.renderedSize;
+				var base = cs.base * scale;
 				parentBounds.minY + (parentBounds.h / 2 - base);
 			}
 			else
