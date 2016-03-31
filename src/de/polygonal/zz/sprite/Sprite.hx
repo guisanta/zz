@@ -23,6 +23,7 @@ import de.polygonal.core.math.Coord2;
 import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.util.Assert.assert;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.effect.TextureEffect;
@@ -50,6 +51,43 @@ class Sprite extends SpriteBase
 	inline static var FLAG_SKIP_WORLD_UPDATE = 0x04;
 	
 	inline public static var TYPE = 1;
+	
+	public static var MAX_POOL_SIZE = 256;
+	
+	static var _pool = new ArrayList<Sprite>(64);
+	
+	public static function get(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String):Sprite
+	{
+		var sprite =
+		if (_pool.size > 0)
+			_pool.popBack();
+		else
+			new Sprite();
+		
+		if (parent != null) parent.addChild(sprite);
+		
+		if (textureId != null)
+			sprite.setTexture(textureId, frame);
+		return sprite;
+	}
+	
+	public static function put(sprite:Sprite)
+	{
+		if (_pool.size == MAX_POOL_SIZE)
+		{
+			sprite.free();
+			return;
+		}
+		
+		sprite.sheetAni.stop();
+		
+		sprite.remove();
+		sprite.resetTransformation();
+		sprite.alpha = 1;
+		sprite.visible = true;
+		
+		_pool.pushBack(sprite);
+	}
 	
 	var mSizeX = 0.;
 	var mSizeY = 0.;
@@ -442,9 +480,6 @@ class Sprite extends SpriteBase
 		input.x /= mSizeX;
 		input.y /= mSizeY;
 		super.toWorldSpace(input, output);
-		input.x = x;
-		input.y = y;
-		
 		return output;
 	}
 	
