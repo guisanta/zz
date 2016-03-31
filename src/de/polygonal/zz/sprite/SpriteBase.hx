@@ -40,6 +40,8 @@ import de.polygonal.zz.scene.Spatial.as;
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteBase
 {
+	public static var gc = false; //flag is raised every time free() is called
+	
 	inline static var SCALE_EPS = .001;
 	
 	public var type(default, null):Int;
@@ -89,6 +91,8 @@ class SpriteBase
 			mBlending = null;
 		}
 		mSpatial = null;
+		
+		gc = true;
 	}
 	
 	/**
@@ -328,7 +332,6 @@ class SpriteBase
 			mOriginX = value;
 			mFlags |= IS_LOCAL_DIRTY;
 		}
-		
 		return value;
 	}
 	
@@ -347,7 +350,6 @@ class SpriteBase
 			mOriginY = value;
 			mFlags |= IS_LOCAL_DIRTY;
 		}
-		
 		return value;
 	}
 	
@@ -369,7 +371,6 @@ class SpriteBase
 			mPivotX = value;
 			mFlags |= IS_LOCAL_DIRTY;
 		}
-		
 		return value;
 	}
 	
@@ -390,7 +391,6 @@ class SpriteBase
 			mPivotY = value;
 			mFlags |= IS_LOCAL_DIRTY;
 		}
-		
 		return value;
 	}
 	
@@ -485,7 +485,6 @@ class SpriteBase
 	public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
 		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
-		
 		return mSpatial.world.applyForward2(input, output);
 	}
 	
@@ -495,7 +494,6 @@ class SpriteBase
 	public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
 		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
-		
 		return mSpatial.world.applyInverse2(input, output);
 	}
 	
