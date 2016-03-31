@@ -79,7 +79,6 @@ class SpriteGroup extends SpriteBase
 			s.syncLocal();
 			c = c.mSibling;
 		}
-		
 		return this;
 	}
 	
@@ -272,7 +271,6 @@ class SpriteGroup extends SpriteBase
 	public function getLocalBounds():Aabb2
 	{
 		TreeTools.updateGeometricState(as(mSpatial, Node), false);
-		
 		return mSpatial.getBoundingBox(mSpatial, mBoundOut);
 	}
 	
@@ -282,7 +280,6 @@ class SpriteGroup extends SpriteBase
 		r.syncLocal();
 		var n = as(r.sgn.getRoot(), Node);
 		TreeTools.updateGeometricState(n, true);
-		
 		return mSpatial.getBoundingBox(n, mBoundOut);
 	}
 	
@@ -371,14 +368,12 @@ class SpriteGroup extends SpriteBase
 				leafs[k] = null;
 			}
 		}
-		
 		return output;
 	}
 	
 	override public function getSize():Sizef
 	{
 		getBounds(parent, mBoundOut);
-		
 		return new Sizef(mBoundOut.w, mBoundOut.h);
 	}
 	
@@ -441,7 +436,6 @@ class SpriteGroup extends SpriteBase
 		var bound = getBounds(this, mBoundOut);
 		originX = -bound.w / 2;
 		originY = -bound.h / 2;
-		
 		mFlags |= IS_LOCAL_DIRTY;
 	}
 }

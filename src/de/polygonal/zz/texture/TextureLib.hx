@@ -11,6 +11,8 @@ import haxe.ds.IntMap;
 
 class TextureLib
 {
+	public static var textureScale = 1.;
+	
 	static var _renderer:Renderer;
 	static var _imageLut = new IntMap<ImageData>();
 	static var _textureLut = new IntMap<Texture>();
@@ -23,13 +25,14 @@ class TextureLib
 	public static function allocateTexture(id:Int, image:ImageData, ?pma:Bool = true, ?format:TextureAtlasFormat):Texture
 	{
 		assert(_renderer != null);
-		assert(!_imageLut.exists(id), "image [$id] was already mapped to the given id");
+		assert(!_imageLut.exists(id), 'image [$id] was already mapped to the given id');
 		
 		_imageLut.set(id, image);
 		
 		var texture = new Texture();
 		texture.isAlphaPremultiplied = pma;
 		texture.setImageData(image, _renderer.supportsNonPowerOfTwoTextures);
+		texture.scale = textureScale;
 		
 		assert(!_textureLut.exists(id));
 		_textureLut.set(id, texture);

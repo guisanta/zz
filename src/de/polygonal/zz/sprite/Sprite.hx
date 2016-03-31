@@ -127,7 +127,6 @@ class Sprite extends SpriteBase
 			min += m12 * ey;
 			max -= m12 * ey;
 		}
-		
 		return max - min;
 	}
 	override function set_width(value:Float):Float
@@ -180,7 +179,6 @@ class Sprite extends SpriteBase
 			min += m22 * ey;
 			max -= m22 * ey;
 		}
-		
 		return max - min;
 	}
 	override function set_height(value:Float):Float
@@ -263,13 +261,18 @@ class Sprite extends SpriteBase
 		
 		mSizeX = e.texture.sourceSize.x;
 		mSizeY = e.texture.sourceSize.y;
+		
+		if (frame == null)
+		{
+			mSizeX *= texture.scale;
+			mSizeY *= texture.scale;
+		}
+		
 		setSquareHint(mSizeX, mSizeY);
 		mFlags &= ~HINT_TRIMMED;
 		mFlags |= HAS_SIZE | IS_LOCAL_DIRTY;
 		
 		if (frame != null) set_frame(frame);
-		
-		return;
 	}
 	
 	public var frame(get, set):String;
@@ -336,18 +339,14 @@ class Sprite extends SpriteBase
 		}
 		
 		mFlags |= IS_LOCAL_DIRTY;
-		
 		return name;
 	}
 	
 	public function getColor():Int
 	{
 		if (mVisual.effect == null) return -1;
-		
 		var e = mVisual.effect.as(ColorEffect);
-		
 		if (e == null) return -1;
-		
 		return e.color;
 	}
 	
@@ -387,9 +386,7 @@ class Sprite extends SpriteBase
 	public function pick(point:Coord2f):Bool
 	{
 		SpriteTools.updateWorldTransform(this);
-		
 		if (sgn.mFlags & Spatial.IS_WORLD_BOUND_DIRTY > 0) sgn.updateWorldBound();
-		
 		return mVisual.pick(point, null) == 1;
 	}
 	
@@ -419,7 +416,6 @@ class Sprite extends SpriteBase
 			mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
 			setSquareHint(mSizeX, mSizeY);
 		}
-		
 		return bounds;
 	}
 	
@@ -457,7 +453,6 @@ class Sprite extends SpriteBase
 		super.toLocalSpace(input, output);
 		output.x *= mSizeX;
 		output.y *= mSizeY;
-		
 		return output;
 	}
 	
