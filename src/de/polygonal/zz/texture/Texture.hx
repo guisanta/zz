@@ -50,6 +50,8 @@ class Texture implements Hashable
 	public var isCompressed = false;
 	public var isPadded = false;
 	
+	public var scale = 1.;
+	
 	public var atlas:TextureAtlas;
 	
 	public function new()
