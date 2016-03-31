@@ -101,10 +101,11 @@ class Spatial extends ControlledObject implements Hashable
 	**/
 	@:noCompletion public var key:Int;
 	
+	public var arbiter:Dynamic;
+	
 	var mSibling:Spatial;
 	var mFlags:Int;
 	var mGlobalState:GlobalStateNode;
-	var mArbiter:Dynamic;
 	
 	function new(?name:String)
 	{
@@ -136,7 +137,7 @@ class Spatial extends ControlledObject implements Hashable
 		worldBound = null;
 		removeAllGlobalStates();
 		effect = null;
-		mArbiter = null;
+		arbiter = null;
 		mFlags = IS_FREED;
 	}
 	
