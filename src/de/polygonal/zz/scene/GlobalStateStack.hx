@@ -19,16 +19,16 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.scene;
 
 import de.polygonal.ds.ArrayedStack;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.scene.GlobalState;
-import haxe.ds.Vector;
 
-typedef GlobalStateStackList = Vector<ArrayedStack<GlobalState>>;
+typedef GlobalStateStackList = ArrayList<ArrayedStack<GlobalState>>;
 
 @:access(de.polygonal.zz.scene.Spatial)
 class GlobalStateStack
 {
 	static var _stacks:GlobalStateStackList;
-	static var _tmpVector:Vector<Spatial>;
+	static var _tmpStack:ArrayedStack<Spatial>;
 	
 	inline public static function getStacks():GlobalStateStackList
 	{
@@ -36,50 +36,45 @@ class GlobalStateStack
 		return _stacks;
 	}
 	
-	public static function clrStacks()
+	public static function clearStacks()
 	{
 		for (i in 0...GlobalState.NUM_STATES)
-			_stacks[i].clear();
+			_stacks.get(i).clear();
 	}
 	
 	public static function dumpStacks():String
 	{
 		var s = "";
 		for (i in 0...GlobalState.NUM_STATES)
-			s += '[$i] => [${_stacks[i].toArray().join("")}]';
+			s += "[$i] => [" + _stacks.get(i).toArray().join("") + "]";
 		return s;
 	}
 	
 	public static function propagateStateFromRoot(spatial:Spatial):GlobalStateStackList
 	{
+		//traverse to root and push states from root to this node
 		var stacks = getStacks();
 		
-		//traverse to root and push states from root to this node
 		//push parents, then pop and push their state
-		var v = _tmpVector;
-		var k = 0;
-		var p = spatial;
+		var s = _tmpStack, p = spatial;
+		s.clear();
 		while (p.parent != null)
 		{
-			v[k++] = p.parent;
+			s.push(p.parent);
 			p = p.parent;
 		}
-		while (k > 0)
-		{
-			var s = v[--k];
-			v[k] = null;
-			s.pushStates(stacks);
-		}
-		spatial.pushStates(stacks);
 		
+		for (i in 0...s.size) s.pop().pushStates(stacks);
+		spatial.pushStates(stacks);
+		s.clear(true);
 		return stacks;
 	}
 	
 	static function initStacks()
 	{
 		var k = GlobalState.NUM_STATES;
-		_stacks = new Vector<ArrayedStack<GlobalState>>(k);
-		for (i in 0...k) _stacks[i] = new ArrayedStack<GlobalState>();
-		_tmpVector = new Vector<Spatial>(1024);
+		_stacks = new ArrayList(k);
+		for (i in 0...k) _stacks.pushBack(new ArrayedStack<GlobalState>());
+		_tmpStack = new ArrayedStack(16);
 	}
 }
