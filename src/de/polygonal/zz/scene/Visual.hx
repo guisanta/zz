@@ -25,12 +25,15 @@ http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.ds.NativeArray;
+import de.polygonal.ds.tools.NativeArrayTools;
 import de.polygonal.zz.scene.Bv.BvType;
 import de.polygonal.zz.scene.Culler;
 import de.polygonal.zz.scene.GlobalState;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 import haxe.EnumFlags;
-import haxe.ds.Vector;
+
+using de.polygonal.ds.tools.NativeArrayTools;
 
 /**
 	A leaf node in the scene graph hierarchy; the element that is drawn on the screen.
@@ -44,7 +47,7 @@ class Visual extends Spatial
 	/**
 		An array of all global states that occur on the path from the root node to this node.
 	**/
-	public var stateList:Vector<GlobalState> = null;
+	public var stateList:NativeArray<GlobalState> = null;
 	
 	/**
 		A bit field of all global states that occur on the path from the root node to this node.
@@ -61,15 +64,14 @@ class Visual extends Spatial
 		
 		modelBound = createBoundingVolume();
 		updateModelBound();
-		
-		var k = GlobalState.NUM_STATES;
-		stateList = new Vector<GlobalState>(k);
-		for (i in 0...k) stateList[i] = null;
+		stateList = NativeArrayTools.alloc(GlobalState.NUM_STATES);
 	}
 	
 	override public function free()
 	{
+		modelBound.free();
 		modelBound = null;
+		stateList.nullify();
 		stateList = null;
 		super.free();
 	}
@@ -81,7 +83,7 @@ class Visual extends Spatial
 	
 	override public function pick(point:Coord2f, ?result:PickResult):Int
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
 	}
 	
 	override function updateWorldBound()
@@ -109,103 +111,24 @@ class Visual extends Spatial
 	
 	override function propagateRenderStateUpdate(stacks:GlobalStateStackList)
 	{
-		var bits = 0;
-		var i = 0, k = stacks.length, stack, state:GlobalState;
-		while (i < k)
+		var bits = 0, s, state:GlobalState;
+		for (i in 0...stacks.size)
 		{
-			var stack = stacks[i];
-			if (stack.isEmpty())
+			s = stacks.get(i);
+			
+			if (s.isEmpty())
 			{
-				stateList[i++] = null;
+				stateList.set(i, null);
 				continue;
 			}
 			
-			state = stack.top().collapse(stack);
-			stateList[i++] = state;
+			state = s.top().collapse(s);
+			stateList.set(i, state);
 			bits |= state.bits;
 		}
 		
 		stateFlags = EnumFlags.ofInt(bits);
 	}
-	
-	/*override function propagateRenderStateUpdate(stacks:GlobalStateStackList)
-	{
-		//render state at leaf node represents all global stateList from root to leaf
-		//copy stateList: put stack contents into local linked list
-		stateFlags = 0;
-		
-		var i = 0, k = stacks.length, stack, state:GlobalState = null, node;
-		
-		if (stateList == null)
-		{
-			//initialize linked list
-			while (i < k)
-			{
-				stack = stacks[i++];
-				if (!stack.isEmpty())
-				{
-					state = stack.top().collapse(stack);
-					stateList = GlobalStateNode.get(state);
-					stateFlags |= state.bit;
-					break;
-				}
-			}
-			
-			//append remaining stateList
-			node = stateList;
-			while (i < k)
-			{
-				stack = stacks[i++];
-				if (!stack.isEmpty())
-				{
-					state = stack.top().collapse(stack);
-					node.next = GlobalStateNode.get(state);
-					stateFlags |= state.bit;
-					node = node.next;
-				}
-			}
-		}
-		else
-		{
-			//overwrite existing nodes before creating new ones
-			node = stateList;
-			
-			var prev:GlobalStateNode = null;
-			while (i < k)
-			{
-				stack = stacks[i++];
-				if (stack.isEmpty()) continue;
-				state = stack.top().collapse(stack);
-				
-				if (node == null)
-					prev.next = node = GlobalStateNode.get(state); //append new node
-				else
-					node.state = state; //reuse exising node
-				
-				stateFlags |= state.bit;
-				
-				prev = node;
-				node = node.next;
-			}
-			
-			//trim superfluous nodes
-			if (node != null)
-			{
-				if (prev != null) prev.next = null;
-				
-				while (node != null)
-				{
-					var next = node.next;
-					GlobalStateNode.put(node);
-					node.next = null;
-					node = next;
-				}
-			}
-			
-			//empty list
-			if (stateList.state == null) stateList = null;
-		}
-	}*/
 	
 	override function getBvType():BvType
 	{

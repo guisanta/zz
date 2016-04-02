@@ -127,7 +127,7 @@ class Controller
 	
 	function onUpdate(time:Float):Bool
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
 	}
 	
 	function getControlTime():Float

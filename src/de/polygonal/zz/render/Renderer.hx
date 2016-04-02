@@ -44,7 +44,7 @@ class Renderer
 	
 	public var allowedGlobalStates:EnumFlags<GlobalStateType>;
 	
-	public var smooth(get_smooth, set_smooth):Bool;
+	public var smooth(get, set):Bool;
 	inline function get_smooth():Bool return mSmooth;
 	inline function set_smooth(value:Bool):Bool
 	{

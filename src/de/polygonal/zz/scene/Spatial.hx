@@ -212,7 +212,7 @@ class Spatial extends ControlledObject implements Hashable
 	
 	function getVisibleSet(culler:Culler, noCull:Bool)
 	{
-		throw 'override for implementation';
+		throw "override for implementation";
 	}
 	
 	/**
@@ -220,7 +220,7 @@ class Spatial extends ControlledObject implements Hashable
 	**/
 	public function pick(point:Coord2f, ?result:PickResult):Int
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
 	}
 	
 	/**
@@ -229,7 +229,14 @@ class Spatial extends ControlledObject implements Hashable
 	**/
 	public function getBoundingBox(targetSpace:Spatial, output:Aabb2):Aabb2
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
+	}
+	
+	public function getRoot():Spatial
+	{
+		var p = this;
+		while (p.parent != null) p = p.parent;
+		return p;
 	}
 	
 	//{ geometric state
@@ -326,7 +333,7 @@ class Spatial extends ControlledObject implements Hashable
 		//propagate the render state update in a recursive traversal of the scene hierarchy
 		propagateRenderStateUpdate(stacks);
 		
-		initiator ? GlobalStateStack.clrStacks() : popStates(stacks);
+		initiator ? GlobalStateStack.clearStacks() : popStates(stacks);
 		
 		mFlags &= ~IS_RS_DIRTY;
 	}
@@ -361,7 +368,7 @@ class Spatial extends ControlledObject implements Hashable
 			return;
 		}
 		
-		//first try replacing existing state
+		//first try to replace existing state
 		var node = mGlobalState, type = state.type;
 		while (node != null)
 		{
@@ -411,26 +418,16 @@ class Spatial extends ControlledObject implements Hashable
 		while (node != null)
 		{
 			next = node.next;
-			
 			node.next = null;
 			GlobalStateNode.put(node);
-			
 			node = next;
 		}
 		mGlobalState = null;
 	}
 	
-	public function getRoot():Spatial
-	{
-		var p = this;
-		while (p.parent != null) p = p.parent;
-		
-		return p;
-	}
-	
 	function propagateRenderStateUpdate(stacks:GlobalStateStackList)
 	{
-		throw 'override for implementation';
+		throw "override for implementation";
 	}
 	
 	inline function pushStates(stacks:GlobalStateStackList)
@@ -439,7 +436,7 @@ class Spatial extends ControlledObject implements Hashable
 		while (node != null)
 		{
 			state = node.state;
-			stacks[state.slot].push(state);
+			stacks.get(state.slot).push(state);
 			node = node.next;
 		}
 	}
@@ -449,7 +446,7 @@ class Spatial extends ControlledObject implements Hashable
 		var node = mGlobalState;
 		while (node != null)
 		{
-			stacks[node.state.slot].pop();
+			stacks.get(node.state.slot).pop();
 			node = node.next;
 		}
 	}

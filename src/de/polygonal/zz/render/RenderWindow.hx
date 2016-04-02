@@ -25,7 +25,7 @@ import de.polygonal.zz.data.Size.Sizei;
 @:access(de.polygonal.zz.render.RenderWindowListener)
 class RenderWindow extends RenderTarget
 {
-	public var multiTouch(get_multiTouch, set_multiTouch):Bool;
+	public var multiTouch(get, set):Bool;
 	inline function get_multiTouch():Bool return mMultiTouch;
 	function set_multiTouch(value:Bool):Bool return mMultiTouch = value;
 	
