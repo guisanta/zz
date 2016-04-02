@@ -25,6 +25,7 @@ import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.Renderer;
+import de.polygonal.core.util.Assert.assert;
 
 /**
 	A camera defines the region that is shown in the render-target.
@@ -55,6 +56,7 @@ class Camera
 	**/
 	public function setSize(width:Int, height:Int)
 	{
+		assert(width > 0 && height > 0);
 		mSize.x = width;
 		mSize.y = height;
 		invalidate();
@@ -67,6 +69,7 @@ class Camera
 	}
 	function set_sizeX(value:Int):Int
 	{
+		assert(value > 0);
 		mSize.x = value;
 		invalidate();
 		return value;
@@ -79,6 +82,7 @@ class Camera
 	}
 	function set_sizeY(value:Int):Int
 	{
+		assert(value > 0);
 		mSize.y = value;
 		invalidate();
 		return value;
@@ -236,6 +240,9 @@ class Camera
 		mCenter.y = rect.y + rect.h / 2;
 		mSize.x = rect.w;
 		mSize.y = rect.h;
+		
+		assert(mSize.x > 0 && mSize.y > 0);
+		
 		mRotation = 0;
 		mZoom = 1;
 		mTransformChanged = true;

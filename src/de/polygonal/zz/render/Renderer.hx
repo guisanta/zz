@@ -221,7 +221,7 @@ class Renderer
 			//globalEffect.draw(this, visibleSet);
 	}
 	
-	function drawVisual(visual:Visual) //TODO inline, needs to be overrided?
+	function drawVisual(visual:Visual)
 	{
 		currentVisual = visual;
 		
@@ -259,7 +259,7 @@ class Renderer
 	
 	function getProjectionMatrix():Mat44
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
 	}
 	
 	function viewportTransform(output:Vec3)
@@ -345,7 +345,7 @@ class Renderer
 	{
 	}
 	
-	function onCameraChanged()
+	function onCameraChanged() //TODO unused
 	{
 	}
 	
