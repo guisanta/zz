@@ -240,7 +240,6 @@ class Renderer
 		currentVisual = null;
 	}
 	
-	
 	/*function setProjectionMatrix(x:Mat44)
 	{
 		mProjMatrix = x;
@@ -375,7 +374,10 @@ class Renderer
 			else
 			{
 				if (currentAlphaBlending != null)
+				{
+					currentAlphaBlending = null;
 					setAlphaBlendState(AlphaBlendState.PRESET_NORMAL.alphaBlendMode);
+				}
 			}
 		}
 	}
