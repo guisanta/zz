@@ -39,13 +39,14 @@ import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 import de.polygonal.zz.tools.uax14.LineBreaker;
+import haxe.ds.IntMap;
 
 enum TextAlign { Left; Center; Right; }
 
 typedef SpriteTextDef =
 {
 	text:String, size:Int, align:TextAlign, width:Float, height:Float,
-	kerning:Bool, multiline:Bool, tracking:Float, leading:Float
+	kerning:Bool, multiline:Bool, tracking:Float, leading:Float, ligatures:Int
 }
 
 typedef TextLayoutData =
@@ -66,6 +67,17 @@ class SpriteText extends SpriteBase
 	inline public static var TYPE = 3;
 	inline public static var FLAG_TRIM = 0x01;
 	
+	static var _ligatureLut:IntMap<IntIntHashTable> = null;
+	
+	public static function registerLigature(id:Int, first:String, second:String, ligatureCharCode:Int)
+	{
+		assert(first.charCodeAt(0) <= 0xffff && second.charCodeAt(0) <= 0xffff);
+		
+		if (_ligatureLut == null) _ligatureLut = new IntMap();
+		if (!_ligatureLut.exists(id)) _ligatureLut.set(id, new IntIntHashTable(16));
+		_ligatureLut.get(id).set(second.charCodeAt(0) << 16 | first.charCodeAt(0), ligatureCharCode);
+	}
+	
 	/**
 		True if the given text does not fit.
 	**/
@@ -83,7 +95,7 @@ class SpriteText extends SpriteBase
 	var mDef:SpriteTextDef =
 	{
 		text: "", size: 10, align: TextAlign.Left, width: 100., height: 100.,
-		kerning: true, multiline: false, tracking: 0., leading: 0.
+		kerning: true, multiline: false, tracking: 0., leading: 0., ligatures: -1
 	}
 	
 	var mTextLayoutResult:TextLayoutData =
@@ -238,6 +250,18 @@ class SpriteText extends SpriteBase
 	{
 		mChanged = mChanged || (mDef.tracking != value);
 		mDef.tracking = value;
+		return this;
+	}
+	
+	public function getLigatures():Int
+	{
+		return mDef.ligatures;
+	}
+	
+	public function setLigatures(value:Int)
+	{
+		mChanged = mChanged || (mDef.ligatures != value);
+		mDef.ligatures = value;
 		return this;
 	}
 	
@@ -569,16 +593,21 @@ private class Glyph extends Quad
 **/
 class SingleLineTextLayout implements TextLayoutStrategy
 {
-	var mCharCodes = new ArrayList<BitmapChar>(32);
+	var mBitmapChars = new ArrayList<BitmapChar>(32);
+	var mCharCodes = new ArrayList<Int>(32);
 	
 	public function new() {}
 	
 	public function free()
 	{
+		mBitmapChars.free();
+		mBitmapChars = null;
+		
 		mCharCodes.free();
 		mCharCodes = null;
 	}
 	
+	@:access(de.polygonal.zz.sprite.SpriteText)
 	public function layout(charSet:BitmapCharSet, def:SpriteTextDef, output:TextLayoutData)
 	{
 		var s = def.text, len = s.length;
@@ -598,16 +627,46 @@ class SingleLineTextLayout implements TextLayoutStrategy
 		
 		if (len == 0) return;
 		
-		//only draw supported characters
-		var bmpCharLut = charSet.characters;
-		var codes = mCharCodes, code;
+		var bmpCharLut = charSet.characters, code;
+		
+		var codes = mCharCodes;
 		codes.clear();
 		codes.reserve(len);
-		for (i in 0...len)
+		for (i in 0...len) codes.unsafePushBack(s.charCodeAt(i));
+		
+		//test for ligatures
+		if (def.ligatures > -1)
 		{
-			code = s.charCodeAt(i);
+			var lut = SpriteText._ligatureLut.get(def.ligatures);
+			if (lut != null)
+			{
+				var i = 0, k = codes.size - 1, first, second;
+				while (i < k)
+				{
+					first = codes.get(i);
+					second = codes.get(i + 1);
+					if (lut.hasKey(second << 16 | first))
+					{
+						codes.set(i, lut.get(second << 16 | first));
+						codes.removeAt(i + 1);
+						k--;
+						i++;
+						continue;
+					}
+					i++;
+				}
+			}
+		}
+		
+		//only draw supported characters
+		var bitmapChars = mBitmapChars;
+		bitmapChars.clear();
+		bitmapChars.reserve(codes.size);
+		for (i in 0...codes.size)
+		{
+			code = codes.get(i);
 			if (bmpCharLut.hasKey(code))
-				codes.unsafePushBack(bmpCharLut.get(code));
+				bitmapChars.unsafePushBack(bmpCharLut.get(code));
 		}
 		
 		var boxW = def.width;
@@ -624,7 +683,7 @@ class SingleLineTextLayout implements TextLayoutStrategy
 			return;
 		}
 		
-		var bc = codes.get(0);
+		var bc = bitmapChars.get(0);
 		var cursor = -(bc.offsetX * scale);
 		
 		var padding = charSet.padding;
@@ -636,11 +695,11 @@ class SingleLineTextLayout implements TextLayoutStrategy
 		var l, t, w, h;
 		
 		//write characters, left to right
-		var i = 0, k = codes.size, lastCode = 0;
+		var i = 0, k = bitmapChars.size, lastCode = 0;
 		var maxX, kerningAmount = 0.;
 		while (i < k)
 		{
-			bc = codes.get(i++);
+			bc = bitmapChars.get(i++);
 			
 			//glyph rectangle
 			l = cursor + bc.offsetX * scale;
@@ -712,7 +771,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 	var mDef:SpriteTextDef;
 	var mOutput:TextLayoutData;
 	var mBreakList = new BreakList();
-	var mCharCodes = new ArrayList<BitmapChar>(64);
+	var mBitmapChars = new ArrayList<BitmapChar>(64);
 	var mTmpCharBounds = new Aabb2();
 	var mTmpLineBounds = new Aabb2();
 	
@@ -729,8 +788,8 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		mOutput = null;
 		mBreakList.free();
 		mBreakList = null;
-		mCharCodes.free();
-		mCharCodes = null;
+		mBitmapChars.free();
+		mBitmapChars = null;
 		mTmpCharBounds = null;
 		mTmpLineBounds = null;
 	}
@@ -755,14 +814,14 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		
 		var hasUnsupportedChars = false;
 		var bmpCharLut = charSet.characters;
-		var codes = mCharCodes, code;
-		codes.clear();
-		codes.reserve(len);
+		var bitmapChars = mBitmapChars, code;
+		bitmapChars.clear();
+		bitmapChars.reserve(len);
 		for (i in 0...len)
 		{
 			code = s.charCodeAt(i);
 			if (bmpCharLut.hasKey(code))
-				codes.unsafePushBack(bmpCharLut.get(code));
+				bitmapChars.unsafePushBack(bmpCharLut.get(code));
 			else
 				hasUnsupportedChars = true;
 		}
@@ -770,7 +829,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		if (hasUnsupportedChars)
 		{
 			var buf = new StringBuf();
-			for (i in codes) buf.addChar(i.code);
+			for (i in bitmapChars) buf.addChar(i.code);
 			s = buf.toString();
 		}
 		
@@ -825,7 +884,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 			if (firstCharInLine)
 			{
 				firstCharInLine = false;
-				cursorX = -codes.get(segMin).offsetX * scale;
+				cursorX = -bitmapChars.get(segMin).offsetX * scale;
 			}
 			
 			//write segment
@@ -840,7 +899,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 				output.charRects.trim(lastSize * 4);
 				
 				//write again after trimming trailing whitespace
-				while (segMax > segMin && Ascii.isWhite(codes.get(segMax - 1).code)) segMax--;
+				while (segMax > segMin && Ascii.isWhite(bitmapChars.get(segMax - 1).code)) segMax--;
 				lastSize = output.charCodes.size;
 				write(cursorX, cursorY, segMin, segMax, charBounds);
 				overflow = newCursorX == Math.POSITIVE_INFINITY;
@@ -891,8 +950,8 @@ class MultiLineTextLayout implements TextLayoutStrategy
 	{
 		//returns a finite number if the segments fits into the current line
 		var scale = mDef.size / mCharSet.renderedSize;
-		var codes = mCharCodes;
-		var bc = codes.get(segMin);
+		var bitmapChars = mBitmapChars;
+		var bc = bitmapChars.get(segMin);
 		var padding = mCharSet.padding;
 		var pu = padding.up * scale;
 		var pr = padding.right * scale;
@@ -907,7 +966,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		var kerningLut = mCharSet.kerning, kerning = mDef.kerning, tracking = mDef.tracking;
 		while (segMin < segMax)
 		{
-			bc = codes.get(segMin++);
+			bc = bitmapChars.get(segMin++);
 			
 			//glyph rectangle
 			l = cursorX + bc.offsetX * scale;
