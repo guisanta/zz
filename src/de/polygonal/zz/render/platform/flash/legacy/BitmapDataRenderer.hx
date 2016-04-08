@@ -23,11 +23,10 @@ import de.polygonal.core.math.Vec3;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.IntHashTable;
 import de.polygonal.zz.data.ColorTransform;
-import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.render.Renderer;
+import de.polygonal.zz.render.effect.*;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.scene.Xform;
-import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.BlendMode;
 import flash.display.Shape;
@@ -55,7 +54,6 @@ class BitmapDataRenderer extends Renderer
 	var mTileLookup:IntHashTable<Tile>;
 	var mCurrentBlendMode:BlendMode;
 	var mScratchShape:Shape;
-	var mAllowBlit:Bool;
 	
 	var mTileMapCanvas:BitmapData;
 	var mTileMapCanvasLut:IntHashTable<BitmapData>;
@@ -124,26 +122,12 @@ class BitmapDataRenderer extends Renderer
 		var target = getRenderTarget();
 		if (target == null || mContext == null) return;
 		
-		if (mContext != null)
-			mContext.fillRect(mContext.rect, target.color | 0xff000000);
+		mContext.fillRect(mContext.rect, target.color);
 	}
 	
 	override function onBeginScene()
 	{
 		super.onBeginScene();
-		
-		mAllowBlit = false;
-		
-		var c = getCamera();
-		if (c == null)
-			mAllowBlit = true;
-		else
-		{
-			//TODO with viewport?
-			var targetSize = getRenderTarget().getSize();
-			mAllowBlit = targetSize.x == c.sizeX && targetSize.y == c.sizeY && c.rotation == 0;
-		}
-		
 		mContext.lock();
 	}
 	
@@ -172,35 +156,18 @@ class BitmapDataRenderer extends Renderer
 		var s = w.getScale();
 		var t = w.getTranslate();
 		
-		if (
-			!mAllowBlit ||
-			!w.isIdentityRotation() ||
-			t.x % 1 > 0 ||
-			t.y % 1 > 0
-		)
-		{
-			var shape = mScratchShape;
-			if (shape == null) shape = mScratchShape = new Shape();
-			
-			var g = shape.graphics;
-			g.clear();
-			g.beginFill(effect.color, 1);
-			g.drawRect(0, 0, s.x, s.y);
-			g.endFill();
-			
-			var flashMatrix = transformationToMatrix(w, s.x, s.y, mTmpMatrix);
-			var flashColorTransform = getColorTransform(effect);
-			mContext.draw(shape, flashMatrix, flashColorTransform, mCurrentBlendMode, null, smooth);
-		}
-		else
-		{
-			var r = mTmpRect;
-			r.x = t.x;
-			r.y = t.y;
-			r.width = s.x;
-			r.height = s.y;
-			mContext.fillRect(r, effect.color | Std.int(currentAlphaMultiplier * 0xFF) << 24);
-		}
+		var shape = mScratchShape;
+		if (shape == null) shape = mScratchShape = new Shape();
+		
+		var g = shape.graphics;
+		g.clear();
+		g.beginFill(effect.color, 1);
+		g.drawRect(0, 0, s.x, s.y);
+		g.endFill();
+		
+		var flashMatrix = transformationToMatrix(w, s.x, s.y, mTmpMatrix);
+		var flashColorTransform = getColorTransform(effect);
+		mContext.draw(shape, flashMatrix, flashColorTransform, mCurrentBlendMode, null, smooth);
 	}
 	
 	override function drawTextureEffect(effect:TextureEffect)
@@ -236,26 +203,9 @@ class BitmapDataRenderer extends Renderer
 		var s = world.getScale();
 		var t = world.getTranslate();
 		
-		if (
-			!mAllowBlit ||
-			currentAlphaMultiplier < 1 ||
-			!world.isIdentityRotation() ||
-			s.x != uv.w ||
-			s.y != uv.h ||
-			t.x % 1 > 0 ||
-			t.y % 1 > 0
-		)
-		{
-			var flashMatrix = transformationToMatrix(world, w, h, mTmpMatrix);
-			var flashColorTransform = getColorTransform(effect);
-			mContext.draw(tile.data, flashMatrix, flashColorTransform, mCurrentBlendMode, null, smooth);
-		}
-		else
-		{
-			mTmpPoint.x = t.x;
-			mTmpPoint.y = t.y;
-			mContext.copyPixels(tile.data, tile.rect, mTmpPoint, null, null, true);
-		}
+		var flashMatrix = transformationToMatrix(world, w, h, mTmpMatrix);
+		var flashColorTransform = getColorTransform(effect);
+		mContext.draw(tile.data, flashMatrix, flashColorTransform, mCurrentBlendMode, null, smooth);
 	}
 	
 	override function drawTileMapEffect(effect:TileMapEffect)
