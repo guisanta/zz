@@ -43,6 +43,14 @@ DEALINGS IN THE SOFTWARE.
 
 ----------------------------------------
 
+Geometric Tools, LLC
+Copyright (c) 1998-2012
+Distributed under the Boost Software License, Version 1.0.
+http://www.boost.org/LICENSE_1_0.txt
+http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
+
+----------------------------------------
+
 Copyright (c) 2011, Adobe Systems Incorporated
 All rights reserved.
 
@@ -72,3 +80,16 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------
+
+tiny-inflate (https://github.com/devongovett/tiny-inflate) - MIT
+
+----------------------------------------
+
+unicode-trie (https://github.com/devongovett/unicode-trie) - MIT
+
+----------------------------------------
+
+An implementation of the Unicode Line Breaking Algorithm (UAX #14)
+See https://github.com/devongovett/linebreak
