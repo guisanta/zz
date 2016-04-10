@@ -311,6 +311,8 @@ class SpriteBase
 	
 	public function getSize():Sizef return new Sizef(width, height);
 	
+	public function getHalfSize():Sizef return new Sizef(width / 2, height / 2);
+	
 	public function setSize(x:Float, y:Float)
 	{
 		assert(Math.isFinite(x) && Math.isFinite(y));
@@ -473,6 +475,9 @@ class SpriteBase
 		mFlags &= ~(HINT_ROTATE | HINT_SCALE);
 		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
 		mSpatial.local.setIdentity2();
+		
+		//TODO test with spritesheet frame
+		
 	}
 
 	public function getBounds(targetSpace:SpriteBase, ?output:Aabb2, ?flags:Int = 0):Aabb2
