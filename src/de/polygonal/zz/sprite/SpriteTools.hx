@@ -19,6 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Coord2.Coord2f;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.ArrayedStack;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.Spatial.as;
@@ -32,9 +33,7 @@ import de.polygonal.zz.scene.Spatial.as;
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteTools
 {
-	static var _aSpatial = new Array<Spatial>();
 	static var _tmpCoord = new Coord2f(0, 0);
-	
 	static var _spatialStack = new ArrayedStack<Spatial>();
 	
 	public static function gc()
@@ -48,146 +47,108 @@ class SpriteTools
 	**/
 	public static function descendantsIterator(root:SpriteGroup, ordered:Bool = true):Iterator<SpriteBase>
 	{
-		if (ordered)
+		var a = [], top = 0, c, i;
+		
+		inline function pushChildren(x:Node)
 		{
-			var a = [];
-			var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
-			
-			n = root.mNode;
-			k = n.numChildren;
-			p = top + k;
-			c = n.child;
-			while (c != null)
+			if (ordered)
 			{
-				a[p++] = c;
-				c = c.mSibling;
-			}
-			for (i in 0...k)
-			{
-				a[top++] = a[--p];
-			}
-			
-			return
-			{
-				hasNext: function()
+				c = x.child;
+				i = top;
+				while (c != null)
 				{
-					return top > 0;
-				},
-				next: function()
+					if (c.arbiter != null) a[i++] = null;
+					c = c.mSibling;
+				}
+				c = x.child;
+				while (c != null)
 				{
-					var s = a[--top];
-					if (s.isNode())
+					if (c.arbiter != null)
 					{
-						n = as(s, Node);
-						k = n.numChildren;
-						p = top + k;
-						
-						c = n.child;
-						while (c != null)
-						{
-							a[p++] = c;
-							c = c.mSibling;
-						}
-						
-						for (i in 0...k)
-						{
-							a[top++] = a[--p];
-						}
+						a[--i] = c;
+						top++;
 					}
-					
-					return as(s.arbiter, SpriteBase);
+					c = c.mSibling;
+				}
+			}
+			else
+			{
+				c = x.child;
+				while (c != null)
+				{
+					if (c.arbiter != null)
+						a[top++] = c;
+					c = c.mSibling;
 				}
 			}
 		}
-		else
+		
+		pushChildren(root.mNode);
+		
+		return
 		{
-			var a = [];
-			var top = 0, n:Node, s:Spatial, k:Int, p:Int, c:Spatial;
-			
-			n = root.mNode;
-			k = n.numChildren;
-			p = top + k;
-			c = n.child;
-			while (c != null)
+			hasNext: function()
 			{
-				a[top++] = c;
-				c = c.mSibling;
-			}
-			
-			return
+				return top > 0;
+			},
+			next: function()
 			{
-				hasNext: function()
-				{
-					return top > 0;
-				},
-				next: function()
-				{
-					var s = a[--top];
-					if (s.isNode())
-					{
-						n = as(s, Node);
-						k = n.numChildren;
-						p = top + k;
-						
-						c = n.child;
-						while (c != null)
-						{
-							a[p++] = c;
-							c = c.mSibling;
-						}
-						
-						for (i in 0...k)
-						{
-							a[top++] = a[--p];
-						}
-					}
-					
-					return as(s.arbiter, SpriteBase);
-				}
+				var s = a[--top];
+				if (s.isNode() && s.mFlags & Spatial.SKIP_CHILDREN == 0)
+					pushChildren(as(s, Node));
+				return s.arbiter;
 			}
 		}
 	}
 	
 	/**
 		Stores all descendants of `root` in `output` (or just the leafs if `leafsOnly` is true) and returns the number of elements in `output`.
+		@param ordered if true, sprite objects are stored in the correct draw order.
 	**/
-	public static function descendants(root:SpriteGroup, leafsOnly:Bool, output:Array<SpriteBase>):Int
+	public static function descendants(root:SpriteGroup, leafsOnly:Bool, ordered:Bool = false, output:ArrayList<SpriteBase>)
 	{
-		var k = 0;
-		var a = _aSpatial;
-		
-		var top = 0;
-		var s = as(root.sgn, Node).child;
-		while (s != null)
+		var stack = _spatialStack;
+		stack.clear();
+		stack.push(root.sgn);
+		var spatial, sprite, n, c, i;
+		while (stack.size > 0)
 		{
-			a[top++] = s;
-			s = s.mSibling;
-		}
-		
-		while (top != 0)
-		{
-			s = a[--top];
-			a[top] = null;
+			spatial = stack.pop();
 			
-			if (s.arbiter == null) continue;
-			
-			if (s.isNode())
+			if (ordered)
 			{
-				if (!leafsOnly)
-					output[k++] = s.arbiter;
-				
-				s = as(s, Node).child;
-				while (s != null)
+				if (spatial.isNode())
 				{
-					a[top++] = s;
-					s = s.mSibling;
+					n = as(spatial, Node);
+					i = stack.size + n.numChildren;
+					for (i in 0...n.numChildren) stack.push(null);
+					c = n.child;
+					while (c != null)
+					{
+						stack.set(--i, c);
+						c = c.mSibling;
+					}
 				}
 			}
 			else
-				output[k++] = s.arbiter;
+			{
+				if (spatial.isNode() && spatial.mFlags & Spatial.SKIP_CHILDREN == 0)
+				{
+					n = as(spatial, Node);
+					c = n.child;
+					while (c != null)
+					{
+						stack.push(c);
+						c = c.mSibling;
+					}
+				}
+			}
+			
+			sprite = as(spatial.arbiter, SpriteBase);
+			if (sprite == null) continue;
+			if (leafsOnly && sprite.type == SpriteGroup.TYPE) continue;
+			output.pushBack(sprite);
 		}
-		
-		return k;
 	}
 	
 	/**
@@ -224,7 +185,7 @@ class SpriteTools
 	}
 	
 	/**
-		Recursive bottom-up deconstruction: Invokes the free() method on all descendants of the given sprite.
+		Recursive bottom-up deconstruction: Invokes free() method on all descendants of the given sprite.
 	**/
 	public static function freeSubtree(sprite:SpriteBase, includeCaller = false)
 	{
