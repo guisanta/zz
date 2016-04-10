@@ -60,7 +60,7 @@ class RenderTarget
 	
 	public function getContext():Dynamic
 	{
-		return throw 'override for implementation';
+		return throw "override for implementation";
 	}
 	
 	/**

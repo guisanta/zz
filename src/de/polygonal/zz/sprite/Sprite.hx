@@ -83,6 +83,7 @@ class Sprite extends SpriteBase
 		
 		sprite.remove();
 		sprite.resetTransformation();
+		sprite.blending.setInherit();
 		sprite.alpha = 1;
 		sprite.visible = true;
 		
