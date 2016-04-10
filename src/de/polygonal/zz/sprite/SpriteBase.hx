@@ -28,6 +28,7 @@ import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.GlobalStateType;
 import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 /**
 	Abstract base class for sprite objects.
@@ -540,7 +541,7 @@ class SpriteBase
 			}
 			
 			mFlags &= ~IS_ALPHA_DIRTY;
-			mSpatial.mFlags |= Spatial.IS_RS_DIRTY;
+			mSpatial.mFlags |= IS_RS_DIRTY;
 		}
 		return this;
 	}
@@ -581,7 +582,7 @@ class SpriteBase
 	function updateLocalTransform()
 	{
 		mFlags &= ~IS_LOCAL_DIRTY;
-		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		mSpatial.mFlags |= IS_WORLD_XFORM_DIRTY;
 		
 		/*//simple brute-force SRT update
 		var l = mSpatial.local;
@@ -613,7 +614,7 @@ class SpriteBase
 		);*/
 		
 		mFlags &= ~IS_LOCAL_DIRTY;
-		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		mSpatial.mFlags |= IS_WORLD_XFORM_DIRTY;
 		
 		var l = mSpatial.local;
 		

@@ -40,6 +40,7 @@ import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 import de.polygonal.zz.tools.uax14.LineBreaker;
 import haxe.ds.IntMap;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 enum TextAlign { Left; Center; Right; }
 
@@ -107,7 +108,7 @@ class SpriteText extends SpriteBase
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>)
 	{
 		mNode = new Node("SpriteText");
-		mNode.mFlags |= Spatial.SKIP_CHILDREN;
+		mNode.mFlags |= SKIP_CHILDREN;
 		super(mNode);
 		
 		type = TYPE;
@@ -404,7 +405,7 @@ class SpriteText extends SpriteBase
 		var c = mNode.child, g;
 		while (c != null)
 		{
-			if (c.mFlags & Spatial.CULL_ALWAYS > 0)
+			if (c.mFlags & CULL_ALWAYS > 0)
 			{
 				g = as(c, Glyph);
 				g.idleTime += dt;
@@ -489,7 +490,7 @@ class SpriteText extends SpriteBase
 			glyph.effect.as(TextureEffect).setFrameIndex(c);
 		}
 		
-		mNode.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		mNode.mFlags |= IS_WORLD_XFORM_DIRTY;
 		
 		//cull/remove unused quads
 		var count = 0;

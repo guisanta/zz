@@ -24,6 +24,7 @@ import de.polygonal.core.math.Limits;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.ArrayedStack;
 import de.polygonal.zz.scene.Spatial.as;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 /**
 	Scene graph helper functions.
@@ -209,12 +210,12 @@ class TreeTools
 		}
 		
 		p = a.pop();
-		p.mFlags &= ~Spatial.IS_WORLD_XFORM_DIRTY;
+		p.mFlags &= ~IS_WORLD_XFORM_DIRTY;
 		p.world.of(p.local);
 		while (a.size > 0)
 		{
 			c = a.pop();
-			c.mFlags &= ~Spatial.IS_WORLD_XFORM_DIRTY;
+			c.mFlags &= ~IS_WORLD_XFORM_DIRTY;
 			if (!c.worldTransformCurrent)
 				c.world.setProduct2(p.world, c.local); //W' = Wp * L
 			p = c;
@@ -233,8 +234,8 @@ class TreeTools
 		a.clear();
 		a.push(root);
 		
-		var mask = Spatial.IS_WORLD_XFORM_DIRTY;
-		if (updateBound) mask |= Spatial.IS_WORLD_BOUND_DIRTY;
+		var mask = IS_WORLD_XFORM_DIRTY;
+		if (updateBound) mask |= IS_WORLD_BOUND_DIRTY;
 		
 		while (a.size > 0)
 		{
@@ -276,7 +277,7 @@ class TreeTools
 		{
 			s = a.pop();
 			
-			if (s.mFlags & Spatial.IS_RS_DIRTY > 0)
+			if (s.mFlags & IS_RS_DIRTY > 0)
 			{
 				//descendants are updated as a "side effect" of the update rooted at this node, so
 				//we can safely skip the subtree.
@@ -310,7 +311,7 @@ class TreeTools
 		{
 			s = a.pop();
 			
-			if (s.mFlags & Spatial.CULL_ALWAYS > 0) continue;
+			if (s.mFlags & CULL_ALWAYS > 0) continue;
 			
 			if (s.isVisual())
 			{
@@ -469,6 +470,30 @@ class TreeTools
 		output.maxX = oMaxX;
 		output.maxY = oMaxY;
 		return output;
+	}
+	
+	public static function clearHints(root:Node)
+	{
+		var a = _spatialStack1, s, n, c;
+		a.clear();
+		a.push(root);
+		
+		while (a.size > 0)
+		{
+			s = a.pop();
+			
+			s.mFlags &= ~HINT_GS_UPDATED;
+			
+			if (!s.isNode()) continue;
+			
+			n = as(s, Node);
+			c = n.child;
+			while (c != null)
+			{
+				a.push(c);
+				c = c.mSibling;
+			}
+		}
 	}
 	
 	/**

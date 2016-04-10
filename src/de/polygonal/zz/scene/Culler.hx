@@ -67,7 +67,7 @@ class Culler
 		mVisibleSet.clear();
 		
 		if (noCull)
-			TreeTools.getVisibleSetNoCull(scene, mVisibleSet);
+			TreeTools.getVisibleLeafs(scene, mVisibleSet);
 		else
 		{
 			mPlaneCullState = Bits.mask(4);

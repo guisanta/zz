@@ -110,6 +110,8 @@ class Sprite extends SpriteBase
 	
 	override public function free()
 	{
+		if (mSpatial == null) return;
+		
 		super.free();
 		if (mSheetAni != null)
 		{
@@ -424,7 +426,7 @@ class Sprite extends SpriteBase
 	public function pick(point:Coord2f):Bool
 	{
 		SpriteTools.updateWorldTransform(this);
-		if (sgn.mFlags & Spatial.IS_WORLD_BOUND_DIRTY > 0) sgn.updateWorldBound();
+		if (sgn.mFlags & SpatialFlags.IS_WORLD_BOUND_DIRTY > 0) sgn.updateWorldBound();
 		return mVisual.pick(point, null) == 1;
 	}
 	
@@ -512,7 +514,7 @@ class Sprite extends SpriteBase
 	override function updateLocalTransform()
 	{
 		mFlags &= ~IS_LOCAL_DIRTY;
-		mSpatial.mFlags |= Spatial.IS_WORLD_XFORM_DIRTY;
+		mSpatial.mFlags |= SpatialFlags.IS_WORLD_XFORM_DIRTY;
 		
 		/* SRT update:
 		 -always apply translation and origin

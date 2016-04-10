@@ -15,12 +15,6 @@ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPO
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Geometric Tools, LLC
-Copyright (c) 1998-2012
-Distributed under the Boost Software License, Version 1.0.
-http://www.boost.org/LICENSE_1_0.txt
-http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 */
 package de.polygonal.zz.scene;
 
@@ -35,26 +29,11 @@ import de.polygonal.zz.render.effect.Effect;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.Bv.BvType;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 /**
 	Abstract base class of the scene graph hierarchy.
 **/
-@:build(de.polygonal.core.macro.IntConsts.build(
-[
-	CULL_ALWAYS,
-	CULL_NEVER,
-	IS_WORLD_XFORM_CURRENT,
-	IS_WORLD_BOUND_CURRENT,
-	IS_WORLD_XFORM_DIRTY,
-	IS_WORLD_BOUND_DIRTY,
-	IS_MODEL_BOUND_DIRTY,
-	IS_RS_DIRTY,
-	IS_NODE,
-	IS_VISUAL,
-	IS_FREED,
-	GS_UPDATED,
-	SKIP_CHILDREN
-], true, false))
 @:access(de.polygonal.zz.scene.Node)
 class Spatial extends ControlledObject implements Hashable
 {
@@ -116,7 +95,7 @@ class Spatial extends ControlledObject implements Hashable
 		local = new Xform();
 		world = new Xform();
 		worldBound = createBoundingVolume();
-		mFlags = GS_UPDATED | IS_WORLD_XFORM_DIRTY | IS_WORLD_BOUND_DIRTY | IS_MODEL_BOUND_DIRTY | IS_RS_DIRTY;
+		mFlags = HINT_GS_UPDATED | IS_WORLD_XFORM_DIRTY | IS_WORLD_BOUND_DIRTY | IS_MODEL_BOUND_DIRTY | IS_RS_DIRTY;
 	}
 	
 	/**
@@ -248,7 +227,7 @@ class Spatial extends ControlledObject implements Hashable
 	**/
 	public function updateGeometricState(initiator = true, updateBound = true)
 	{
-		mFlags |= GS_UPDATED;
+		mFlags |= HINT_GS_UPDATED;
 		
 		//propagate transformations: parent => children
 		updateWorldData(updateBound);
@@ -287,20 +266,17 @@ class Spatial extends ControlledObject implements Hashable
 		if (worldTransformCurrent) return;
 		
 		mFlags &= ~IS_WORLD_XFORM_DIRTY;
-		
-		if (worldTransformCurrent) return;
+		mFlags |= IS_WORLD_BOUND_DIRTY;
 		
 		if (parent != null)
 			world.setProduct2(parent.world, local); //W' = Wp * L
 		else
 			world.of(local); //root node
-		
-		mFlags |= IS_WORLD_BOUND_DIRTY;
 	}
 	
 	function updateWorldBound()
 	{
-		if (parent != null) parent.mFlags |= Spatial.IS_WORLD_BOUND_DIRTY;
+		if (parent != null) parent.mFlags |= IS_WORLD_BOUND_DIRTY;
 	}
 	
 	function propagateBoundToRoot()

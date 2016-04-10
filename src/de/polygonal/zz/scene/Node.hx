@@ -15,18 +15,13 @@ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPO
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Geometric Tools, LLC
-Copyright (c) 1998-2012
-Distributed under the Boost Software License, Version 1.0.
-http://www.boost.org/LICENSE_1_0.txt
-http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 */
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.util.Assert.assert;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.scene.Bv.BvType;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 import de.polygonal.zz.scene.Spatial.as;
@@ -34,7 +29,7 @@ import de.polygonal.zz.scene.Spatial.as;
 /**
 	Allows grouping of child nodes.
 **/
-class Node extends Spatial implements SpatialWrapper<Node>
+class Node extends Spatial
 {
 	public static var getBvTypeFunc:Void->BvType = null;
 	
@@ -52,7 +47,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 	public function new(?name:String)
 	{
 		super(name);
-		mFlags |= Spatial.IS_NODE;
+		mFlags |= SpatialFlags.IS_NODE;
 	}
 	
 	override public function free()
@@ -325,17 +320,16 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		return null;
 	}
 	
-	public function getDescendants(output:Array<Spatial>):Array<Spatial>
+	public function getDescendants(output:ArrayList<Spatial>)
 	{
 		var e = child;
 		while (e != null)
 		{
-			output.push(e);
+			output.pushBack(e);
 			if (e.isNode())
 				as(e, Node).getDescendants(output);
 			e = e.mSibling;
 		}
-		return output;
 	}
 	
 	public function getDescendantByName(name:String):Spatial
@@ -354,17 +348,16 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		return null;
 	}
 	
-	public function getAllDescendantsByName(name:String, output:Array<Spatial>):Array<Spatial>
+	public function getAllDescendantsByName(name:String, output:ArrayList<Spatial>)
 	{
 		var e = child, s:String;
 		while (e != null)
 		{
-			if (e.name == name) output.push(e);
+			if (e.name == name) output.pushBack(e);
 			if (e.isNode())
 				as(e, Node).getAllDescendantsByName(name, output);
 			e = e.mSibling;
 		}
-		return output;
 	}
 	
 	public function swapChildren(x:Spatial, y:Spatial):Node
@@ -555,10 +548,6 @@ class Node extends Spatial implements SpatialWrapper<Node>
 		//set to first non-null child
 		if (child == null) return;
 		
-		#if profile
-		SceneStats.numWorldBvUpdatesNode++;
-		#end
-		
 		//merge world bound with the world bounds of all children
 		var c = child;
 		worldBound.of(c.worldBound);
@@ -569,7 +558,7 @@ class Node extends Spatial implements SpatialWrapper<Node>
 			c = c.mSibling;
 		}
 		
-		mFlags &= ~Spatial.IS_WORLD_BOUND_DIRTY;
+		mFlags &= ~SpatialFlags.IS_WORLD_BOUND_DIRTY;
 		
 		super.updateWorldBound();
 	}

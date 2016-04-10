@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 Michael Baczynski, http://www.polygonal.de
+Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -18,14 +18,20 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
-class SceneStats
-{
-	public static function reset()
-	{
-		numWorldBvUpdatesLeaf = 0;
-		numWorldBvUpdatesNode = 0;
-	}
-	
-	public static var numWorldBvUpdatesLeaf = 0;
-	public static var numWorldBvUpdatesNode = 0;
-}
+@:build(de.polygonal.core.macro.IntConsts.build(
+[
+	CULL_ALWAYS,
+	CULL_NEVER,
+	IS_WORLD_XFORM_CURRENT,
+	IS_WORLD_BOUND_CURRENT,
+	IS_WORLD_XFORM_DIRTY,
+	IS_WORLD_BOUND_DIRTY,
+	IS_MODEL_BOUND_DIRTY,
+	IS_RS_DIRTY,
+	IS_NODE,
+	IS_VISUAL,
+	IS_FREED,
+	HINT_GS_UPDATED,
+	SKIP_CHILDREN
+], true, true))
+class SpatialFlags {}

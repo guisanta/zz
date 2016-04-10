@@ -21,7 +21,6 @@ package de.polygonal.zz.sprite;
 import de.polygonal.zz.scene.AlphaBlendState;
 import de.polygonal.zz.scene.GlobalStateType;
 
-@:access(de.polygonal.zz.sprite.SpriteBase)
 @:allow(de.polygonal.zz.sprite.SpriteBase)
 class SpriteBlending
 {
@@ -35,44 +34,44 @@ class SpriteBlending
 	public var current(get, never):String;
 	function get_current():String
 	{
-		var o = mSprite.mSpatial.getGlobalState(GlobalStateType.AlphaBlend);
+		var o = mSprite.sgn.getGlobalState(GlobalStateType.AlphaBlend);
 		if (o == null) return "Inherit";
 		return Std.string(o.as(AlphaBlendState).alphaBlendMode);
 	}
 	
 	public function setInherit():SpriteBase
 	{
-		mSprite.mSpatial.removeGlobalState(GlobalStateType.AlphaBlend);
+		mSprite.sgn.removeGlobalState(GlobalStateType.AlphaBlend);
 		return mSprite;
 	}
 	
 	public function setMultiply():SpriteBase
 	{
-		mSprite.mSpatial.setGlobalState(AlphaBlendState.PRESET_MULTIPLY);
+		mSprite.sgn.setGlobalState(AlphaBlendState.PRESET_MULTIPLY);
 		return mSprite;
 	}
 	
 	public function setAdd():SpriteBase
 	{
-		mSprite.mSpatial.setGlobalState(AlphaBlendState.PRESET_ADD);
+		mSprite.sgn.setGlobalState(AlphaBlendState.PRESET_ADD);
 		return mSprite;
 	}
 	
 	public function setScreen():SpriteBase
 	{
-		mSprite.mSpatial.setGlobalState(AlphaBlendState.PRESET_SCREEN);
+		mSprite.sgn.setGlobalState(AlphaBlendState.PRESET_SCREEN);
 		return mSprite;
 	}
 	
 	public function setNormal():SpriteBase
 	{
-		mSprite.mSpatial.setGlobalState(AlphaBlendState.PRESET_NORMAL);
+		mSprite.sgn.setGlobalState(AlphaBlendState.PRESET_NORMAL);
 		return mSprite;
 	}
 	
 	public function setNone():SpriteBase
 	{
-		mSprite.mSpatial.setGlobalState(AlphaBlendState.PRESET_NONE);
+		mSprite.sgn.setGlobalState(AlphaBlendState.PRESET_NONE);
 		return mSprite;
 	}
 }

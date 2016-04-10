@@ -15,12 +15,6 @@ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPO
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Geometric Tools, LLC
-Copyright (c) 1998-2012
-Distributed under the Boost Software License, Version 1.0.
-http://www.boost.org/LICENSE_1_0.txt
-http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 */
 package de.polygonal.zz.scene;
 
@@ -32,6 +26,7 @@ import de.polygonal.zz.scene.Culler;
 import de.polygonal.zz.scene.GlobalState;
 import de.polygonal.zz.scene.GlobalStateStack.GlobalStateStackList;
 import haxe.EnumFlags;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 using de.polygonal.ds.tools.NativeArrayTools;
 
@@ -60,7 +55,7 @@ class Visual extends Spatial
 	{
 		super(name);
 		
-		mFlags |= Spatial.IS_VISUAL;
+		mFlags |= IS_VISUAL;
 		
 		modelBound = createBoundingVolume();
 		updateModelBound();
@@ -78,7 +73,7 @@ class Visual extends Spatial
 	
 	public function updateModelBound()
 	{
-		mFlags |= Spatial.IS_MODEL_BOUND_DIRTY;
+		mFlags |= IS_MODEL_BOUND_DIRTY;
 	}
 	
 	override public function pick(point:Coord2f, ?result:PickResult):Int
@@ -90,16 +85,12 @@ class Visual extends Spatial
 	{
 		if (worldBoundCurrent) return;
 		
-		if (mFlags & (Spatial.IS_WORLD_BOUND_DIRTY | Spatial.IS_MODEL_BOUND_DIRTY) == 0) return;
-		
-		#if profile
-		SceneStats.numWorldBvUpdatesLeaf++;
-		#end
+		if (mFlags & (IS_WORLD_BOUND_DIRTY | IS_MODEL_BOUND_DIRTY) == 0) return;
 		
 		//apply world transformation to compute model -> world bounding volume
 		modelBound.transformBy(world, worldBound);
 		
-		mFlags &= ~(Spatial.IS_WORLD_BOUND_DIRTY | Spatial.IS_MODEL_BOUND_DIRTY);
+		mFlags &= ~(IS_WORLD_BOUND_DIRTY | IS_MODEL_BOUND_DIRTY);
 		
 		super.updateWorldBound();
 	}

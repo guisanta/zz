@@ -18,11 +18,13 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
+import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.ArrayedStack;
 import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.Spatial.as;
+import de.polygonal.zz.scene.SpatialFlags.*;
 
 /**
 	Helper methods to operate on hierarchical sprite structures.
@@ -94,7 +96,7 @@ class SpriteTools
 			next: function()
 			{
 				var s = a[--top];
-				if (s.isNode() && s.mFlags & Spatial.SKIP_CHILDREN == 0)
+				if (s.isNode() && s.mFlags & SKIP_CHILDREN == 0)
 					pushChildren(as(s, Node));
 				return s.arbiter;
 			}
@@ -132,7 +134,7 @@ class SpriteTools
 			}
 			else
 			{
-				if (spatial.isNode() && spatial.mFlags & Spatial.SKIP_CHILDREN == 0)
+				if (spatial.isNode() && spatial.mFlags & SKIP_CHILDREN == 0)
 				{
 					n = as(spatial, Node);
 					c = n.child;
@@ -171,7 +173,7 @@ class SpriteTools
 				s.updateControllers(dt);
 			
 			//SKIP_CHILDREN: SpriteText glyph nodes have no arbiter so don't bother iterating over them
-			if (s.mFlags & (Spatial.IS_NODE | Spatial.SKIP_CHILDREN) == Spatial.IS_NODE)
+			if (s.mFlags & (IS_NODE | SKIP_CHILDREN) == IS_NODE)
 			{
 				n = as(s, Node);
 				c = n.child;
@@ -247,6 +249,26 @@ class SpriteTools
 		else
 		{
 			if (updateBounds) sprite.sgn.propagateBoundToRoot();
+		}
+	}
+	
+	public static function fitBounds(sprite:SpriteBase, bounds:Aabb2)
+	{
+		if (sprite.isGroup())
+		{
+			var g = sprite.asGroup();
+			var b = g.getLocalBounds();
+			var size = g.getSize();
+			g.scale = M.fmin(bounds.w / size.x, bounds.h / size.y);
+			g.x = bounds.x;
+			g.y = bounds.y;
+		}
+		else
+		{
+			sprite.x = bounds.x;
+			sprite.y = bounds.y;
+			sprite.scale = 1;
+			sprite.scale = M.fmin(bounds.w / sprite.width, bounds.h / sprite.height);
 		}
 	}
 }
