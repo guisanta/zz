@@ -7,7 +7,7 @@ import de.polygonal.core.log.LogSystem;
 class L
 {
 	static var _log:Log;
-	public static var log(get_log, never):Log;
+	public static var log(get, never):Log;
 	static function get_log():Log
 	{
 		if (_log == null) _log = LogSystem.createLog("zz", true);

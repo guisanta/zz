@@ -35,7 +35,6 @@ class CanvasWindow extends RenderWindow
 {
 	public var canvas(default, null):CanvasElement;
 	
-	var mResizeTimeoutHandle:Int = -1;
 	var mFullscreen = false;
 	var mContext:Dynamic;
 	var mUseExistingCanvasElement:Bool;
@@ -116,15 +115,6 @@ class CanvasWindow extends RenderWindow
 		}
 		
 		if (!mUseExistingCanvasElement) win.addEventListener("resize", onResize);
-		
-		var tmp = mListener;
-		mListener = null; //skip onResize()
-		try 
-		{
-			onResize(null);
-		}
-		catch(error:Dynamic) {}
-		mListener = tmp;
 	}
 	
 	public function initCanvas2dContext()
@@ -137,7 +127,7 @@ class CanvasWindow extends RenderWindow
 		
 		detectResize();
 		
-		mTimer = new Timer(500);
+		mTimer = new Timer(1000);
 		mTimer.run = detectResize;
 		mTimer.run();
 	}
@@ -165,7 +155,7 @@ class CanvasWindow extends RenderWindow
 		
 		detectResize();
 		
-		mTimer = new Timer(500);
+		mTimer = new Timer(1000);
 		mTimer.run = detectResize;
 		mTimer.run();
 	}
@@ -358,7 +348,7 @@ class CanvasWindow extends RenderWindow
 	function onTouchStart(e:TouchEvent)
 	{
 		e.preventDefault(); 
-		var x, y, syncPointer;
+		var x, y, updatePointer;
 		if (multiTouch)
 		{
 			for (i in e.changedTouches)
@@ -366,14 +356,14 @@ class CanvasWindow extends RenderWindow
 				x = i.clientX - mOffset.x;
 				y = i.clientY - mOffset.y;
 				
-				syncPointer = false;
+				updatePointer = false;
 				if (mFirstTouchId == null)
 				{
 					mFirstTouchId = i.identifier;
-					syncPointer = true;
+					updatePointer = true;
 				}
 				
-				onInput(x, y, Press, i.identifier, syncPointer);
+				onInput(x, y, Press, i.identifier, updatePointer);
 			}
 		}
 		else
@@ -449,11 +439,11 @@ class CanvasWindow extends RenderWindow
 		}
 	}
 	
-	function onInput(x:Int, y:Int, type:InputType, id = 0, syncPointer = true, hint:InputHint = cast 0)
+	function onInput(x:Int, y:Int, type:InputType, id = 0, updatePointer = true, hint:InputHint = cast 0)
 	{
 		x = Std.int(x * mDevicePixelRatio);
 		y = Std.int(y * mDevicePixelRatio);
-		if (syncPointer) mPointer.set(x, y);
+		if (updatePointer) mPointer.set(x, y);
 		
 		if (!mMouseDown && type == Move) return;
 		if (!pointerInsideViewport(x, y)) return;
@@ -483,7 +473,11 @@ class CanvasWindow extends RenderWindow
 		w = Std.int(w * mDevicePixelRatio);
 		h = Std.int(h * mDevicePixelRatio);
 		
-		if (mSize.x != w || mSize.y != h) resize(w, h);
+		if (mSize.x != w || mSize.y != h)
+		{
+			resize(w, h);
+			Browser.window.scrollTo(0, 1); //http://stackoverflow.com/questions/6011223/how-to-completely-hide-the-navigation-bar-in-iphone-html5/6011305#6011305
+		}
 	}
 	
 	function callPrefixMethod(object:Dynamic, ?name:String, ?names:Array<String>):Dynamic
