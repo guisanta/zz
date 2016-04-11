@@ -248,17 +248,8 @@ class Sprite extends SpriteBase
 	
 	override public function centerPivot()
 	{
-		if (mFlags & HINT_TRIMMED > 0)
-		{
-			mPivotX = mTrimRect.x + mTrimRect.w / 2;
-			mPivotY = mTrimRect.y + mTrimRect.h / 2;
-		}
-		else
-		{
-			mPivotX = mSizeX / 2;
-			mPivotY = mSizeY / 2;
-		}
-		
+		mPivotX = mSizeX / 2;
+		mPivotY = mSizeY / 2;
 		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
