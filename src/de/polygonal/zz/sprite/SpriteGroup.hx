@@ -354,9 +354,7 @@ class SpriteGroup extends SpriteBase
 			a[top] = null;
 			
 			arbiter = as(s.arbiter, SpriteBase);
-			
 			if (arbiter == null) continue;
-			if (arbiter.visible == false) continue;
 			
 			if (s.isNode())
 			{
