@@ -45,24 +45,22 @@ import de.polygonal.zz.texture.TextureLib;
 @:access(de.polygonal.zz.scene.Spatial)
 class Sprite extends SpriteBase
 {
+	inline public static var TYPE = 1;
+	
 	inline public static var FLAG_TRIM = 0x01;
 	
 	inline static var FLAG_SKIP_UNTRIM = 0x02;
 	inline static var FLAG_SKIP_WORLD_UPDATE = 0x04;
 	
-	inline public static var TYPE = 1;
-	
 	public static var MAX_POOL_SIZE = 256;
 	
-	static var _pool = new ArrayList<Sprite>(64);
+	static var _pool:ArrayList<Sprite>;
 	
 	public static function get(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String):Sprite
 	{
-		var sprite =
-		if (_pool.size > 0)
-			_pool.popBack();
-		else
-			new Sprite();
+		if (_pool == null) _pool = new ArrayList<Sprite>(64);
+		
+		var sprite = _pool.size > 0 ? _pool.popBack() : new Sprite();
 		
 		if (parent != null) parent.addChild(sprite);
 		
@@ -73,6 +71,8 @@ class Sprite extends SpriteBase
 	
 	public static function put(sprite:Sprite)
 	{
+		if (_pool == null) _pool = new ArrayList<Sprite>(64);
+		
 		if (_pool.size == MAX_POOL_SIZE)
 		{
 			sprite.free();
