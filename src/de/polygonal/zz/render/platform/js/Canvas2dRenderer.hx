@@ -234,7 +234,7 @@ class Canvas2dRenderer extends Renderer
 					dy = y * s;
 					if (gid > 0)
 					{
-						uv = atlas.getFrameAt(gid).texCoordPx;
+						uv = atlas.getFrameAtIndex(gid).texCoordPx;
 						ctx.drawImage(data, uv.x, uv.y, uv.w, uv.h, dx, dy, s, s);
 					}
 					else
