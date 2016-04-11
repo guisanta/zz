@@ -35,9 +35,12 @@ class TpJsonArrayFormatMacro
 		
 		if (urls.length == 0) Context.fatalError('no tp .json files found' , p);
 		
-		for (url in urls)
-			if (!FileSystem.exists(url))
-				Context.fatalError('file "$url" not found', p);
+		for (i in urls)
+			if (!FileSystem.exists(i))
+				Context.fatalError('file "$i" not found', p);
+		
+		var m = Context.getLocalClass().get().module;
+		for (i in urls) Context.registerModuleDependency(m, i);
 		
 		build(urls, fields);
 		return fields;
