@@ -48,7 +48,6 @@ class Canvas2dRenderer extends Renderer
 	var mTileMapCanvasLut:IntMap<{element:CanvasElement, context:CanvasRenderingContext2D}>;
 	var mSmoothingFlag:String;
 	var mColorChannels = new Colori();
-	var mAllowBlitting = false;
 	
 	public function new()
 	{
@@ -110,28 +109,12 @@ class Canvas2dRenderer extends Renderer
 	override function onBeginScene()
 	{
 		super.onBeginScene();
-		
-		var c = getCamera();
-		if (c == null)
-			mAllowBlitting = true;
-		else
-		{
-			//TODO with viewport?
-			//var targetSize = getRenderTarget().getSize();
-			//var vp = getRenderTarget().getPixelViewport();
-			//trace( "targetSize : " + vp.w + ' ' + vp.h + ' ' + c.sizeX + ' ' + c.sizeY);
-			//mAllowBlitting = targetSize.x == c.sizeX && targetSize.y == c.sizeY && c.rotation == 0;
-		}
-		
-		mAllowBlitting = true;
-		
 		context.save();
 	}
 	
 	override function onEndScene()
 	{
 		context.restore();
-		
 		super.onEndScene();
 	}
 	
@@ -170,26 +153,17 @@ class Canvas2dRenderer extends Renderer
 		var s = w.getScale();
 		var t = w.getTranslate();
 		
-		var flip = s.x < 0 || s.y < 0;
+		setTransform(w, ctx);
 		
-		mAllowBlitting = false;
-		
-		if (!mAllowBlitting || !w.isIdentityRotation() || flip)
+		if (s.x < 0 || s.y < 0) //flip image h/v
 		{
-			setTransform(w, ctx);
-			
-			if (flip) //flip image h/v
-			{
-				ctx.save();
-				ctx.scale(s.x < 0 ? -1 : 1, s.y < 0 ? -1 : 1);
-				ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, M.fabs(s.x), M.fabs(s.y));
-				ctx.restore();
-			}
-			else
-				ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, s.x, s.y);
+			ctx.save();
+			ctx.scale(s.x < 0 ? -1 : 1, s.y < 0 ? -1 : 1);
+			ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, M.fabs(s.x), M.fabs(s.y));
+			ctx.restore();
 		}
 		else
-			ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, t.x, t.y, s.x, s.y);
+			ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, s.x, s.y);
 	}
 	
 	override function drawTileMapEffect(effect:TileMapEffect)
