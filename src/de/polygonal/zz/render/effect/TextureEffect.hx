@@ -120,8 +120,8 @@ class TextureEffect extends Effect
 		if (mFrameIndex != value)
 		{
 			mFrameIndex = value;
-			cropRectUv = atlas.getFrameAt(value).texCoordUv;
-			cropRectPx = atlas.getFrameAt(value).texCoordPx;
+			cropRectUv = atlas.getFrameAtIndex(value).texCoordUv;
+			cropRectPx = atlas.getFrameAtIndex(value).texCoordPx;
 		}
 	}
 	

@@ -71,7 +71,7 @@ class TpJsonArrayFormat implements TextureAtlasFormat
 					name: i.filename,
 					cropRect: toRect(i.frame),
 					trimFlag: i.trimmed,
-					untrimmedSize: new Sizei(i.sourceSize.w, i.sourceSize.h),
+					sourceSize: new Sizei(i.sourceSize.w, i.sourceSize.h),
 					trimOffset: new Coord2i(i.spriteSourceSize.x, i.spriteSourceSize.y)
 				});
 		}

@@ -77,7 +77,7 @@ class BmFontFormat implements TextureAtlasFormat
 			if (code == -1) continue;
 			
 			data.frames.push({index: code, name: String.fromCharCode(code), cropRect: new Recti(bc.x, bc.y, bc.w, bc.h),
-				trimFlag: false, untrimmedSize: new Sizei(bc.w, bc.h), trimOffset: new Coord2i()});
+				trimFlag: false, sourceSize: new Sizei(bc.w, bc.h), trimOffset: new Coord2i()});
 		}
 		
 		for (pair in file.kerningPairs)

@@ -112,10 +112,11 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	
 	/* INTERFACE de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener */
 	
-	function onSpriteSheetAniUpdate(frame:String, time:Float, index:Int)
+	@:access(de.polygonal.zz.sprite.Sprite)
+	function onSpriteSheetAniUpdate(frameIndex:Int, time:Float, index:Int)
 	{
-		mSprite.frame = frame;
 		mLastTime = time;
+		mSprite.setFrameIndex(frameIndex);
 	}
 	
 	/* INTERFACE de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener */

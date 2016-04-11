@@ -343,7 +343,7 @@ class DisplayListRenderer extends Renderer
 					}
 					else
 					{
-						var uv = atlas.getFrameAt(gid).texCoordPx;
+						var uv = atlas.getFrameAtIndex(gid).texCoordPx;
 						r.x = uv.x;
 						r.y = uv.y;
 						r.width = uv.w;

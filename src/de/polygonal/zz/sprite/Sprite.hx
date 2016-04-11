@@ -96,7 +96,7 @@ class Sprite extends SpriteBase
 	var mVisual:Quad;
 	var mTrimRect:Rectf;
 	var mCurrentTexture = -1;
-	var mCurrentFrame:String;
+	var mCurrentFrameName:String;
 	var mSheetAni:SpriteSheetAni = null;
 	
 	public function new(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String)
@@ -124,7 +124,7 @@ class Sprite extends SpriteBase
 		mVisual = null;
 		mTrimRect = null;
 		mCurrentTexture = -1;
-		mCurrentFrame = null;
+		mCurrentFrameName = null;
 	}
 	
 	/**
@@ -276,7 +276,7 @@ class Sprite extends SpriteBase
 		
 		mCurrentTexture = textureId;
 		
-		mCurrentFrame = null;
+		mCurrentFrameName = null;
 		
 		//create/reuse texture effect
 		var e:TextureEffect;
@@ -317,69 +317,18 @@ class Sprite extends SpriteBase
 	}
 	
 	public var frame(get, set):String;
-	inline function get_frame():String return mCurrentFrame;
+	inline function get_frame():String return mCurrentFrameName;
 	function set_frame(name:String):String
 	{
 		assert(name != null);
-		assert(mCurrentTexture != -1, "no texture assigned");
-		assert(TextureLib.getTexture(mCurrentTexture).atlas != null, "current texture has no texture atlas definition");
 		
-		if (mCurrentFrame == name) return name; //no change
-		mCurrentFrame = name;
-		
-		//change frame
-		var e = mVisual.effect.as(TextureEffect);
-		
-		var frame = e.atlas.getFrameBy(name);
-		e.setFrameIndex(frame.index); //change uv coordinates
-		
-		mSizeX = frame.untrimmedSize.x;
-		mSizeY = frame.untrimmedSize.y;
-		
-		if (frame.trimmed)
+		if (mCurrentFrameName != name)
 		{
-			//opaque region is trimmed
-			mFlags |= HINT_TRIMMED;
-			
-			var t = frame.trimOffset;
-			var u = frame.texCoordPx;
-			
-			if (mTrimRect == null)
-				mTrimRect = new Rectf(t.x, t.y, u.w, u.h);
-			else
-			{
-				mTrimRect.x = t.x;
-				mTrimRect.y = t.y;
-				mTrimRect.w = u.w;
-				mTrimRect.h = u.h;
-			}
-			
-			setSquareHint(u.w, u.h);
+			mCurrentFrameName = name;
+			var effect = mVisual.effect.as(TextureEffect);
+			var frame = effect.atlas.getFrameByName(name);
+			setFrameIndex(frame.index);
 		}
-		else
-		{
-			mFlags &= ~HINT_TRIMMED;
-			setSquareHint(mSizeX, mSizeY);
-		}
-		
-		if (e.atlas.scale != 1.)
-		{
-			//for low-res texture, scaleFactor is < 1.
-			//to end up with the same size, we need to multiply by the inverse.
-			var invScale = 1 / e.atlas.scale;
-			mSizeX *= invScale;
-			mSizeY *= invScale;
-			
-			if (frame.trimmed)
-			{
-				mTrimRect.x *= invScale;
-				mTrimRect.y *= invScale;
-				mTrimRect.w *= invScale;
-				mTrimRect.h *= invScale;
-			}
-		}
-		
-		mFlags |= IS_LOCAL_DIRTY;
 		return name;
 	}
 	
@@ -410,7 +359,7 @@ class Sprite extends SpriteBase
 		else
 		{
 			mCurrentTexture = -1;
-			mCurrentFrame = null;
+			mCurrentFrameName = null;
 			
 			mVisual.effect.free();
 			mVisual.effect = new ColorEffect(value);
@@ -782,9 +731,68 @@ class Sprite extends SpriteBase
 		}
 	}
 	
+	function setFrameIndex(index:Int)
+	{
+		//set spritesheet frame
+		assert(mCurrentTexture != -1, "no texture assigned");
+		assert(TextureLib.getTexture(mCurrentTexture).atlas != null, "current texture has no texture atlas definition");
+		
+		var effect = mVisual.effect.as(TextureEffect);
+		effect.setFrameIndex(index); //change uv coordinates
+		
+		var frame = effect.atlas.getFrameAtIndex(index);
+		mSizeX = frame.sourceSize.x;
+		mSizeY = frame.sourceSize.y;
+		
+		if (frame.trimmed)
+		{
+			//opaque region is trimmed
+			mFlags |= HINT_TRIMMED;
+			
+			var t = frame.trimOffset;
+			var u = frame.texCoordPx;
+			
+			if (mTrimRect == null)
+				mTrimRect = new Rectf(t.x, t.y, u.w, u.h);
+			else
+			{
+				mTrimRect.x = t.x;
+				mTrimRect.y = t.y;
+				mTrimRect.w = u.w;
+				mTrimRect.h = u.h;
+			}
+			
+			setSquareHint(u.w, u.h);
+		}
+		else
+		{
+			mFlags &= ~HINT_TRIMMED;
+			setSquareHint(mSizeX, mSizeY);
+		}
+		
+		if (effect.atlas.scale != 1.)
+		{
+			//for low-res texture, scaleFactor is < 1.
+			//to end up with the same size, we need to multiply by the inverse.
+			var invScale = 1 / effect.atlas.scale;
+			mSizeX *= invScale;
+			mSizeY *= invScale;
+			
+			if (frame.trimmed)
+			{
+				mTrimRect.x *= invScale;
+				mTrimRect.y *= invScale;
+				mTrimRect.w *= invScale;
+				mTrimRect.h *= invScale;
+			}
+		}
+		
+		mFlags |= IS_LOCAL_DIRTY;
+	}
+	
 	function undoTrim()
 	{
-		assert(mVisual.effect.as(TextureEffect).atlas.getFrameBy(mCurrentFrame).trimmed);
+		assert(mVisual.effect.as(TextureEffect).atlas.getFrameByName(mCurrentFrameName).trimmed);
 		
 		mFlags |= IS_LOCAL_DIRTY;
 		mFlags &= ~HINT_TRIMMED;
@@ -793,7 +801,7 @@ class Sprite extends SpriteBase
 	
 	function redoTrim()
 	{
-		assert(mVisual.effect.as(TextureEffect).atlas.getFrameBy(mCurrentFrame).trimmed);
+		assert(mVisual.effect.as(TextureEffect).atlas.getFrameByName(mCurrentFrameName).trimmed);
 		
 		mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
 		setSquareHint(mSizeX, mSizeY);

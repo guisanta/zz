@@ -260,7 +260,7 @@ class GraphicsRenderer extends Renderer
 					
 					c += 4;
 					
-					var frame = effect.atlas.getFrameAt(gid);
+					var frame = effect.atlas.getFrameAtIndex(gid);
 					var uv = frame.texCoordUv;
 					uvt.push(uv.x);
 					uvt.push(uv.y);

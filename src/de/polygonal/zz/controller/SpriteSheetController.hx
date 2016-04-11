@@ -34,8 +34,7 @@ typedef SheetAnimation = Animation<String>;
 
 interface SpriteSheetControllerListener
 {
-	private function onSpriteSheetAniUpdate(frame:String, time:Float, index:Int):Void;
-	
+	private function onSpriteSheetAniUpdate(frameIndex:Int, time:Float, index:Int):Void;
 	private function onSpriteSheetAniFinish():Void;
 }
 
@@ -176,7 +175,7 @@ class SpriteSheetController extends Controller
 		{
 			mCurrentIndex = index;
 			
-			mListener.onSpriteSheetAniUpdate(mData.names.get(index), controlTime, index);
+			mListener.onSpriteSheetAniUpdate(index, controlTime, index);
 			
 			if (isLastFrame)
 			{

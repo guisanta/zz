@@ -19,15 +19,15 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas;
 
 import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.StringHashTable;
+import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
-import de.polygonal.core.math.Mathematics;
-import haxe.ds.Vector;
+import haxe.ds.StringMap;
 
 class TextureAtlas
 {
@@ -36,8 +36,8 @@ class TextureAtlas
 	public var texture(default, null):Texture;
 	public var userData(default, null):Dynamic;
 	
-	var mFramesByIndex:Vector<TextureAtlasFrame>;
-	var mFramesByName:StringHashTable<TextureAtlasFrame>;
+	var mFrameList:ArrayList<TextureAtlasFrame>;
+	var mFrameMap:StringMap<TextureAtlasFrame>;
 	
 	public function new(texture:Texture, data:TextureAtlasDef)
 	{
@@ -47,55 +47,37 @@ class TextureAtlas
 		
 		scale = data.scale;
 		
-		mFramesByName = new StringHashTable();
-		
 		var max = 0;
 		for (i in data.frames) max = M.max(max, i.index);
 		
-		mFramesByIndex = new Vector<TextureAtlasFrame>(max + 1);
+		mFrameList = new ArrayList<TextureAtlasFrame>().init(max + 1, null);
+		mFrameMap = new StringMap();
 		
 		numFrames = 0;
 		for (i in data.frames)
 		{
-			var frame = i == null ? null : new TextureAtlasFrame(this, i);
-			mFramesByIndex[frame.index] = frame;
-			mFramesByName.set(i.name, frame);
+			assert(i != null);
+			
+			var frame = new TextureAtlasFrame(this, i);
+			mFrameList.set(frame.index, frame);
+			mFrameMap.set(i.name, frame);
 			numFrames++;
 		}
 	}
 	
-	/*public function addSubTextureAtlas(format:TextureAtlasFormat, frame:TextureFrame)
+	inline public function getFrameAtIndex(index:Int):TextureAtlasFrame
 	{
-		//TODO adjust coordinates..
-		trace('adjust coordinates');
-		
-		for (i in 0...format.data.frames.length)
-		{
-			var f = format.data.frames[i];
-			
-			//mFramesByIndex[frame.index] = frame;
-			//mFramesByName.set(i.name, frame);
-			
-			//shift cropRectangle
-			
-			//var subFrame = data.getFrameAtIndex(i);
-		}
-	}*/
-	
-	inline public function getFrameAt(index:Int):TextureAtlasFrame
-	{
-		assert(index >= 0 && index < mFramesByIndex.length);
-		return mFramesByIndex[index];
+		return mFrameList.get(index);
 	}
 	
-	inline public function getFrameBy(name:String):TextureAtlasFrame
+	inline public function getFrameByName(name:String):TextureAtlasFrame
 	{
 		#if debug
-		var f = mFramesByName.get(name);
+		var f = mFrameMap.get(name);
 		assert(f != null, 'frame "$name" not found');
 		return f;
 		#else
-		return mFramesByName.get(name);
+		return mFrameMap.get(name);
 		#end
 	}
 }
@@ -113,7 +95,7 @@ class TextureAtlasFrame
 	/**
 		The original size *before* trimming.
 	**/
-	public var untrimmedSize(default, null):Sizei;
+	public var sourceSize(default, null):Sizei;
 	
 	public var texCoordUv(default, null):Rectf;
 	public var texCoordPx(default, null):Recti;
@@ -149,12 +131,12 @@ class TextureAtlasFrame
 		if (trimmed)
 		{
 			trimOffset = data.trimOffset.clone();
-			untrimmedSize = data.untrimmedSize.clone();
+			sourceSize = data.sourceSize.clone();
 		}
 		else
 		{
 			trimOffset = new Coord2i();
-			untrimmedSize = new Sizei(data.cropRect.w, data.cropRect.h);
+			sourceSize = new Sizei(data.cropRect.w, data.cropRect.h);
 		}
 	}
 }
