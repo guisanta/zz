@@ -375,13 +375,8 @@ class Sprite extends SpriteBase
 	{
 		if (output == null) output = new Aabb2();
 		
-		var untrim = (flags & (FLAG_SKIP_UNTRIM | FLAG_TRIM) == 0) && (mFlags & HINT_TRIMMED > 0);
-		if (untrim)
-		{
-			mFlags |= IS_LOCAL_DIRTY;
-			mFlags &= ~HINT_TRIMMED;
-			setSquareHint(mSizeX, mSizeY);
-		}
+		var trimmed = (mFlags & HINT_TRIMMED > 0) && (flags & (FLAG_SKIP_UNTRIM | FLAG_TRIM) == 0);
+		if (trimmed) unTrim();
 		
 		if (flags & FLAG_SKIP_WORLD_UPDATE == 0)
 		{
@@ -389,14 +384,11 @@ class Sprite extends SpriteBase
 			if (SpriteTools.isAncestor(this, targetSpace) == false)
 				SpriteTools.updateWorldTransform(targetSpace);
 		}
-		
+
 		var bounds = mSpatial.getBoundingBox(targetSpace.sgn, output);
 		
-		if (untrim)
-		{
-			mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
-			setSquareHint(mSizeX, mSizeY);
-		}
+		if (trimmed) reTrim();
+		
 		return bounds;
 	}
 	
@@ -781,21 +773,23 @@ class Sprite extends SpriteBase
 		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
-	function undoTrim()
+	inline function unTrim()
 	{
 		assert(mVisual.effect.as(TextureEffect).atlas.getFrameByName(mCurrentFrameName).trimmed);
+		assert(mFlags <= 0xffff);
 		
+		mFlags |= mFlags << 16; //make copy
 		mFlags |= IS_LOCAL_DIRTY;
 		mFlags &= ~HINT_TRIMMED;
 		setSquareHint(mSizeX, mSizeY);
 	}
 	
-	function redoTrim()
+	inline function reTrim()
 	{
 		assert(mVisual.effect.as(TextureEffect).atlas.getFrameByName(mCurrentFrameName).trimmed);
 		
-		mFlags |= HINT_TRIMMED | IS_LOCAL_DIRTY;
-		setSquareHint(mSizeX, mSizeY);
+		mFlags >>>= 16; //restore copy
+		mFlags |= IS_LOCAL_DIRTY;
 	}
 	
 	inline function setSquareHint(w:Float, h:Float) w == h ? mFlags |= HINT_SQUARE_SIZE : mFlags &= ~HINT_SQUARE_SIZE;

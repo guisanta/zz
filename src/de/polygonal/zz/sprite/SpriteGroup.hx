@@ -24,15 +24,13 @@ import de.polygonal.core.math.Limits;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Size.Sizef;
-import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
-import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.SpatialFlags;
 import de.polygonal.zz.scene.TreeTools;
-import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.Sprite.*;
+import de.polygonal.zz.sprite.SpriteBase.*;
 import de.polygonal.zz.sprite.SpriteTools;
 import de.polygonal.core.math.Mathematics;
 
@@ -67,8 +65,7 @@ class SpriteGroup extends SpriteBase
 				addChild(i);
 		mBoundOut = new Aabb2();
 		
-		if (COUNT++ == 0)
-			_tmpSpriteList = new ArrayList(16);
+		if (COUNT++ == 0) _tmpSpriteList = new ArrayList(16);
 	}
 	
 	override public function syncLocal():SpriteBase
@@ -94,17 +91,18 @@ class SpriteGroup extends SpriteBase
 	
 	override public function free()
 	{
+		if (mNode == null) return;
+		
 		assert(numChildren == 0, "children must be removed first before calling free()");
+		
 		mNode = null;
-		super.free();
 		if (--COUNT == 0)
 		{
-			if (_tmpSpriteList != null)
-			{
-				_tmpSpriteList.free();
-				_tmpSpriteList = null;
-			}
+			_tmpSpriteList.free();
+			_tmpSpriteList = null;
 		}
+		
+		super.free();
 	}
 	
 	public function freeDescendants()
@@ -310,7 +308,7 @@ class SpriteGroup extends SpriteBase
 	{
 		if (output == null) output = new Aabb2();
 		
-		var leafs = _tmpSpriteList, k = 0, i = 0;
+		var leafs = _tmpSpriteList, k = 0, i = 0, max = 0;
 		
 		var untrim = flags & Sprite.FLAG_TRIM == 0;
 		if (untrim)
@@ -318,14 +316,15 @@ class SpriteGroup extends SpriteBase
 			leafs.clear();
 			
 			SpriteTools.descendants(this, true, false, leafs);
-			k = leafs.size;
+			max = k = leafs.size;
+			
 			var s;
 			while (i < k)
 			{
 				s = leafs.get(i);
 				if (s.type == Sprite.TYPE && s.mFlags & HINT_TRIMMED > 0)
 				{
-					as(s, Sprite).undoTrim();
+					as(s, Sprite).unTrim();
 					i++;
 				}
 				else
@@ -388,10 +387,8 @@ class SpriteGroup extends SpriteBase
 		if (untrim)
 		{
 			while (--k > -1)
-			{
-				as(leafs.get(k), Sprite).redoTrim();
-				leafs.set(k, null);
-			}
+				as(leafs.get(k), Sprite).reTrim();
+			leafs.init(max, null);
 		}
 		return output;
 	}
