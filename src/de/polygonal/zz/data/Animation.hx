@@ -24,7 +24,7 @@ package de.polygonal.zz.data;
 typedef AnimationFrame<V> =
 {
 	value:V,
-	holdTime:Float,
+	holdTime:Float
 }
 
 /**

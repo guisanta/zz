@@ -34,6 +34,7 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	var mSprite:Sprite;
 	var mLastTime:Float = 0;
 	var mCurrentAnimation:SheetAnimation;
+	var mCurrentOffset:Int;
 	
 	public function new(sprite:Sprite)
 	{
@@ -52,12 +53,12 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	
 	public function play(animation:SheetAnimation, ?startOver:Bool = true, ?onFinish:SheetAnimation->Void):SpriteSheetAni
 	{
+		mCurrentAnimation = animation;
+		mCurrentOffset = animation.offset;
 		var c = getController();
 		c.play(animation, startOver ? 0 : mLastTime);
 		c.onFinish = onFinish;
 		length = c.maxTime;
-		mCurrentAnimation = animation;
-		
 		return this;
 	}
 	
@@ -80,6 +81,7 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 		getController().stop();
 		length = -1;
 		mCurrentAnimation = null;
+		mCurrentOffset = -1;
 		
 		return this;
 	}
@@ -116,7 +118,7 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	function onSpriteSheetAniUpdate(frameIndex:Int, time:Float, index:Int)
 	{
 		mLastTime = time;
-		mSprite.setFrameIndex(frameIndex);
+		mSprite.setFrameIndex(mCurrentOffset + frameIndex);
 	}
 	
 	/* INTERFACE de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener */

@@ -30,7 +30,9 @@ import haxe.ds.StringMap;
 /**
 	A simple frame-by-frame animation.
 **/
-typedef SheetAnimation = Animation<String>;
+typedef SheetAnimation = {
+	> Animation<String>, offset:Int //index of first animation frame (relative to sprite sheet)
+}
 
 interface SpriteSheetControllerListener
 {
