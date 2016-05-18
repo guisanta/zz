@@ -263,24 +263,26 @@ private class Data
 		inline function set(pos:Int, chnl:KeyValue, val:Float) parameters[pos * 6 + chnl.getIndex()] = val;
 		
 		var sx = 1., sy = 1., r = 0., x = 0., y = 0., a = 1.;
-		var i = 0, v;
-		for (frame in def.frames)
+		var i = 0, v:Dynamic;
+		
+		var frames:Array<Dynamic> = def.field("frames");
+		for (frame in frames)
 		{
 			times[i] = length;
-			length += frame.holdTime;
+			length += frame.field("holdTime");
 			
-			v = frame.value;
+			v = frame.field("value");
 			
-			set(i, ScaleX, sx = v.hasField("sx") ? v.sx : sx);
-			set(i, ScaleY, sy = v.hasField("sy") ? v.sy : sy);
-			set(i, Rotate, r = v.hasField("r") ? v.r : r);
-			set(i, TranslateX, x = v.hasField("x") ? v.x : x);
-			set(i, TranslateY, y = v.hasField("y") ? v.y : y);
-			set(i, Alpha, a = v.hasField("a") ? v.a : a);
+			set(i, ScaleX, sx = v.hasField("sx") ? v.field("sx") : sx);
+			set(i, ScaleY, sy = v.hasField("sy") ? v.field("sy") : sy);
+			set(i, Rotate, r = v.hasField("r") ? v.field("r") : r);
+			set(i, TranslateX, x = v.hasField("x") ? v.field("x") : x);
+			set(i, TranslateY, y = v.hasField("y") ? v.field("y") : y);
+			set(i, Alpha, a = v.hasField("a") ? v.field("a") : a);
 			
 			easing[i] =
 			if (v.hasField("easing"))
-				EaseFactory.create(v.easing);
+				EaseFactory.create(cast v.field("easing"));
 			else
 				linear;
 			i++;
