@@ -34,7 +34,7 @@ class PainterQuadColor extends PainterQuad
 {
 	var mColorChannels = new Colori();
 	
-	public function new(renderer:Stage3dRenderer, featureFlags:Int)
+	public function new(renderer:Stage3dRenderer, featureFlags:Int, textureFlags:Int)
 	{
 		super(renderer, featureFlags);
 		
