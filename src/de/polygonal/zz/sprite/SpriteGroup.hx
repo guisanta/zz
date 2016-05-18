@@ -259,7 +259,7 @@ class SpriteGroup extends SpriteBase
 	
 	public function pick(point:Coord2f, result:Array<Sprite>):Int
 	{
-		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
+		if (mFlags & HINT_LOCAL_DIRTY > 0) syncLocal();
 		
 		var f = sgn.mFlags;
 		if (f & SpatialFlags.IS_WORLD_XFORM_DIRTY > 0)
@@ -440,7 +440,7 @@ class SpriteGroup extends SpriteBase
 	**/
 	override public function centerPivot()
 	{
-		if (mFlags & IS_LOCAL_DIRTY > 0) syncLocal();
+		if (mFlags & HINT_LOCAL_DIRTY > 0) syncLocal();
 		
 		mNode.updateGeometricState();
 		
@@ -448,7 +448,7 @@ class SpriteGroup extends SpriteBase
 		mPivotX = bound.w / 2;
 		mPivotY = bound.h / 2;
 		
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	override public function centerOrigin()
@@ -456,6 +456,6 @@ class SpriteGroup extends SpriteBase
 		var bound = getBounds(this, mBoundOut);
 		originX = bound.w / 2;
 		originY = bound.h / 2;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 }

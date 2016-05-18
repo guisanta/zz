@@ -24,6 +24,7 @@ import de.polygonal.ds.IntHashTable;
 import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
+import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
 
 using Std;
 
@@ -42,7 +43,7 @@ class BmFontFormat implements TextureAtlasFormat
 	
 	public function getAtlas():TextureAtlasDef
 	{
-		var data:TextureAtlasDef = {size: new Sizei(), scale: 1., frames: []};
+		var data = new TextureAtlasDef();
 		
 		var file = new BmFontFile(mSrc);
 		var charSet = new BitmapCharSet();
@@ -76,8 +77,17 @@ class BmFontFormat implements TextureAtlasFormat
 			
 			if (code == -1) continue;
 			
-			data.frames.push({index: code, name: String.fromCharCode(code), cropRect: new Recti(bc.x, bc.y, bc.w, bc.h),
-				trimFlag: false, sourceSize: new Sizei(bc.w, bc.h), trimOffset: new Coord2i()});
+			var f = new TextureAtlasFrameDef();
+			data.frames.push(f);
+			
+			f.index = code;
+			f.name = String.fromCharCode(code);
+			f.cropRect.x = bc.x;
+			f.cropRect.y = bc.y;
+			f.cropRect.w = bc.w;
+			f.cropRect.h = bc.h;
+			f.sourceSize.x = bc.w;
+			f.sourceSize.y = bc.h;
 		}
 		
 		for (pair in file.kerningPairs)

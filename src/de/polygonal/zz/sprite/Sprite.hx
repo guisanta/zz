@@ -37,18 +37,16 @@ import de.polygonal.zz.texture.TextureLib;
 /**
 	A Sprite is a rectangular, drawable representation of a texture, with its own transformations, color, etc.
 **/
-@:build(de.polygonal.core.macro.IntConsts.build(
-[
-	HAS_SIZE,
-	HINT_TRIMMED, HINT_SQUARE_SIZE
-], true, false, "de.polygonal.zz.sprite.SpriteBase"))
 @:access(de.polygonal.zz.scene.Spatial)
 class Sprite extends SpriteBase
 {
+	inline static var HINT_SIZE = 0x80;
+	inline static var HINT_SQUARE = 0x100;
+	inline static var HINT_TRIMMED = 0x200;
+	
 	inline public static var TYPE = 1;
 	
 	inline public static var FLAG_TRIM = 0x01;
-	
 	inline static var FLAG_SKIP_UNTRIM = 0x02;
 	inline static var FLAG_SKIP_WORLD_UPDATE = 0x04;
 	
@@ -177,7 +175,7 @@ class Sprite extends SpriteBase
 		
 		mScaleX = value / mSizeX;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_SCALE | HINT_LOCAL_DIRTY;
 		return value;
 	}
 	
@@ -228,7 +226,7 @@ class Sprite extends SpriteBase
 		assert(mSizeY != 0, "height must not be zero, call setTexture() or setColor() first");
 		mScaleY = value / mSizeY;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_SCALE | HINT_LOCAL_DIRTY;
 		return value;
 	}
 	
@@ -250,7 +248,7 @@ class Sprite extends SpriteBase
 	{
 		mPivotX = mSizeX / 2;
 		mPivotY = mSizeY / 2;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	public function getTexture():Int
@@ -302,7 +300,7 @@ class Sprite extends SpriteBase
 		
 		setSquareHint(mSizeX, mSizeY);
 		mFlags &= ~HINT_TRIMMED;
-		mFlags |= HAS_SIZE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_SIZE | HINT_LOCAL_DIRTY;
 		
 		if (frame != null) set_frame(frame);
 	}
@@ -337,7 +335,7 @@ class Sprite extends SpriteBase
 		mSizeY = contentSize.y;
 		setSquareHint(mSizeX, mSizeY);
 		mFlags &= ~HINT_TRIMMED;
-		mFlags |= HAS_SIZE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_SIZE | HINT_LOCAL_DIRTY;
 		
 		if (mCurrentTexture == -1)
 		{
@@ -394,7 +392,7 @@ class Sprite extends SpriteBase
 	
 	override public function syncLocal():SpriteBase
 	{
-		if (mFlags & HAS_SIZE == 0) return this;
+		if (mFlags & HINT_SIZE == 0) return this;
 		return super.syncLocal();
 	}
 	
@@ -440,13 +438,13 @@ class Sprite extends SpriteBase
 		
 		mScaleX = mScaleY = value / mSizeX;
 		mFlags &= ~HINT_UNIT_SCALE;
-		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | IS_LOCAL_DIRTY);
+		mFlags |= (HINT_SCALE | HINT_UNIFORM_SCALE | HINT_LOCAL_DIRTY);
 		return value;
 	}
 	
 	override function updateLocalTransform()
 	{
-		mFlags &= ~IS_LOCAL_DIRTY;
+		mFlags &= ~HINT_LOCAL_DIRTY;
 		mSpatial.mFlags |= SpatialFlags.IS_WORLD_XFORM_DIRTY;
 		
 		/* SRT update:
@@ -462,7 +460,7 @@ class Sprite extends SpriteBase
 			var px = mPivotX - mTrimRect.x;
 			var py = mPivotY - mTrimRect.y;
 			
-			var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_SQUARE_SIZE);
+			var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_SQUARE);
 			if (hints & HINT_ROTATE > 0)
 			{
 				/* rotate and scale around pivot point
@@ -483,7 +481,7 @@ class Sprite extends SpriteBase
 				if (hints & HINT_UNIT_SCALE > 0)
 				{
 					//R, S = I
-					if (hints & HINT_SQUARE_SIZE > 0)
+					if (hints & HINT_SQUARE > 0)
 						l.setUniformScale2(mTrimRect.w);
 					else
 						l.setScale2(mTrimRect.w, mTrimRect.h);
@@ -503,7 +501,7 @@ class Sprite extends SpriteBase
 						var spx = su * px;
 						var spy = su * py;
 						
-						if (hints & HINT_SQUARE_SIZE > 0)
+						if (hints & HINT_SQUARE > 0)
 							l.setUniformScale2(mTrimRect.w * su);
 						else
 							l.setScale2(mTrimRect.w * su, mTrimRect.h * su);
@@ -537,7 +535,7 @@ class Sprite extends SpriteBase
 				if (hints & HINT_UNIT_SCALE > 0)
 				{
 					//R = I, S = I
-					if (hints & HINT_SQUARE_SIZE > 0)
+					if (hints & HINT_SQUARE > 0)
 						l.setUniformScale2(mTrimRect.w);
 					else
 						l.setScale2(mTrimRect.w, mTrimRect.h);
@@ -563,7 +561,7 @@ class Sprite extends SpriteBase
 						//R = I, S = cI
 						var su = clampScale(mScaleX);
 						
-						if (hints & HINT_SQUARE_SIZE > 0)
+						if (hints & HINT_SQUARE > 0)
 							l.setUniformScale2(mTrimRect.w * su);
 						else
 							l.setScale2(mTrimRect.w * su, mTrimRect.h * su);
@@ -596,7 +594,7 @@ class Sprite extends SpriteBase
 			var px = mPivotX;
 			var py = mPivotY;
 			
-			var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_SQUARE_SIZE);
+			var hints = mFlags & (HINT_ROTATE | HINT_SCALE | HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_SQUARE);
 			if (hints & HINT_ROTATE > 0)
 			{
 				//rotate and scale around pivot point
@@ -611,7 +609,7 @@ class Sprite extends SpriteBase
 				if (hints & HINT_UNIT_SCALE > 0)
 				{
 					//R, S = I
-					if (hints & HINT_SQUARE_SIZE > 0)
+					if (hints & HINT_SQUARE > 0)
 						l.setUniformScale2(mSizeX);
 					else
 						l.setScale2(mSizeX, mSizeY);
@@ -631,7 +629,7 @@ class Sprite extends SpriteBase
 						var spx = su * px;
 						var spy = su * py;
 						
-						if (hints & HINT_SQUARE_SIZE > 0)
+						if (hints & HINT_SQUARE > 0)
 							l.setUniformScale2(mSizeX * su);
 						else
 							l.setScale2(mSizeX * su, mSizeY * su);
@@ -665,7 +663,7 @@ class Sprite extends SpriteBase
 				if (hints & HINT_UNIT_SCALE > 0)
 				{
 					//R = I, S = I
-					if (hints & HINT_SQUARE_SIZE > 0)
+					if (hints & HINT_SQUARE > 0)
 						l.setUniformScale2(mSizeX);
 					else
 						l.setScale2(mSizeX, mSizeY);
@@ -684,7 +682,7 @@ class Sprite extends SpriteBase
 						//R = I, S = cI
 						var su = clampScale(mScaleX);
 						
-						if (hints & HINT_SQUARE_SIZE > 0)
+						if (hints & HINT_SQUARE > 0)
 							l.setUniformScale2(mSizeX * su);
 						else
 							l.setScale2(mSizeX * su, mSizeY * su);
@@ -770,7 +768,7 @@ class Sprite extends SpriteBase
 			}
 		}
 		
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	inline function unTrim()
@@ -779,7 +777,7 @@ class Sprite extends SpriteBase
 		assert(mFlags <= 0xffff);
 		
 		mFlags |= mFlags << 16; //make copy
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 		mFlags &= ~HINT_TRIMMED;
 		setSquareHint(mSizeX, mSizeY);
 	}
@@ -789,8 +787,8 @@ class Sprite extends SpriteBase
 		assert(mVisual.effect.as(TextureEffect).atlas.getFrameByName(mCurrentFrameName).trimmed);
 		
 		mFlags >>>= 16; //restore copy
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
-	inline function setSquareHint(w:Float, h:Float) w == h ? mFlags |= HINT_SQUARE_SIZE : mFlags &= ~HINT_SQUARE_SIZE;
+	inline function setSquareHint(w:Float, h:Float) w == h ? mFlags |= HINT_SQUARE : mFlags &= ~HINT_SQUARE;
 }

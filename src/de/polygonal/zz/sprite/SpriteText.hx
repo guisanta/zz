@@ -391,7 +391,7 @@ class SpriteText extends SpriteBase
 		var charBounds = getTextBounds();
 		mPivotX = charBounds.cx;
 		mPivotY = charBounds.cy;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	override public function tick(dt:Float)

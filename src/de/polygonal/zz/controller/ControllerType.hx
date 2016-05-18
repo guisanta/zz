@@ -75,7 +75,6 @@ class ControllerType
 			kind: FVar(TPath({pack: [], name: "Int", params: [], sub: null}), {expr: EConst(CInt(Std.string(_counter))), pos: p}),
 			pos: p
 		});
-		
 		return fields;
 	}
 	static var _counter = 0;

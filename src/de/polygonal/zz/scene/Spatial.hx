@@ -442,6 +442,6 @@ class Spatial extends ControlledObject implements Hashable
 	
 	public function toString():String
 	{
-		return Printf.format('${ClassUtil.getUnqualifiedClassName(this)} name=%s', [name]);
+		return ClassTools.getUnqualifiedClassName(this) + " name=" + name;
 	}
 }

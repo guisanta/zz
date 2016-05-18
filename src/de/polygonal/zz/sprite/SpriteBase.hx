@@ -33,14 +33,17 @@ import de.polygonal.zz.scene.SpatialFlags.*;
 /**
 	Abstract base class for sprite objects.
 **/
-@:build(de.polygonal.core.macro.IntConsts.build(
-[
-	IS_LOCAL_DIRTY, IS_ALPHA_DIRTY, IS_VISIBILITY_DIRTY,
-	HINT_ROTATE, HINT_SCALE, HINT_UNIFORM_SCALE, HINT_UNIT_SCALE
-], true, false, "de.polygonal.zz.sprite.SpriteBase"))
 @:access(de.polygonal.zz.scene.Spatial)
 class SpriteBase
 {
+	inline static var HINT_LOCAL_DIRTY = 0x01;
+	inline static var HINT_ALPHA_DIRTY = 0x02;
+	inline static var HINT_VISIBILITY_DIRTY = 0x04;
+	inline static var HINT_ROTATE = 0x08;
+	inline static var HINT_SCALE = 0x10;
+	inline static var HINT_UNIFORM_SCALE = 0x20;
+	inline static var HINT_UNIT_SCALE = 0x40;
+	
 	public static var gc = false; //flag is raised every time free() is called
 	
 	inline static var SCALE_EPS = .001;
@@ -151,7 +154,7 @@ class SpriteBase
 		if (mAlpha != value)
 		{
 			mAlpha = Mathematics.fclamp(value, 0, 1);
-			mFlags |= IS_ALPHA_DIRTY;
+			mFlags |= HINT_ALPHA_DIRTY;
 		}
 		return mAlpha;
 	}
@@ -166,7 +169,7 @@ class SpriteBase
 		if (mVisible != value)
 		{
 			mVisible = value;
-			mFlags |= IS_VISIBILITY_DIRTY;
+			mFlags |= HINT_VISIBILITY_DIRTY;
 		}
 		return value;
 	}
@@ -183,7 +186,7 @@ class SpriteBase
 		if (mX != value)
 		{
 			mX = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -200,7 +203,7 @@ class SpriteBase
 		if (mY != value)
 		{
 			mY = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -217,7 +220,7 @@ class SpriteBase
 		if (mRotation != value)
 		{
 			mRotation = value;
-			mFlags |= HINT_ROTATE | IS_LOCAL_DIRTY;
+			mFlags |= HINT_ROTATE | HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -238,7 +241,7 @@ class SpriteBase
 		if (mScaleX != value || mScaleY != value)
 		{
 			mScaleX = mScaleY = value;
-			mFlags |= HINT_SCALE | HINT_UNIFORM_SCALE | IS_LOCAL_DIRTY;
+			mFlags |= HINT_SCALE | HINT_UNIFORM_SCALE | HINT_LOCAL_DIRTY;
 			mFlags &= ~HINT_UNIT_SCALE;
 		}
 		return value;
@@ -258,7 +261,7 @@ class SpriteBase
 		{
 			mScaleX = value;
 			mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-			mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+			mFlags |= HINT_SCALE | HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -277,7 +280,7 @@ class SpriteBase
 		{
 			mScaleY = value;
 			mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-			mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+			mFlags |= HINT_SCALE | HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -333,7 +336,7 @@ class SpriteBase
 		if (mOriginX != value)
 		{
 			mOriginX = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -351,7 +354,7 @@ class SpriteBase
 		if (mOriginY != value)
 		{
 			mOriginY = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -372,7 +375,7 @@ class SpriteBase
 		if (mPivotX != value)
 		{
 			mPivotX = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -392,7 +395,7 @@ class SpriteBase
 		if (mPivotY != value)
 		{
 			mPivotY = value;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 		return value;
 	}
@@ -405,7 +408,7 @@ class SpriteBase
 	{
 		originX = width / 2;
 		originY = height / 2;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	/**
@@ -424,7 +427,7 @@ class SpriteBase
 		{
 			mX = x;
 			mY = y;
-			mFlags |= IS_LOCAL_DIRTY;
+			mFlags |= HINT_LOCAL_DIRTY;
 		}
 	}
 	
@@ -434,26 +437,26 @@ class SpriteBase
 		mScaleX = x;
 		mScaleY = y;
 		mFlags &= ~(HINT_UNIFORM_SCALE | HINT_UNIT_SCALE);
-		mFlags |= HINT_SCALE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_SCALE | HINT_LOCAL_DIRTY;
 	}
 	
 	public function resetOrigin()
 	{
 		mOriginX = mOriginY = 0;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	public function resetPivot()
 	{
 		mPivotX = mPivotY = 0;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 	}
 	
 	public function resetScale()
 	{
 		mScaleX = mScaleX = 1;
 		mFlags &= ~HINT_SCALE;
-		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_LOCAL_DIRTY;
 		mSpatial.local.setUnitScale2();
 	}
 	
@@ -461,7 +464,7 @@ class SpriteBase
 	{
 		mRotation = 0;
 		mFlags &= ~HINT_ROTATE;
-		mFlags |= IS_LOCAL_DIRTY;
+		mFlags |= HINT_LOCAL_DIRTY;
 		mSpatial.local.setIdentityRotation();
 	}
 	
@@ -473,7 +476,7 @@ class SpriteBase
 		mScaleY = 1.;
 		mRotation = 0.;
 		mFlags &= ~(HINT_ROTATE | HINT_SCALE);
-		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | IS_LOCAL_DIRTY;
+		mFlags |= HINT_UNIFORM_SCALE | HINT_UNIT_SCALE | HINT_LOCAL_DIRTY;
 		mSpatial.local.setIdentity2();
 		
 		//TODO test with spritesheet frame
@@ -490,16 +493,17 @@ class SpriteBase
 	**/
 	public function toWorldSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
+		if (mFlags & HINT_LOCAL_DIRTY > 0) updateLocalTransform();
 		return mSpatial.world.applyForward2(input, output);
 	}
 	
 	/**
 		Converts a point from world coordinates (`input`) to local space coordinates (`output`).
+		Note: `input` and `output` can point to the same object.
 	**/
 	public function toLocalSpace(input:Coord2f, output:Coord2f):Coord2f
 	{
-		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
+		if (mFlags & HINT_LOCAL_DIRTY > 0) updateLocalTransform();
 		return mSpatial.world.applyInverse2(input, output);
 	}
 	
@@ -514,19 +518,19 @@ class SpriteBase
 	**/
 	public function syncLocal():SpriteBase
 	{
-		if (mFlags & (IS_LOCAL_DIRTY | IS_VISIBILITY_DIRTY | IS_ALPHA_DIRTY) == 0) return this;
+		if (mFlags & (HINT_LOCAL_DIRTY | HINT_VISIBILITY_DIRTY | HINT_ALPHA_DIRTY) == 0) return this;
 		
-		if (mFlags & IS_LOCAL_DIRTY > 0) updateLocalTransform();
-		if (mFlags & IS_VISIBILITY_DIRTY > 0)
+		if (mFlags & HINT_LOCAL_DIRTY > 0) updateLocalTransform();
+		if (mFlags & HINT_VISIBILITY_DIRTY > 0)
 		{
 			if (mAlpha == 0)
 				mSpatial.cullingMode = CullingMode.CullAlways; //always skip rendering
 			else
 				mSpatial.cullingMode = mVisible ? CullingMode.CullDynamic : CullingMode.CullAlways;
 			
-			mFlags &= ~IS_VISIBILITY_DIRTY;
+			mFlags &= ~HINT_VISIBILITY_DIRTY;
 		}
-		if (mFlags & IS_ALPHA_DIRTY > 0)
+		if (mFlags & HINT_ALPHA_DIRTY > 0)
 		{
 			if (mAlpha < 1)
 			{
@@ -545,7 +549,7 @@ class SpriteBase
 				mSpatial.removeGlobalState(GlobalStateType.AlphaMultiplier);
 			}
 			
-			mFlags &= ~IS_ALPHA_DIRTY;
+			mFlags &= ~HINT_ALPHA_DIRTY;
 			mSpatial.mFlags |= IS_RS_DIRTY;
 		}
 		return this;
@@ -586,7 +590,7 @@ class SpriteBase
 	
 	function updateLocalTransform()
 	{
-		mFlags &= ~IS_LOCAL_DIRTY;
+		mFlags &= ~HINT_LOCAL_DIRTY;
 		mSpatial.mFlags |= IS_WORLD_XFORM_DIRTY;
 		
 		/*//simple brute-force SRT update
@@ -618,7 +622,7 @@ class SpriteBase
 			-(spx * s) - (spy * c) + mPivotY + y - mOriginY
 		);*/
 		
-		mFlags &= ~IS_LOCAL_DIRTY;
+		mFlags &= ~HINT_LOCAL_DIRTY;
 		mSpatial.mFlags |= IS_WORLD_XFORM_DIRTY;
 		
 		var l = mSpatial.local;
