@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash.stage3d;
 
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.ds.Bits;
+import de.polygonal.ds.tools.Bits;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.IntHashTable;
 import de.polygonal.zz.data.Color;

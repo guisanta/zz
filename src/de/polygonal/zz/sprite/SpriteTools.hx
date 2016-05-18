@@ -229,7 +229,7 @@ class SpriteTools
 			if (p.arbiter != null)
 			{
 				s = as(p.arbiter, SpriteBase);
-				if (s.mFlags & SpriteBase.IS_LOCAL_DIRTY > 0)
+				if (s.mFlags & SpriteBase.HINT_LOCAL_DIRTY > 0)
 					s.updateLocalTransform();
 			}
 			

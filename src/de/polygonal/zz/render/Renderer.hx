@@ -29,7 +29,7 @@ import de.polygonal.zz.scene.*;
 import de.polygonal.zz.scene.AlphaBlendState.AlphaBlendMode;
 import de.polygonal.zz.texture.*;
 import haxe.EnumFlags;
-import de.polygonal.core.util.ClassUtil;
+import de.polygonal.core.util.ClassTools;
 
 @:allow(de.polygonal.zz.render.effect)
 class Renderer
@@ -89,7 +89,7 @@ class Renderer
 	
 	public function new()
 	{
-		L.d('${ClassUtil.getUnqualifiedClassName(this)} created');
+		L.d(ClassTools.getUnqualifiedClassName(this) + " created");
 		
 		mCuller = new Culler(this);
 		

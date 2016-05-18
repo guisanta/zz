@@ -46,7 +46,7 @@ class TweenController extends Controller
 	
 	public function new()
 	{
-		super();
+		super(TYPE);
 	}
 	
 	inline public function setListener(listener:TweenControllerListener)

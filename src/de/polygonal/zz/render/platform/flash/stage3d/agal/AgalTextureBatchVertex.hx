@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash.stage3d.agal;
 
 import flash.display3D.Context3D;
 
-using de.polygonal.ds.Bits;
+using de.polygonal.ds.tools.Bits;
 
 class AgalTextureBatchVertex extends AgalTextureShader
 {

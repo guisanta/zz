@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.core.util.ClassUtil;
+import de.polygonal.core.util.ClassTools;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalShader;
@@ -58,7 +58,7 @@ class Painter
 		mConstantRegisters = new Vector<Float>();
 		
 		var flags = PainterFeature.print(featureFlags);
-		L.d('creating painter: ${ClassUtil.getUnqualifiedClassName(Type.getClass(this))} [${flags}]', "s3d");
+		L.d("creating painter: " + ClassTools.getUnqualifiedClassName(Type.getClass(this)) + " [" + flags + "]", "s3d");
 	}
 	
 	public function free()

@@ -59,7 +59,7 @@ class SpriteSheetController extends Controller
 	
 	public function new()
 	{
-		super();
+		super(TYPE);
 	}
 	
 	override public function free()

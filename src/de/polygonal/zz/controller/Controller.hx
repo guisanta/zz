@@ -36,7 +36,7 @@ class Controller
 	public var passedTime:Float = 0;
 	public var dispose:Bool;
 	
-	public var type:Int;
+	public var type(default, null):Int;
 	public var next:Controller;
 	
 	var mActive = false;
@@ -51,10 +51,10 @@ class Controller
 	
 	var mObject:ControlledObject;
 	
-	function new()
+	function new(type:Int)
 	{
+		this.type = type;
 		repeat = RepeatType.Clamp;
-		type = Reflect.field(Type.getClass(this), "TYPE");
 		COUNT++;
 	}
 	
