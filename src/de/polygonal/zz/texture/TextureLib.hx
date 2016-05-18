@@ -11,7 +11,7 @@ import haxe.ds.IntMap;
 
 class TextureLib
 {
-	public static var textureScale = 1.;
+	public static var globalTextureScale = 1.;
 	
 	static var _renderer:Renderer;
 	static var _imageLut = new IntMap<ImageData>();
@@ -32,7 +32,7 @@ class TextureLib
 		var texture = new Texture();
 		texture.isAlphaPremultiplied = pma;
 		texture.setImageData(image, _renderer.supportsNonPowerOfTwoTextures);
-		texture.scale = textureScale;
+		texture.scale = globalTextureScale;
 		
 		assert(!_textureLut.exists(id));
 		_textureLut.set(id, texture);
