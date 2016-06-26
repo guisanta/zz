@@ -25,6 +25,7 @@ import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
+import haxe.ds.IntMap;
 
 using Std;
 
@@ -40,6 +41,27 @@ class BmFontFormat implements TextureAtlasFormat
 	{
 		mSrc = src;
 	}
+	
+	#if debug
+	public function getMissingChars(string:String):Array<String>
+	{
+		var map = new IntMap<String>();
+		var lut = [];
+		var file = new BmFontFile(mSrc);
+		for (char in file.chars) lut[char.id] = true;
+		
+		for (i in 0...string.length)
+		{
+			var code = string.charCodeAt(i);
+			
+			if (StringTools.isSpace(string.charAt(i), 0)) continue;
+			
+			var char = string.charAt(i);
+			if (!lut[code]) map.set(code, char);
+		}
+		return Lambda.array(map);
+	}
+	#end
 	
 	public function getAtlas():TextureAtlasDef
 	{
