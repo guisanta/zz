@@ -20,23 +20,19 @@ package de.polygonal.zz.controller;
 
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
-import de.polygonal.ds.tools.ArrayTools;
 import de.polygonal.ds.tools.NativeArrayTools;
 import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.data.Animation;
-import de.polygonal.zz.scene.Spatial;
 import haxe.ds.StringMap;
 
 /**
 	A simple frame-by-frame animation.
 **/
-typedef SheetAnimation = {
-	> Animation<String>, offset:Int //index of first animation frame (relative to sprite sheet)
-}
+typedef SheetAnimation = Animation<String>;
 
 interface SpriteSheetControllerListener
 {
-	private function onSpriteSheetAniUpdate(frameIndex:Int, time:Float, index:Int):Void;
+	private function onSpriteSheetAniUpdate(frameName:String, time:Float, index:Int):Void;
 	private function onSpriteSheetAniFinish():Void;
 }
 
@@ -177,7 +173,9 @@ class SpriteSheetController extends Controller
 		{
 			mCurrentIndex = index;
 			
-			mListener.onSpriteSheetAniUpdate(index, controlTime, index);
+			var name = mData.names.get(index);
+			
+			mListener.onSpriteSheetAniUpdate(name, controlTime, index);
 			
 			if (isLastFrame)
 			{
@@ -215,9 +213,7 @@ private class AniData
 		times = new ArrayList(totalFrames + 1);
 		names = new ArrayList(totalFrames);
 		
-		var i = 0;
-		var k = totalFrames;
-		var frame;
+		var i = 0, k = totalFrames, frame;
 		while (i < k)
 		{
 			frame = animation.frames[i++];

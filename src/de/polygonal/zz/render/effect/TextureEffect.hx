@@ -117,12 +117,14 @@ class TextureEffect extends Effect
 	
 	inline public function setFrameIndex(value:Int)
 	{
-		if (mFrameIndex != value)
-		{
-			mFrameIndex = value;
-			cropRectUv = atlas.getFrameAtIndex(value).texCoordUv;
-			cropRectPx = atlas.getFrameAtIndex(value).texCoordPx;
-		}
+		if (mFrameIndex != value) updateFrame(value);
+	}
+	
+	function updateFrame(frame:Int)
+	{
+		mFrameIndex = frame;
+		cropRectUv = atlas.getFrameAtIndex(frame).texCoordUv;
+		cropRectPx = atlas.getFrameAtIndex(frame).texCoordPx;
 	}
 	
 	override public function draw(renderer:Renderer)
