@@ -60,6 +60,13 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 		return this;
 	}
 	
+	public function repeat(times:Int):SpriteSheetAni
+	{
+		var c = getController();
+		c.repeatCount = times;
+		return this;
+	}
+	
 	public function pause():SpriteSheetAni
 	{
 		getController().pause();

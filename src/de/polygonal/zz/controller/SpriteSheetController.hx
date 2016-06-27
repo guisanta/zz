@@ -48,9 +48,12 @@ class SpriteSheetController extends Controller
 	
 	public var onFinish:SheetAnimation->Void;
 	
+	public var repeatCount:Int = 0;
+	
 	var mListener:SpriteSheetControllerListener;
 	var mLastIndex:Int;
 	var mCurrentIndex:Int;
+	var mCurrentAnimation:SheetAnimation;
 	var mData:AniData;
 	
 	public function new()
@@ -73,6 +76,8 @@ class SpriteSheetController extends Controller
 	
 	public function play(animation:SheetAnimation, startTime:Float = 0)
 	{
+		mCurrentAnimation = animation;
+		
 		if (_dataCache == null)
 			_dataCache = new StringMap();
 		mData = _dataCache.get(animation.name);
@@ -108,8 +113,10 @@ class SpriteSheetController extends Controller
 	
 	public function stop()
 	{
+		mCurrentAnimation = null;
 		mData = null;
 		onFinish = null;
+		repeatCount = 0;
 		markForDisposal();
 	}
 	
@@ -181,14 +188,21 @@ class SpriteSheetController extends Controller
 			{
 				mListener.onSpriteSheetAniFinish();
 				
-				if (onFinish != null)
+				if (repeatCount-- > 0)
 				{
-					onFinish(mData.animation);
-					onFinish = null;
+					play(mCurrentAnimation, 0);
 				}
-				
-				mData = null;
-				markForDisposal();
+				else
+				{
+					if (onFinish != null)
+					{
+						onFinish(mData.animation);
+						onFinish = null;
+					}
+					
+					mData = null;
+					markForDisposal();
+				}
 			}
 		}
 		
