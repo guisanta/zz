@@ -810,7 +810,7 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		//make sure there is enough space available for storing output
 		output.charCodes.reserve(len);
 		output.charCodes.clear();
-		output.charRects.reserve(len);
+		output.charRects.reserve(len * 4);
 		output.charRects.clear();
 		
 		var hasUnsupportedChars = false;
