@@ -20,7 +20,7 @@ package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics as M;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;

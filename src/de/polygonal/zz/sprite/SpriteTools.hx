@@ -20,7 +20,7 @@ package de.polygonal.zz.sprite;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.ArrayedStack;
 import de.polygonal.zz.scene.*;
@@ -260,7 +260,7 @@ class SpriteTools
 			var g = sprite.asGroup();
 			var b = g.getLocalBounds();
 			var size = g.getSize();
-			g.scale = M.fmin(bounds.w / size.x, bounds.h / size.y);
+			g.scale = Mathematics.fmin(bounds.w / size.x, bounds.h / size.y);
 			g.x = bounds.x;
 			g.y = bounds.y;
 		}
@@ -269,7 +269,7 @@ class SpriteTools
 			sprite.x = bounds.x;
 			sprite.y = bounds.y;
 			sprite.scale = 1;
-			sprite.scale = M.fmin(bounds.w / sprite.width, bounds.h / sprite.height);
+			sprite.scale = Mathematics.fmin(bounds.w / sprite.width, bounds.h / sprite.height);
 		}
 	}
 }

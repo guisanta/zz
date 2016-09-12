@@ -300,7 +300,7 @@ class SpriteText extends SpriteBase
 			if (currentSize > maxSize) return;
 			bestSize = bsearch(currentSize, maxSize + 1);
 		}
-		bestSize = M.clamp(bestSize, minSize, maxSize);
+		bestSize = Mathematics.clamp(bestSize, minSize, maxSize);
 		mDef.size = bestSize;
 		mChanged = true;
 		mTextLayout.layout(mAtlas.userData, mDef, mTextLayoutResult);
