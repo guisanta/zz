@@ -1,7 +1,7 @@
 package de.polygonal.zz.render.platform.flash.legacy;
 
 import de.polygonal.core.math.Mat44;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.zz.render.effect.ColorEffect;
 import de.polygonal.zz.render.effect.TextureEffect;
@@ -238,7 +238,7 @@ class XrayRenderer extends Renderer
 				var vertices = [];
 				for (i in 0...steps)
 				{
-					var angle = i * (M.PI2 / steps);
+					var angle = i * (Mathematics.PI2 / steps);
 					var x = c.x + Math.cos(angle) * r;
 					var y = c.y + Math.sin(angle) * r;
 					var w = worldToScreenSpace(new Vec3(x, y));

@@ -51,6 +51,7 @@ class DisplayListRenderer extends Renderer
 	var mContext:DisplayObjectContainer;
 	
 	var mBitmapDataLookup:IntHashTable<SpatialBitmapData>;
+	
 	var mBitmapLookup:IntHashTable<SpatialBitmap>;
 	var mBitmapList:Dll<SpatialBitmap>;
 	var mZIndex:Int;

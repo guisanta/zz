@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.math.Interpolation;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.tween.ease.Ease;
 import de.polygonal.core.tween.ease.EaseFactory;
 import de.polygonal.zz.controller.Controller;
@@ -102,7 +102,7 @@ class TweenController extends Controller
 		
 		var controlTime = getControlTime();
 		var alpha = (controlTime - minTime) / (maxTime - minTime); //[0,1]
-		var value = M.lerp(mSrcVal, mDstVal, mInterpolation.interpolate(alpha));
+		var value = Mathematics.lerp(mSrcVal, mDstVal, mInterpolation.interpolate(alpha));
 		mListener.onTweenUpdate(key, value);
 		return true;
 	}

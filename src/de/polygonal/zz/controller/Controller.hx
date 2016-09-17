@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.util.Assert.assert;
-import de.polygonal.core.math.Mathematics;
+import de.polygonal.core.math.Mathematics as M;
 
 @:autoBuild(de.polygonal.zz.controller.ControllerType.build())
 class Controller

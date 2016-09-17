@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
 import de.polygonal.core.math.Mat44;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizei;
@@ -164,9 +164,9 @@ class PainterTileMapRtt extends Painter
 			
 			if (RTT)
 			{
-				var w = M.nextPow2(effect.screenTiles.getW() * effect.tileSize);
+				var w = Mathematics.nextPow2(effect.screenTiles.getW() * effect.tileSize);
 				trace( "w : " + w );
-				var h = M.nextPow2(effect.screenTiles.getH() * effect.tileSize);
+				var h = Mathematics.nextPow2(effect.screenTiles.getH() * effect.tileSize);
 				trace( "h : " + h );
 				
 				//var w = M.nextPow2(effect.numVisTilesX * effect.tileSize);

@@ -19,10 +19,10 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.effect;
 
 import de.polygonal.core.math.Limits;
-import de.polygonal.core.math.Mathematics.M;
 import de.polygonal.ds.Array2;
 import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
+import de.polygonal.core.math.Mathematics as M;
 
 class TileMapEffect extends Effect
 {

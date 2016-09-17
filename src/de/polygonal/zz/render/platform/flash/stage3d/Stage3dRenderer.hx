@@ -84,7 +84,7 @@ class Stage3dRenderer extends Renderer
 		
 		this.batchStrategy = batchStrategy;
 		
-		L.i('texture bits: ${Stage3dTextureFlag.print(textureFlags)}', "s3d");
+		L.d('texture bits: ${Stage3dTextureFlag.print(textureFlags)}', "s3d");
 		mTextureFlags = textureFlags;
 		
 		mSrcBlendFactorLut =
@@ -157,7 +157,7 @@ class Stage3dRenderer extends Renderer
 		{
 			mContextLost = false;
 			
-			L.w("context lost, recovering", "s3d");
+			L.w("recovering from context lost ...", "s3d");
 			
 			for (i in mPainterLut) i.free();
 			mPainterLut.clear();

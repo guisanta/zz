@@ -211,7 +211,7 @@ class KeyframeController extends Controller
 			inline function lerp(chnl:KeyValue)
 			{
 				var c = chnl.getIndex();
-				return M.lerp(p[i0 * 6 + c], p[i1 * 6 + c], alpha);
+				return Mathematics.lerp(p[i0 * 6 + c], p[i1 * 6 + c], alpha);
 			}
 			
 			var chnls = mData.chnls[i0];
