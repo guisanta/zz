@@ -44,7 +44,7 @@ class PainterQuadColorBatch extends PainterQuad
 	var mTmpVertices = [new Vec3(0, 0), new Vec3(1, 0), new Vec3(1, 1), new Vec3(0, 1)]; //TODO needed?
 	var mTmpVec3 = new Vec3();
 	
-	public function new(renderer:Stage3dRenderer, featureFlags:Int)
+	public function new(renderer:Stage3dRenderer, featureFlags:Int, textureFlags:Int)
 	{
 		super(renderer, featureFlags);
 		
