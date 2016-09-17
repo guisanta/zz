@@ -93,11 +93,11 @@ class PainterQuadColor extends PainterQuad
 		//else
 		{
 			var rgb = mColorChannels;
-			Color.extractR8G8B8(effect.color, rgb); 
-			cr[0] = rgb.r;
-			cr[1] = rgb.g;
-			cr[2] = rgb.b;
-			cr[3] = a;
+			Color.extractR8G8B8(effect.color, rgb);
+			cr[0] = rgb.r * (1 / 0xFF);
+			cr[1] = rgb.g * (1 / 0xFF);
+			cr[2] = rgb.b * (1 / 0xFF);
+			cr[3] = 1;
 		}
 		
 		mContext.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, cr, 1);
