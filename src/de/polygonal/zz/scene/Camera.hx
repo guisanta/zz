@@ -20,7 +20,7 @@ package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mat44;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.zz.data.Size.Sizei;
@@ -263,7 +263,7 @@ class Camera
 			var ty = mCenter.y;
 			mViewMatrix.setAsTranslate(-tx, -ty, 0);
 			mViewMatrix.catScale(zoom, zoom, 1);
-			mViewMatrix.catRotateZ(rotation * M.DEG_RAD);
+			mViewMatrix.catRotateZ(rotation * Mathematics.DEG_RAD);
 			mViewMatrix.catTranslate(tx, ty, 0);
 			
 			//move to eye position

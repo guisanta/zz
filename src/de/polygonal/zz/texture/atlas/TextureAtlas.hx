@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas;
 
 import de.polygonal.core.math.Coord2.Coord2i;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.core.util.Assert.assert;
@@ -48,7 +48,7 @@ class TextureAtlas
 		scale = data.scale;
 		
 		var max = 0;
-		for (i in data.frames) max = M.max(max, i.index);
+		for (i in data.frames) max = Mathematics.max(max, i.index);
 		
 		mFrameList = new ArrayList<TextureAtlasFrame>().init(max + 1, null);
 		mFrameMap = new StringMap();

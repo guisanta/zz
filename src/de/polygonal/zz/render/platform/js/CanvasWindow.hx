@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.js;
 
 import de.polygonal.core.math.Coord2.Coord2i;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.zz.render.RenderWindowListener;
 import haxe.Timer;
 import js.Browser;
@@ -43,7 +43,6 @@ class CanvasWindow extends RenderWindow
 	var mOffset = new Coord2i();
 	var mDevicePixelRatio:Float = 1;
 	var mCoord = new Coord2i();
-	
 	var mMouseButtonMask:Int = 1 << 1;
 	
 	public function new(listener:RenderWindowListener)
@@ -60,7 +59,7 @@ class CanvasWindow extends RenderWindow
 		doc.body.appendChild(div);
 		var dpiX = doc.getElementById("tmpdiv").offsetWidth * win.devicePixelRatio;
 		var dpiY = doc.getElementById("tmpdiv").offsetHeight * win.devicePixelRatio;
-		dpi = M.max(Std.int(Math.max(dpiX, dpiY)), 96);
+		dpi = Mathematics.max(Std.int(Math.max(dpiX, dpiY)), 96);
 		doc.body.removeChild(div);
 		div = null;
 		
@@ -317,7 +316,7 @@ class CanvasWindow extends RenderWindow
 	{
 		if (mMouseButtonMask & (1 << e.which) == 0) return;
 		
-		mMouseDown = true;
+		mPressed = true;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
 		onInput(x, y, Press, 0, true, cast e.which);
@@ -327,7 +326,7 @@ class CanvasWindow extends RenderWindow
 	{
 		if (mMouseButtonMask & (1 << e.which) == 0) return;
 		
-		mMouseDown = false;
+		mPressed = false;
 		var x = e.clientX - mOffset.x;
 		var y = e.clientY - mOffset.y;
 		onInput(x, y, Release, true, cast e.which);
@@ -363,6 +362,7 @@ class CanvasWindow extends RenderWindow
 				updatePointer = false;
 				if (mFirstTouchId == null)
 				{
+					mPressed = true;
 					mFirstTouchId = i.identifier;
 					updatePointer = true;
 				}
@@ -376,6 +376,7 @@ class CanvasWindow extends RenderWindow
 			{
 				if (mFirstTouchId == null)
 				{
+					mPressed = true;
 					mFirstTouchId = i.identifier;
 					x = i.clientX - mOffset.x;
 					y = i.clientY - mOffset.y;
@@ -410,6 +411,7 @@ class CanvasWindow extends RenderWindow
 					y = i.clientY - mOffset.y;
 					onInput(x, y, Release, i.identifier);
 					onInput(x, y, Select, i.identifier, false);
+					mPressed = false;
 					break;
 				}
 			}
@@ -449,7 +451,7 @@ class CanvasWindow extends RenderWindow
 		y = Std.int(y * mDevicePixelRatio);
 		if (updatePointer) mPointer.set(x, y);
 		
-		if (!mMouseDown && type == Move) return;
+		if (!mPressed && type == Move) return;
 		if (!pointerInsideViewport(x, y)) return;
 		
 		mListener.onInput(mCoord.set(x, y), type, id, hint);

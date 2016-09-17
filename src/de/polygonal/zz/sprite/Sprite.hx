@@ -329,7 +329,7 @@ class Sprite extends SpriteBase
 		return e.color;
 	}
 	
-	public function setColor(value:Int, contentSize:Coord2f)
+	public function setColor(value:Int, contentSize:Coord2f):Sprite
 	{
 		mSizeX = contentSize.x;
 		mSizeY = contentSize.y;
@@ -353,6 +353,7 @@ class Sprite extends SpriteBase
 			mVisual.effect.free();
 			mVisual.effect = new ColorEffect(value);
 		}
+		return this;
 	}
 	
 	public var sheetAni(get, never):SpriteSheetAni;

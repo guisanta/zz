@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.motor.geom.data.Plane2;
 import de.polygonal.motor.geom.distance.DistancePointPlane;
 import de.polygonal.zz.scene.Bv;
@@ -57,7 +57,7 @@ class CircleBv extends Bv
 			var diffX = data[(i << 1)] - cx;
 			var diffY = data[(i << 1) + 1] - cy;
 			var radiusSqr = diffX * diffX + diffY * diffY;
-			radius = M.fmax(radiusSqr, radius);
+			radius = Mathematics.fmax(radiusSqr, radius);
 		}
 		radius = Math.sqrt(radius);
 	}

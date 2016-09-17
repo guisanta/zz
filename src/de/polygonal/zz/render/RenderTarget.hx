@@ -96,7 +96,7 @@ class RenderTarget
 		{
 			if (mSize.isZero()) return;
 			
-			L.i('configure back buffer ${mSize.x}x${mSize.y}px');
+			L.d('configure back buffer ${mSize.x}x${mSize.y}px');
 			
 			configureBackBuffer();
 			

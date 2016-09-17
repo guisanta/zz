@@ -34,14 +34,12 @@ class RenderWindow extends RenderTarget
 	var mListener:RenderWindowListener;
 	var mPointer = new Coord2i();
 	var mMultiTouch = false;
-	var mMouseDown = false;
+	var mPressed = false;
 	
 	function new(listener:RenderWindowListener)
 	{
 		super();
-		
 		mListener = listener;
-		mPointer = new Coord2i();
 	}
 	
 	override public function free()

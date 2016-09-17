@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.js;
 
 import de.polygonal.core.math.Mat44;
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.zz.data.Color;
 import de.polygonal.zz.data.Colori;
@@ -82,7 +82,7 @@ class Canvas2dRenderer extends Renderer
 		context = cast handle;
 	}
 	
-	override function clear() 
+	override function clear()
 	{
 		var target = getRenderTarget();
 		var viewport = target.getPixelViewport();
@@ -159,7 +159,7 @@ class Canvas2dRenderer extends Renderer
 		{
 			ctx.save();
 			ctx.scale(s.x < 0 ? -1 : 1, s.y < 0 ? -1 : 1);
-			ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, M.fabs(s.x), M.fabs(s.y));
+			ctx.drawImage(data, cr.x, cr.y, cr.w, cr.h, 0, 0, Mathematics.fabs(s.x), Mathematics.fabs(s.y));
 			ctx.restore();
 		}
 		else

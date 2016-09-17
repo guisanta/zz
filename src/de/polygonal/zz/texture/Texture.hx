@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.texture;
 
-import de.polygonal.core.math.Mathematics.M;
+import de.polygonal.core.math.Mathematics as M;
 import de.polygonal.ds.Hashable;
 import de.polygonal.zz.data.ImageData;
 import de.polygonal.zz.data.Size.Sizei;

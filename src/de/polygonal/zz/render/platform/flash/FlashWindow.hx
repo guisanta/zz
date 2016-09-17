@@ -19,6 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.render.platform.flash;
 
 import de.polygonal.core.math.Coord2.Coord2i;
+import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.render.platform.flash.legacy.DisplayListUtil;
 import de.polygonal.zz.render.RenderWindowListener;
@@ -28,7 +29,6 @@ import flash.events.*;
 import flash.Lib;
 import flash.system.Capabilities;
 import flash.ui.Mouse;
-import de.polygonal.core.math.Mathematics;
 
 @:enum
 abstract Stage3dAntiAliasFlag(Int) { var None = 0; var Low = 2; var High = 4; var Ultra = 16; }
@@ -65,7 +65,7 @@ class FlashWindow extends RenderWindow
 		stage.doubleClickEnabled = true;
 		stage.colorCorrection = ColorCorrection.OFF;
 		
-		dpi = M.max(Std.int(Capabilities.screenDPI), 96);
+		dpi = Mathematics.max(Std.int(Capabilities.screenDPI), 96);
 		
 		flash.ui.Multitouch.inputMode = flash.ui.MultitouchInputMode.TOUCH_POINT;
 		
@@ -433,7 +433,6 @@ class FlashWindow extends RenderWindow
 		if (++mContextCreatedCounter == 1)
 		{
 			L.d('driverInfo: ${mStage3dContext.driverInfo}', "stage3d");
-			
 			if (mRenderer != null)
 				mRenderer.onInitRenderContext(mStage3dContext);
 		}

@@ -19,7 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.scene;
 
 import de.polygonal.ds.ArrayedStack;
-import de.polygonal.ds.pooling.DynamicObjectPool;
+import de.polygonal.ds.tools.ObjectPool;
 import de.polygonal.zz.scene.AlphaMultiplierState;
 import de.polygonal.zz.scene.GlobalState;
 
@@ -28,7 +28,7 @@ class AlphaMultiplierState extends GlobalState
 	public static var PRESET_OPAQUE(default, null) = new AlphaMultiplierState(1);
 	public static var PRESET_TRANSPARENT(default, null) = new AlphaMultiplierState(0);
 	
-	static var _pool = new DynamicObjectPool<AlphaMultiplierState>(function() return new AlphaMultiplierState(), 1024);
+	static var _pool = new ObjectPool<AlphaMultiplierState>(function() return new AlphaMultiplierState(), 1024);
 	
 	inline public static function get(alpha:Float):AlphaMultiplierState
 	{
