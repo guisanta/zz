@@ -335,6 +335,8 @@ class SpriteText extends SpriteBase
 	
 	public function align9(parentBounds:Aabb2, horizontal:Int, vertical:Int, baseline = true)
 	{
+		if (mChanged) syncLocal();
+		
 		if (mTextLayoutResult.overflow) return;
 		if (mTextLayoutResult.bounds.isEmpty()) return;
 		
