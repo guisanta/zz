@@ -48,7 +48,7 @@ class Texture implements Hashable
 	
 	public var isAlphaPremultiplied = true;
 	public var isCompressed = false;
-	public var isPadded = false;
+	public var isPadded(default, null) = false;
 	
 	public var scale = 1.;
 	
@@ -83,7 +83,7 @@ class Texture implements Hashable
 			#if flash
 			var data = new flash.display.BitmapData(paddedSize.x, paddedSize.y, true, 0);
 			data.copyPixels(imageData, imageData.rect, new flash.geom.Point());
-			this.imageData = data;
+			imageData = data;
 			#elseif js
 			var canvas = js.Browser.document.createCanvasElement();
 			canvas.width = paddedSize.x;
@@ -132,6 +132,15 @@ class Texture implements Hashable
 	
 	public function free()
 	{
+		if (isPadded)
+		{
+			#if flash
+			imageData.dispose();
+			#elseif js
+			imageData.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
+			#end
+		}
+		
 		imageData = null;
 		sourceSize = null;
 		paddedSize = null;
