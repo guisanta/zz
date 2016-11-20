@@ -259,9 +259,9 @@ class Sprite extends SpriteBase
 	/**
 		Assigning a new texture clears the current frame.
 	**/
-	public function setTexture(textureId:Int, ?frame:String)
+	public function setTexture(textureId:Int, ?frame:String):Sprite
 	{
-		if (mCurrentTexture == textureId) return;
+		if (mCurrentTexture == textureId) return this;
 		
 		mCurrentTexture = textureId;
 		
@@ -303,6 +303,7 @@ class Sprite extends SpriteBase
 		mFlags |= HINT_SIZE | HINT_LOCAL_DIRTY;
 		
 		if (frame != null) set_frame(frame);
+		return this;
 	}
 	
 	public var frame(get, set):String;
