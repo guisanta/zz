@@ -50,8 +50,8 @@ class FlashWindow extends RenderWindow
 	var mDrawBoxing:Bool;
 	var mFullscreen = false;
 	var mVisible = true;
-	var mCoord = new Coord2i();
-	
+	var mTmpCoord1 = new Coord2i();
+	var mTmpCoord2 = new Coord2i();
 	var mContext:Dynamic;
 	
 	public function new(listener:RenderWindowListener)
@@ -216,9 +216,7 @@ class FlashWindow extends RenderWindow
 	
 	override public function getPointer():Coord2i
 	{
-		mPointer.x = Std.int(stage.mouseX);
-		mPointer.y = Std.int(stage.mouseY);
-		return mPointer;
+		return mTmpCoord2.of(mPointer);
 	}
 	
 	override public function showCursor()
@@ -452,23 +450,24 @@ class FlashWindow extends RenderWindow
 	
 	function onMouseDown(e:MouseEvent)
 	{
-		mMouseDown = true;
+		updatePointer();
 		onInput(e.stageX, e.stageY, Press, 0, InputHint.LeftButton);
 	}
 	
 	function onMiddleMouseDown(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Press, 0, InputHint.MiddleButton);
 	}
 	
 	function onRightMouseDown(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Press, 0, InputHint.RightButton);
 	}
 	
 	function onMouseUp(e:MouseEvent)
 	{
-		mMouseDown = false;
 		onInput(e.stageX, e.stageY, Release, 0, InputHint.LeftButton);
 	}
 	
@@ -484,7 +483,7 @@ class FlashWindow extends RenderWindow
 	
 	function onMouseMove(e:MouseEvent)
 	{
-		if (mMouseDown) onInput(e.stageX, e.stageY, Move);
+		onInput(e.stageX, e.stageY, Move);
 	}
 	
 	function onClick(e:MouseEvent)
@@ -517,6 +516,6 @@ class FlashWindow extends RenderWindow
 		var ix = Std.int(x);
 		var iy = Std.int(y);
 		if (pointerInsideViewport(ix, iy))
-			mListener.onInput(mCoord.set(ix, iy), type, id, hint);
+			mListener.onInput(mTmpCoord1.set(ix, iy), type, id, hint);
 	}
 }
