@@ -87,6 +87,8 @@ class TweenController extends Controller
 	{
 		if (time >= maxTime && repeat == RepeatType.Clamp)
 		{
+			markForDisposal();
+			
 			mListener.onTweenUpdate(key, mDstVal);
 			mListener.onTweenFinish(key);
 			
@@ -96,7 +98,6 @@ class TweenController extends Controller
 				onFinish = null;
 			}
 			
-			markForDisposal();
 			return false;
 		}
 		

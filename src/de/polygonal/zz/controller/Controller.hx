@@ -98,7 +98,7 @@ class Controller
 		#end
 	}
 	
-	inline public function update(dt:Float):Bool
+	public function update(dt:Float):Bool
 	{
 		if (active)
 		{
