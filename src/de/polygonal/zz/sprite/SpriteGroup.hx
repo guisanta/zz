@@ -26,6 +26,7 @@ import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.Node;
 import de.polygonal.zz.scene.PickResult;
+import de.polygonal.zz.scene.Spatial;
 import de.polygonal.zz.scene.Spatial.as;
 import de.polygonal.zz.scene.SpatialFlags;
 import de.polygonal.zz.scene.TreeTools;
@@ -178,7 +179,7 @@ class SpriteGroup extends SpriteBase
 	
 	public function getAllDescendantsByName(name:String, output:ArrayList<SpriteBase>):ArrayList<SpriteBase>
 	{
-		var tmp = new ArrayList();
+		var tmp = new ArrayList<Spatial>();
 		mNode.getAllDescendantsByName(name, tmp);
 		output.reserve(output.size + tmp.size);
 		for (i in 0...tmp.size) output.unsafePushBack(as(tmp.get(i).arbiter, SpriteBase));
