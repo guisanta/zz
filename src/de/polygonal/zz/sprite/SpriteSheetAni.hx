@@ -25,6 +25,43 @@ import de.polygonal.core.util.Assert.assert;
 
 class SpriteSheetAni implements SpriteSheetControllerListener
 {
+	public static function createSequence(frameName:String, minIndex:Int, maxIndex:Int):Array<String>
+	{
+		var output = [];
+		
+		inline function add(i:Int) output.push(frameName + (i < 10 ? "000" : (i < 100 ? "00" : "0")) + i);
+		
+		var i = minIndex;
+		if (minIndex > maxIndex)
+		{
+			while (i >= maxIndex) add(i--);
+		}
+		else
+		{
+			while (i <= maxIndex) add(i++);
+		}
+		return output;
+	}
+	
+	public static function createAnimation(name:String, frames:Array<String>, holdTime:Float, loop:Bool):SheetAnimation
+	{
+		var a = [];
+		for (i in 0...frames.length)
+		{
+			var frame = {};
+			Reflect.setField(frame, "value", frames[i]);
+			Reflect.setField(frame, "holdTime", holdTime);
+			Reflect.setField(frame, "loop", loop);
+			a.push(frame);
+		}
+		
+		var output = {};
+		Reflect.setField(output, "name", name);
+		Reflect.setField(output, "frames", a);
+		Reflect.setField(output, "loop", loop);
+		return cast output;
+	}
+	
 	/**
 		Current animation length in seconds or -1 if no animation is playing.
 	**/
