@@ -450,6 +450,7 @@ class FlashWindow extends RenderWindow
 	
 	function onMouseDown(e:MouseEvent)
 	{
+		//mMouseDown = true;
 		updatePointer();
 		onInput(e.stageX, e.stageY, Press, 0, InputHint.LeftButton);
 	}
@@ -468,26 +469,32 @@ class FlashWindow extends RenderWindow
 	
 	function onMouseUp(e:MouseEvent)
 	{
+		//mMouseDown = false;
+		updatePointer();
 		onInput(e.stageX, e.stageY, Release, 0, InputHint.LeftButton);
 	}
 	
 	function onMiddleMouseUp(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Release, 0, InputHint.MiddleButton);
 	}
 	
 	function onRightMouseUp(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Release, 0, InputHint.RightButton);
 	}
 	
 	function onMouseMove(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Move);
 	}
 	
 	function onClick(e:MouseEvent)
 	{
+		updatePointer();
 		onInput(e.stageX, e.stageY, Select);
 	}
 	
@@ -517,5 +524,11 @@ class FlashWindow extends RenderWindow
 		var iy = Std.int(y);
 		if (pointerInsideViewport(ix, iy))
 			mListener.onInput(mTmpCoord1.set(ix, iy), type, id, hint);
+	}
+	
+	function updatePointer()
+	{
+		mPointer.x = Std.int(stage.mouseX);
+		mPointer.y = Std.int(stage.mouseY);
 	}
 }
