@@ -100,20 +100,20 @@ class Texture implements Hashable
 	#if flash
 	public function setAtfData(data:flash.utils.ByteArray):Texture
 	{
-		if (data.length < 3 || data[0] != Ascii.A || data[1] != Ascii.T || data[2] != Ascii.F)
-			throw "invalid ATF signature";
-		
-		atfData = data;
+		if (data.length < 3 || data[0] != Ascii.A || data[1] != Ascii.T || data[2] != Ascii.F) throw "invalid ATF signature";
 		
 		var pos = data[6] == 255 ? 12 : 6;
+		
 		format =
 		switch (data[pos] & 0x7f)
 		{
-			case 1: Context3DTextureFormat.BGRA;
-			case 3: Context3DTextureFormat.COMPRESSED;
-			case 5: Context3DTextureFormat.COMPRESSED_ALPHA;
+			case  0 | 1: Context3DTextureFormat.BGRA;
+			case  2 | 3 | 12: Context3DTextureFormat.COMPRESSED;
+			case  4 | 5 | 13: Context3DTextureFormat.COMPRESSED_ALPHA;
 			case _: throw "invalid ATF format";
 		}
+		
+		atfData = data;
 		
 		sourceSize.set(1 << data[pos + 1], 1 << data[pos + 2]);
 		
