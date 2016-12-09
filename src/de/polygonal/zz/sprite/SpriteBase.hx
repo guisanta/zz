@@ -21,7 +21,6 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Mathematics;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.AlphaMultiplierState;
 import de.polygonal.zz.scene.CullingMode;
@@ -527,7 +526,6 @@ class SpriteBase
 				mSpatial.cullingMode = CullingMode.CullAlways; //always skip rendering
 			else
 				mSpatial.cullingMode = mVisible ? CullingMode.CullDynamic : CullingMode.CullAlways;
-			
 			mFlags &= ~HINT_VISIBILITY_DIRTY;
 		}
 		if (mFlags & HINT_ALPHA_DIRTY > 0)

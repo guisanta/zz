@@ -20,7 +20,6 @@ package de.polygonal.zz.render.platform.flash.legacy;
 
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.IntHashTable;
 import de.polygonal.zz.data.ColorTransform;
 import de.polygonal.zz.render.Renderer;

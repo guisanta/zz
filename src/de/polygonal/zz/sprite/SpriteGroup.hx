@@ -21,7 +21,6 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
 import de.polygonal.core.math.Limits;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Size.Sizef;
 import de.polygonal.zz.scene.Node;

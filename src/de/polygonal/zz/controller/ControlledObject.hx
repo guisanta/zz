@@ -18,8 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.controller;
 
-import de.polygonal.core.util.Assert.assert;
-
 @:access(de.polygonal.zz.controller.Controller)
 class ControlledObject
 {

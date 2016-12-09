@@ -1,6 +1,5 @@
 ﻿package de.polygonal.zz.render.platform.flash.legacy;
 
-import de.polygonal.core.util.Assert.assert;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;

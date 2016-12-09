@@ -21,7 +21,6 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.random.Random;
 import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener;
-import de.polygonal.core.util.Assert.assert;
 
 class SpriteSheetAni implements SpriteSheetControllerListener
 {

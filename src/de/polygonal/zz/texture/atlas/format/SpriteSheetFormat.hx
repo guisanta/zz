@@ -19,7 +19,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas.format;
 
 import de.polygonal.core.math.Recti;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;

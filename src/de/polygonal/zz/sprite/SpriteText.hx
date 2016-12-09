@@ -21,7 +21,6 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.fmt.Ascii;
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Mathematics;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.IntIntHashTable;
 import de.polygonal.zz.data.Size.Sizef;
@@ -876,7 +875,6 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		}
 		
 		lineBounds.empty();
-		
 		while (i < k && !overflow)
 		{
 			brk = l.get(i);

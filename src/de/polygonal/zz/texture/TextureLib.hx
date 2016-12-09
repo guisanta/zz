@@ -1,6 +1,5 @@
 package de.polygonal.zz.texture;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.data.*;
 import de.polygonal.zz.render.*;
 import de.polygonal.zz.render.effect.*;

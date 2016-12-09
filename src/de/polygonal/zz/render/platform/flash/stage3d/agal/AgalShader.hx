@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d.agal;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.util.AgalMiniAssembler;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dTextureFlag;
 import de.polygonal.zz.render.platform.flash.stage3d.Stage3dTextureFlag.*;

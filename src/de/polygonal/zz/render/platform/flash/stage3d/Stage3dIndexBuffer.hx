@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d;
 
-import de.polygonal.core.util.Assert.assert;
 import flash.display3D.Context3D;
 import flash.display3D.IndexBuffer3D;
 import flash.Vector;

@@ -66,10 +66,6 @@ class CanvasWindow extends RenderWindow
 		//disable elastic scrolling
 		doc.body.addEventListener("touchmove", function(e) e.preventDefault(), false);
 		
-		//windows phone
-		canvas.addEventListener("touchstart", function(e) {e.preventDefault();}, false);
-		canvas.addEventListener("touchmove", function(e) {e.preventDefault();}, false);
-		
 		//disable context menu
 		doc.body.oncontextmenu = function() return false;
 		

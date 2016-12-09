@@ -20,8 +20,7 @@ package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Aabb2;
 import de.polygonal.core.math.Coord2.Coord2f;
-import de.polygonal.core.util.Assert.assert;
-import de.polygonal.core.util.ClassTools;
+import de.polygonal.core.tools.ClassTools;
 import de.polygonal.ds.Hashable;
 import de.polygonal.ds.HashKey;
 import de.polygonal.zz.controller.ControlledObject;

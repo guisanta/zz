@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.scene;
 
-import de.polygonal.core.util.Assert.assert;
 
 class PickResult
 {

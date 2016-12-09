@@ -25,7 +25,6 @@ import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.render.Renderer;
-import de.polygonal.core.util.Assert.assert;
 
 /**
 	A camera defines the region that is shown in the render-target.

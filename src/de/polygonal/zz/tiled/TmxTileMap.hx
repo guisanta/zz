@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.tiled;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayConvert;
 import de.polygonal.zz.render.effect.TileMapEffect;
 import de.polygonal.zz.scene.CullingMode;

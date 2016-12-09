@@ -19,7 +19,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.scene;
 
 import de.polygonal.core.math.Vec3;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.tools.Bits;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.motor.geom.data.Plane2;

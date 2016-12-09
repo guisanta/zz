@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.data.Color;
 import de.polygonal.zz.data.Colori;

@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.texture.atlas.format;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.zz.controller.SpriteSheetController.SheetAnimation;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat;
 import haxe.Json;

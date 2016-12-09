@@ -18,7 +18,6 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.controller;
 
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.ds.tools.NativeArrayTools;
 import de.polygonal.zz.controller.RepeatType;

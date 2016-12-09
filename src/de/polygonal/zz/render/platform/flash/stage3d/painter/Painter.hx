@@ -18,8 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash.stage3d.painter;
 
-import de.polygonal.core.util.Assert.assert;
-import de.polygonal.core.util.ClassTools;
+import de.polygonal.core.tools.ClassTools;
 import de.polygonal.ds.ArrayList;
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.agal.AgalShader;
@@ -29,7 +28,6 @@ import de.polygonal.zz.scene.Visual;
 import flash.display3D.Context3D;
 import flash.Vector;
 import haxe.ds.IntMap;
-import de.polygonal.core.util.Assert.assert;
 
 import de.polygonal.zz.render.effect.Effect.*;
 import de.polygonal.zz.render.platform.flash.stage3d.painter.PainterFeature.*;

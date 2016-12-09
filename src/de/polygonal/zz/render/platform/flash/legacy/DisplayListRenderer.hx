@@ -21,7 +21,6 @@ package de.polygonal.zz.render.platform.flash.legacy;
 import de.polygonal.core.math.Mat44;
 import de.polygonal.core.math.Vec3;
 import de.polygonal.core.time.Timebase;
-import de.polygonal.core.util.Assert.assert;
 import de.polygonal.ds.Dll;
 import de.polygonal.ds.DllNode;
 import de.polygonal.ds.IntHashTable;
