@@ -18,13 +18,15 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.texture.atlas.format;
 
-import de.polygonal.core.util.FileSequence;
+import de.polygonal.core.tools.FileSequence;
 import haxe.ds.StringMap;
 import haxe.io.Path;
 import haxe.Json;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import sys.FileSystem;
+
+using Lambda;
 
 class TpJsonArrayFormatMacro
 {
@@ -110,8 +112,8 @@ class TpJsonArrayFormatMacro
 		}
 		
 		//generate sequences
-		for (i in FileSequence.find(Lambda.array(Lambda.map(frames, function(x) return x.filename))))
-			output.push(makeArrayField("sequence_" + makeIdentifier(i.name), i.items));
+		for (i in new FileSequence().find(frames.map(function(x) return x.filename).array()))
+			output.push(makeArrayField("sequence_" + makeIdentifier(~/{counter}/.replace(i.name, "xxx")), i.items));
 		
 		//generate frames, but skip frames that are part of a sequence
 		for (i in frames)
