@@ -927,7 +927,9 @@ class MultiLineTextLayout implements TextLayoutStrategy
 		}
 		
 		line1 = output.charCodes.size - 1;
-		alignLine(def.align, line0, line1, lineBounds);
+		
+		if (!lineBounds.isEmpty())
+			alignLine(def.align, line0, line1, lineBounds);
 		
 		output.bounds.addOther(lineBounds);
 		output.overflow = i < k;
