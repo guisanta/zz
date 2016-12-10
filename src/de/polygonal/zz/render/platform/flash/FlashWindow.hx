@@ -18,15 +18,13 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render.platform.flash;
 
-import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.zz.render.RenderWindowListener;
 import de.polygonal.zz.render.platform.flash.legacy.DisplayListUtil;
-import de.polygonal.zz.render.RenderWindowListener;
+import flash.Lib;
 import flash.display.*;
 import flash.display3D.*;
 import flash.events.*;
-import flash.Lib;
 import flash.system.Capabilities;
 import flash.ui.Mouse;
 
@@ -50,34 +48,22 @@ class FlashWindow extends RenderWindow
 	var mDrawBoxing:Bool;
 	var mFullscreen = false;
 	var mVisible = true;
-	var mTmpCoord1 = new Coord2i();
-	var mTmpCoord2 = new Coord2i();
 	var mContext:Dynamic;
 	
 	public function new(listener:RenderWindowListener)
 	{
 		super(listener);
-		
 		stage = Lib.current.stage;
 		stage.frameRate = 60;
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.stageFocusRect = false;
 		stage.doubleClickEnabled = true;
 		stage.colorCorrection = ColorCorrection.OFF;
-		
 		dpi = Mathematics.max(Std.int(Capabilities.screenDPI), 96);
-		
-		flash.ui.Multitouch.inputMode = flash.ui.MultitouchInputMode.TOUCH_POINT;
-		
-		stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-		stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		stage.addEventListener(MouseEvent.CLICK, onClick);
 		stage.addEventListener(Event.RESIZE, onResize);
 		stage.addEventListener(Event.FULLSCREEN, onFullScreen);
 		stage.addEventListener(Event.ACTIVATE, onActivate);
 		stage.addEventListener(Event.DEACTIVATE, onDeactivate);
-		
 		mSize.set(stage.stageWidth, stage.stageHeight);
 	}
 	
@@ -100,14 +86,6 @@ class FlashWindow extends RenderWindow
 			mCanvas = null;
 		}
 		
-		stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-		stage.removeEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
-		stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
-		stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		stage.removeEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
-		stage.removeEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
-		stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		stage.removeEventListener(MouseEvent.CLICK, onClick);
 		stage.removeEventListener(Event.RESIZE, onResize);
 		stage.removeEventListener(Event.FULLSCREEN, onFullScreen);
 		stage.removeEventListener(Event.ACTIVATE, onActivate);
@@ -164,7 +142,6 @@ class FlashWindow extends RenderWindow
 		mListener.onContext();
 		
 		resize(stage.stageWidth, stage.stageHeight);
-		
 		return this;
 	}
 	
@@ -187,7 +164,6 @@ class FlashWindow extends RenderWindow
 		{
 			L.e(Std.string(error), "stage3d");
 		}
-		
 		return this;
 	}
 	
@@ -197,26 +173,9 @@ class FlashWindow extends RenderWindow
 		configureBackBuffer();
 	}
 	
-	public function enableRightMouseButton()
-	{
-		stage.addEventListener(MouseEvent.RIGHT_MOUSE_DOWN, onRightMouseDown);
-		stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onRightMouseUp);
-	}
-	
-	public function enableMiddleMouseButton()
-	{
-		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_DOWN, onMiddleMouseDown);
-		stage.addEventListener(MouseEvent.MIDDLE_MOUSE_UP, onMiddleMouseUp);
-	}
-	
 	override public function getContext():Dynamic
 	{
 		return mContext;
-	}
-	
-	override public function getPointer():Coord2i
-	{
-		return mTmpCoord2.of(mPointer);
 	}
 	
 	override public function showCursor()
@@ -360,26 +319,6 @@ class FlashWindow extends RenderWindow
 		}
 	}
 	
-	override function set_multiTouch(value:Bool):Bool
-	{
-		if (value)
-		{
-			stage.addEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
-			stage.addEventListener(TouchEvent.TOUCH_END, onTouchEnd);
-			stage.addEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
-			stage.addEventListener(TouchEvent.TOUCH_TAP, onTouchTap);
-		}
-		else
-		{
-			stage.removeEventListener(TouchEvent.TOUCH_BEGIN, onTouchBegin);
-			stage.removeEventListener(TouchEvent.TOUCH_END, onTouchEnd);
-			stage.removeEventListener(TouchEvent.TOUCH_MOVE, onTouchMove);
-			stage.removeEventListener(TouchEvent.TOUCH_TAP, onTouchTap);
-		}
-		
-		return super.set_multiTouch(value);
-	}
-	
 	function onResize(?_)
 	{
 		resize(stage.stageWidth, stage.stageHeight);
@@ -395,7 +334,6 @@ class FlashWindow extends RenderWindow
 	{
 		if (mVisible) return;
 		mVisible = true;
-		
 		mListener.onVisibilityChanged(true);
 	}
 	
@@ -403,7 +341,6 @@ class FlashWindow extends RenderWindow
 	{
 		if (!mVisible) return;
 		mVisible = false;
-		
 		mListener.onVisibilityChanged(false);
 	}
 	
@@ -441,94 +378,12 @@ class FlashWindow extends RenderWindow
 		}
 	}
 	
-	function onRightClick(_) {}
+	function onRightClick(_)
+	{
+	}
 	
 	function onError(e)
 	{
 		L.e(Std.string(e));
-	}
-	
-	function onMouseDown(e:MouseEvent)
-	{
-		//mMouseDown = true;
-		updatePointer();
-		onInput(e.stageX, e.stageY, Press, 0, InputHint.LeftButton);
-	}
-	
-	function onMiddleMouseDown(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Press, 0, InputHint.MiddleButton);
-	}
-	
-	function onRightMouseDown(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Press, 0, InputHint.RightButton);
-	}
-	
-	function onMouseUp(e:MouseEvent)
-	{
-		//mMouseDown = false;
-		updatePointer();
-		onInput(e.stageX, e.stageY, Release, 0, InputHint.LeftButton);
-	}
-	
-	function onMiddleMouseUp(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Release, 0, InputHint.MiddleButton);
-	}
-	
-	function onRightMouseUp(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Release, 0, InputHint.RightButton);
-	}
-	
-	function onMouseMove(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Move);
-	}
-	
-	function onClick(e:MouseEvent)
-	{
-		updatePointer();
-		onInput(e.stageX, e.stageY, Select);
-	}
-	
-	function onTouchBegin(e:TouchEvent)
-	{
-		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Press, e.touchPointID);
-	}
-	
-	function onTouchEnd(e:TouchEvent)
-	{
-		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Release, e.touchPointID);
-	}
-	
-	function onTouchMove(e:TouchEvent)
-	{
-		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Move, e.touchPointID);
-	}
-	
-	function onTouchTap(e:TouchEvent)
-	{
-		if (!e.isPrimaryTouchPoint) onInput(e.stageX, e.stageY, Select, e.touchPointID);
-	}
-	
-	function onInput(x:Float, y:Float, type:InputType, id = 0, hint:InputHint = cast 0)
-	{
-		var ix = Std.int(x);
-		var iy = Std.int(y);
-		if (pointerInsideViewport(ix, iy))
-			mListener.onInput(mTmpCoord1.set(ix, iy), type, id, hint);
-	}
-	
-	function updatePointer()
-	{
-		mPointer.x = Std.int(stage.mouseX);
-		mPointer.y = Std.int(stage.mouseY);
 	}
 }

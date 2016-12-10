@@ -18,18 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.render;
 
-import de.polygonal.core.math.Coord2.Coord2i;
 import de.polygonal.zz.data.Size.Sizei;
-
-enum InputType { Press; Release; Move; Select; }
-
-@:enum
-abstract InputHint(Int)
-{
-	var LeftButton = 1;
-	var MiddleButton = 2;
-	var RightButton = 3;
-}
 
 interface RenderWindowListener
 {
@@ -40,6 +29,4 @@ interface RenderWindowListener
 	private function onVisibilityChanged(isVisible:Bool):Void;
 	
 	private function onFullscreenChanged(isFullscreen:Bool):Void;
-	
-	private function onInput(coord:Coord2i, type:InputType, id:Int, hint:InputHint = cast 0):Void;
 }

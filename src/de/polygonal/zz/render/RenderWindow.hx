@@ -25,14 +25,9 @@ import de.polygonal.zz.data.Size.Sizei;
 @:access(de.polygonal.zz.render.RenderWindowListener)
 class RenderWindow extends RenderTarget
 {
-	public var multiTouch(get, set):Bool;
-	inline function get_multiTouch():Bool return mMultiTouch;
-	function set_multiTouch(value:Bool):Bool return mMultiTouch = value;
-	
 	public var dpi(default, null):Int = 96;
 	
 	var mListener:RenderWindowListener;
-	var mPointer = new Coord2i();
 	var mMultiTouch = false;
 	var mPressed = false;
 	
@@ -46,7 +41,6 @@ class RenderWindow extends RenderTarget
 	{
 		super.free();
 		mListener = null;
-		mPointer = null;
 	}
 	
 	public function isFullscreen():Bool
@@ -80,11 +74,6 @@ class RenderWindow extends RenderTarget
 	}
 	
 	public function hideContextMenu()
-	{
-		throw "override for implementation";
-	}
-	
-	public function getPointer():Coord2i
 	{
 		throw "override for implementation";
 	}

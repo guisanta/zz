@@ -26,8 +26,6 @@ import js.Browser;
 import js.html.CanvasElement;
 import js.html.Event;
 import js.html.EventTarget;
-import js.html.TouchEvent;
-import js.html.MouseEvent;
 
 @:access(de.polygonal.zz.render.Renderer)
 @:access(de.polygonal.zz.render.RenderWindowListener)
@@ -98,22 +96,8 @@ class CanvasWindow extends RenderWindow
 			win.addEventListener("pagehide", onVisibilityChange);
 		}
 		
-		var target:EventTarget = mUseExistingCanvasElement ? canvas.parentElement : win;
-		if (doc.createTouch == null)
-		{
-			target.addEventListener("mousedown", onMouseDown);
-			target.addEventListener("mouseup", onMouseUp);
-			target.addEventListener("mousemove", onMouseMove);
-			target.addEventListener("click", onClick);
-		}
-		else
-		{
-			target.addEventListener("touchstart", onTouchStart);
-			target.addEventListener("touchend", onTouchEnd);
-			target.addEventListener("touchmove", onTouchMove);
-		}
-		
-		if (!mUseExistingCanvasElement) win.addEventListener("resize", onResize);
+		//if (!mUseExistingCanvasElement) 
+		win.addEventListener("resize", onResize);
 	}
 	
 	public function initCanvas2dContext()
@@ -159,29 +143,12 @@ class CanvasWindow extends RenderWindow
 		mTimer.run();
 	}
 	
-	public function enableRightMouseButton()
-	{
-		mMouseButtonMask |= 1 << 3;
-	}
-	
-	public function enableMiddleMouseButton()
-	{
-		mMouseButtonMask |= 1 << 2;
-	}
-	
 	override public function free()
 	{
 		super.free();
 		
 		var doc = Browser.document;
 		var win = Browser.window;
-		win.removeEventListener("mousedown", onMouseDown);
-		win.removeEventListener("mouseup", onMouseUp);
-		win.removeEventListener("mousemove", onMouseMove);
-		win.removeEventListener("click", onClick);
-		win.removeEventListener("touchstart", onTouchStart);
-		win.addEventListener("touchend", onTouchEnd);
-		win.addEventListener("touchmove", onTouchMove);
 		win.removeEventListener("resize", onResize);
 		removePrefixListener(doc, "fullscreenchange", onFullscreenChange);
 		removePrefixListener(doc, "MSFullscreenChange", onFullscreenChange);
@@ -193,11 +160,6 @@ class CanvasWindow extends RenderWindow
 	override public function getContext():Dynamic
 	{
 		return mContext;
-	}
-	
-	override public function getPointer():Coord2i
-	{
-		return mPointer;
 	}
 	
 	override public function showCursor() 
@@ -306,151 +268,6 @@ class CanvasWindow extends RenderWindow
 		h = Std.int(h * mDevicePixelRatio);
 		
 		resize(w, h);
-	}
-	
-	function onMouseDown(e:MouseEvent)
-	{
-		if (mMouseButtonMask & (1 << e.which) == 0) return;
-		
-		mPressed = true;
-		var x = e.clientX - mOffset.x;
-		var y = e.clientY - mOffset.y;
-		onInput(x, y, Press, 0, true, cast e.which);
-	}
-	
-	function onMouseUp(e:MouseEvent)
-	{
-		if (mMouseButtonMask & (1 << e.which) == 0) return;
-		
-		mPressed = false;
-		var x = e.clientX - mOffset.x;
-		var y = e.clientY - mOffset.y;
-		onInput(x, y, Release, true, cast e.which);
-	}
-	
-	function onMouseMove(e:MouseEvent)
-	{
-		var x = e.clientX - mOffset.x;
-		var y = e.clientY - mOffset.y;
-		onInput(x, y, Move);
-	}
-	
-	function onClick(e:MouseEvent)
-	{
-		if (mMouseButtonMask & (1 << e.which) == 0) return;
-		
-		var x = e.clientX - mOffset.x;
-		var y = e.clientY - mOffset.y;
-		onInput(x, y, Select, 0, true, cast e.which);
-	}
-	
-	function onTouchStart(e:TouchEvent)
-	{
-		e.preventDefault(); 
-		var x, y, updatePointer;
-		if (multiTouch)
-		{
-			for (i in e.changedTouches)
-			{
-				x = i.clientX - mOffset.x;
-				y = i.clientY - mOffset.y;
-				
-				updatePointer = false;
-				if (mFirstTouchId == null)
-				{
-					mPressed = true;
-					mFirstTouchId = i.identifier;
-					updatePointer = true;
-				}
-				
-				onInput(x, y, Press, i.identifier, updatePointer);
-			}
-		}
-		else
-		{
-			for (i in e.changedTouches)
-			{
-				if (mFirstTouchId == null)
-				{
-					mPressed = true;
-					mFirstTouchId = i.identifier;
-					x = i.clientX - mOffset.x;
-					y = i.clientY - mOffset.y;
-					onInput(x, y, Press, i.identifier);
-					break;
-				}
-			}
-		}
-	}
-	
-	function onTouchEnd(e:TouchEvent)
-	{
-		var x, y;
-		if (multiTouch)
-		{
-			for (i in e.changedTouches)
-			{
-				x = i.clientX - mOffset.x;
-				y = i.clientY - mOffset.y;
-				onInput(x, y, Release, i.identifier, i.identifier == mFirstTouchId);
-				onInput(x, y, Select, i.identifier, false);
-			}
-		}
-		else
-		{
-			for (i in e.changedTouches)
-			{
-				if (i.identifier == mFirstTouchId)
-				{
-					mFirstTouchId = null;
-					x = i.clientX - mOffset.x;
-					y = i.clientY - mOffset.y;
-					onInput(x, y, Release, i.identifier);
-					onInput(x, y, Select, i.identifier, false);
-					mPressed = false;
-					break;
-				}
-			}
-		}
-	}
-	
-	function onTouchMove(e:TouchEvent)
-	{
-		var x, y;
-		if (multiTouch)
-		{
-			for (i in e.changedTouches)
-			{
-				x = i.clientX - mOffset.x;
-				y = i.clientY - mOffset.y;
-				onInput(x, y, Move, i.identifier, i.identifier == mFirstTouchId);
-			}
-		}
-		else
-		{
-			for (i in e.changedTouches)
-			{
-				if (i.identifier == mFirstTouchId)
-				{
-					x = i.clientX - mOffset.x;
-					y = i.clientY - mOffset.y;
-					onInput(x, y, Move, i.identifier);
-					break;
-				}
-			}
-		}
-	}
-	
-	function onInput(x:Int, y:Int, type:InputType, id = 0, updatePointer = true, hint:InputHint = cast 0)
-	{
-		x = Std.int(x * mDevicePixelRatio);
-		y = Std.int(y * mDevicePixelRatio);
-		if (updatePointer) mPointer.set(x, y);
-		
-		if (!mPressed && type == Move) return;
-		if (!pointerInsideViewport(x, y)) return;
-		
-		mListener.onInput(mCoord.set(x, y), type, id, hint);
 	}
 	
 	function detectResize()
