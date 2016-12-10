@@ -732,5 +732,5 @@ class SpriteBase
 	
 	inline function clampScale(x:Float) return x < 0 ? (x > -SCALE_EPS ? -SCALE_EPS : x) : (x < SCALE_EPS ? SCALE_EPS : x);
 	
-	inline function getAngle() return M.wrap(mRotation, 360) * M.DEG_RAD;
+	inline function getAngle() return Mathematics.wrap(mRotation, 360) * Mathematics.DEG_RAD;
 }

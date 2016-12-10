@@ -91,7 +91,7 @@ class Stage3dVertexBuffer
 			
 			#if (verbose == "extra")
 			var k = numFloatsPerVertex * numVertices;
-			L.d('allocating vertex buffer: numVertices: $numVertices, numFloatsPerVertex: $numFloatsPerVertex (total of $k floats)', "s3d");
+			L.d('Allocating vertex buffer: numVertices: $numVertices, numFloatsPerVertex: $numFloatsPerVertex (total of $k floats)', "s3d");
 			#end
 		}
 		
@@ -107,7 +107,7 @@ class Stage3dVertexBuffer
 		for (i in mAttributes)
 		{
 			#if (verbose == "extra")
-			L.d('binding buffer to index $index, offset=$bufferOffset, size=$i.');
+			L.d('Binding buffer to index $index, offset=$bufferOffset, size=$i.');
 			#end
 			
 			mContext.setVertexBufferAt(index++, handle, bufferOffset, formatLut[i]);
@@ -120,7 +120,7 @@ class Stage3dVertexBuffer
 		for (i in 0...mAttributes.length)
 		{
 			#if (verbose == "extra")
-			L.d('unbinding buffer from index $i');
+			L.d('Unbinding buffer from index $i');
 			#end
 			
 			mContext.setVertexBufferAt(i, null);
@@ -133,7 +133,7 @@ class Stage3dVertexBuffer
 		handle.uploadFromVector(mBuffer, 0, numVertices);
 		
 		#if (verbose == "extra")
-		L.d('uploading $numVertices vertices.', "s3d");
+		L.d('Uploading $numVertices vertices.', "s3d");
 		#end
 	}
 	

@@ -87,8 +87,8 @@ class Stage3dIndexBuffer
 		handle = mContext.createIndexBuffer(count);
 		handle.uploadFromVector(mBuffer, 0, count);
 		
-		#if verbose
-		L.d('uploading $count indices.', "s3d");
+		#if (verbose == "extra")
+		L.v('Uploading $count indices.', "s3d");
 		#end
 	}
 	

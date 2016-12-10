@@ -95,9 +95,7 @@ class RenderTarget
 		{
 			if (mSize.isZero()) return;
 			
-			#if verbose
-			L.d('configure back buffer ${mSize.x}x${mSize.y}px');
-			#end
+			L.v('Configure back buffer ${mSize.x}x${mSize.y}px.');
 			
 			configureBackBuffer();
 			
@@ -197,9 +195,7 @@ class RenderTarget
 	
 	public function resize(width:Int, height:Int)
 	{
-		#if verbose
-		L.d('resize render target: ${width}x${height}px');
-		#end
+		L.v('Resize render target: ${width}x${height}px');
 		
 		mSize.set(width, height);
 		mInvalidate = true;

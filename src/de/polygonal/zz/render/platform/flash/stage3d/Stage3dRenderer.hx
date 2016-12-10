@@ -272,7 +272,7 @@ class Stage3dRenderer extends Renderer
 		if (visibleSet.isEmpty()) return;
 		
 		#if (verbose == "extra")
-		L.d('drawing visible set: count=${visibleSet.size}, strategy=$batchStrategy', "s3d");
+		L.v('Drawing visible set: count=${visibleSet.size}, strategy=$batchStrategy', "s3d");
 		#end
 		
 		if (batchStrategy == None)
@@ -361,7 +361,7 @@ class Stage3dRenderer extends Renderer
 			max = indices.get(i++);
 			
 			#if (verbose == "extra")
-			L.d('drawing batch group #${i >> 1}: [$min, $max]', "s3d");
+			L.v('Drawing batch group #${i >> 1}: [$min, $max]', "s3d");
 			#end
 			
 			currentVisual = visibleSet.get(min);
