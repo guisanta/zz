@@ -664,7 +664,7 @@ class Stage3dRenderer extends Renderer
 			}
 		}
 		
-		painter = Type.createInstance(clss, [this, key, mTextureFlags]);
+		painter = Type.createInstance(clss, [this, key, textureFlags]);
 		mPainterLut.set(key, painter);
 		
 		usePainter(painter);
