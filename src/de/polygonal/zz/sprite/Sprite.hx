@@ -106,6 +106,12 @@ class Sprite extends SpriteBase
 		if (frame != null) this.frame = frame;
 	}
 	
+	inline public function setName(value:String):Sprite
+	{
+		set_name(value);
+		return this;
+	}
+	
 	override public function free()
 	{
 		if (mSpatial == null) return;
