@@ -133,10 +133,16 @@ class Texture implements Hashable
 	
 	public function free()
 	{
-		if (isPadded)
+		if (isPadded && !isCompressed)
 		{
 			#if flash
-			imageData.dispose();
+			try
+			{
+				imageData.dispose();
+			}
+			catch(error:Dynamic)
+			{
+			}
 			#elseif js
 			imageData.src = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==";
 			#end
