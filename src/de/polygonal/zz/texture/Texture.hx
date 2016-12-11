@@ -126,6 +126,7 @@ class Texture implements Hashable
 		}
 		
 		isCompressed = true;
+		isAlphaPremultiplied = false;
 		return this;
 	}
 	#end
