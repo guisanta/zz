@@ -64,6 +64,8 @@ class Stage3dRenderer extends Renderer
 	var mTextureLut:IntHashTable<Stage3dTexture>;
 	var mSrcBlendFactorLut:Array<Context3DBlendFactor>;
 	var mDstBlendFactorLut:Array<Context3DBlendFactor>;
+	var mSrcFactor:Context3DBlendFactor = null;
+	var mDstFactor:Context3DBlendFactor = null;
 	var mColorChannels = new Colori();
 	
 	var mRenderState1 = new RenderState();
@@ -421,7 +423,7 @@ class Stage3dRenderer extends Renderer
 		var srcFactor:Context3DBlendFactor = null;
 		var dstFactor:Context3DBlendFactor = null;
 		
-		if (currentVisual == null || currentVisual.effect.hint & TextureEffect.HINT_PMA > 0)
+		if (currentVisual == null || currentVisual.effect.pma)
 		{
 			switch (value)
 			{
@@ -480,7 +482,12 @@ class Stage3dRenderer extends Renderer
 			}
 		}
 		
-		mContext.setBlendFactors(srcFactor, dstFactor);
+		if (mSrcFactor != srcFactor || mDstFactor != dstFactor)
+		{
+			mContext.setBlendFactors(srcFactor, dstFactor);
+			mSrcFactor = srcFactor;
+			mDstFactor = dstFactor;
+		}
 	}
 	
 	override function drawColorEffect(effect:ColorEffect)
@@ -592,7 +599,7 @@ class Stage3dRenderer extends Renderer
 				key |= PAINTER_FEATURE_COLOR;
 			
 			case TextureEffect.TYPE | TileMapEffect.TYPE:
-				if (effect.hint & TextureEffect.HINT_PMA > 0)
+				if (effect.pma)
 					key |= PAINTER_FEATURE_TEXTURE_PMA;
 				else
 					key |= PAINTER_FEATURE_TEXTURE;
@@ -656,11 +663,11 @@ class Stage3dRenderer extends Renderer
 			
 			if (key & (PAINTER_FEATURE_COMPRESSED | PAINTER_FEATURE_COMPRESSED_ALPHA) > 0)
 			{
-				textureFlags |=
-					if (key & PAINTER_FEATURE_COMPRESSED > 0)
-						Stage3dTextureFlag.DXT1;
-					else
-						Stage3dTextureFlag.DXT5;
+				if (key & PAINTER_FEATURE_COMPRESSED > 0)
+					textureFlags |= Stage3dTextureFlag.DXT1;
+				
+				if (key & PAINTER_FEATURE_COMPRESSED_ALPHA > 0)
+					textureFlags |= Stage3dTextureFlag.DXT5;
 			}
 		}
 		

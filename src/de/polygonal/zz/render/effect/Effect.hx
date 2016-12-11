@@ -24,14 +24,14 @@ import de.polygonal.zz.render.Renderer;
 class Effect extends HashableItem
 {
 	public var type(default, null):Int;
-	public var hint(default, null):Int = 0;
+	public var hint(default, null) = 0;
 	
-	public var active:Bool = true;
+	public var active = true;
+	public var pma = true;
 	
 	public function new(type:Int)
 	{
 		super();
-		
 		this.type = type;
 	}
 	
@@ -44,10 +44,10 @@ class Effect extends HashableItem
 		throw "override for implementation";
 	}
 	
-	inline public function as<T:Effect>(state:Class<T>):T
+	inline public function as<T:Effect>(cl:Class<T>):T
 	{
 		#if flash
-		return untyped __as__(this, state);
+		return untyped __as__(this, cl);
 		#else
 		return cast this;
 		#end

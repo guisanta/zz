@@ -48,6 +48,7 @@ class Canvas2dRenderer extends Renderer
 	var mTileMapCanvasLut:IntMap<{element:CanvasElement, context:CanvasRenderingContext2D}>;
 	var mSmoothingFlag:String;
 	var mColorChannels = new Colori();
+	var mAlphaBlendMode:AlphaBlendMode = null;
 	
 	public function new()
 	{
@@ -291,6 +292,9 @@ class Canvas2dRenderer extends Renderer
 	
 	override public function setAlphaBlendState(value:AlphaBlendMode)
 	{
+		if (mAlphaBlendMode == value) return;
+		mAlphaBlendMode = value;
+		
 		mCurrentBlending =
 		switch (value)
 		{

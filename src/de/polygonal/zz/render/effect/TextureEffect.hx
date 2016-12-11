@@ -28,11 +28,9 @@ import de.polygonal.zz.texture.Texture;
 
 class TextureEffect extends Effect
 {
-	inline public static var HINT_PMA = 0x01;
-	
 	#if flash
-	inline public static var HINT_COMPRESSED = 0x02;
-	inline public static var HINT_COMPRESSED_ALPHA = 0x04;
+	inline public static var HINT_COMPRESSED = 0x01;
+	inline public static var HINT_COMPRESSED_ALPHA = 0x02;
 	#end
 	
 	inline public static var TYPE = 1;
@@ -82,11 +80,12 @@ class TextureEffect extends Effect
 		
 		hint = 0;
 		
-		if (texture.isAlphaPremultiplied) hint |= HINT_PMA;
+		pma = texture.isAlphaPremultiplied;
 		
 		#if flash
 		if (texture.isCompressed)
 		{
+			pma = false;
 			switch (texture.format)
 			{
 				case flash.display3D.Context3DTextureFormat.COMPRESSED:

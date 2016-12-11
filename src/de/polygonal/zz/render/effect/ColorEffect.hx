@@ -9,7 +9,6 @@ class ColorEffect extends Effect
 	public function new(color:Int)
 	{
 		super(TYPE);
-		
 		this.color = color;
 	}
 	

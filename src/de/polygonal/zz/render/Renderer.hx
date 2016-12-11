@@ -364,19 +364,13 @@ class Renderer
 			var state = visual.stateList[GlobalStateType.AlphaBlend.getIndex()];
 			if (state != null)
 			{
-				if (currentAlphaBlending == null || !currentAlphaBlending.equals(state))
-				{
-					currentAlphaBlending = state.as(AlphaBlendState);
-					setAlphaBlendState(currentAlphaBlending.alphaBlendMode);
-				}
+				currentAlphaBlending = state.as(AlphaBlendState);
+				setAlphaBlendState(currentAlphaBlending.alphaBlendMode);
 			}
 			else
 			{
-				if (currentAlphaBlending != null)
-				{
-					currentAlphaBlending = null;
-					setAlphaBlendState(AlphaBlendState.PRESET_NORMAL.alphaBlendMode);
-				}
+				currentAlphaBlending = null;
+				setAlphaBlendState(AlphaBlendState.PRESET_NORMAL.alphaBlendMode);
 			}
 		}
 	}
