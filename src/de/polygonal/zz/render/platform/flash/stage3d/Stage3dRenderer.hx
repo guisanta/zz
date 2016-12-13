@@ -237,8 +237,11 @@ class Stage3dRenderer extends Renderer
 		
 		if (!handleContextLoss)
 		{
-			source.imageData.dispose();
-			source.imageData = null;
+			if (source.imageData != null)
+			{
+				source.imageData.dispose();
+				source.imageData = null;
+			}
 		}
 		
 		return o;

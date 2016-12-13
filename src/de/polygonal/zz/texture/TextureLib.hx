@@ -47,7 +47,7 @@ class TextureLib
 		_textureLut.set(id, texture);
 		if (format != null) texture.atlas = new TextureAtlas(texture, format.getAtlas());
 		
-		L.d('Allocated texture [$id]');
+		L.d('Allocated compressed texture [$id]');
 		return texture;
 	}
 	#end
