@@ -43,12 +43,6 @@ import de.polygonal.zz.scene.SpatialFlags.*;
 
 enum TextAlign { Left; Center; Right; }
 
-typedef SpriteTextDef =
-{
-	text:String, size:Int, align:TextAlign, width:Float, height:Float,
-	kerning:Bool, multiline:Bool, tracking:Float, leading:Float, ligatures:Int
-}
-
 typedef TextLayoutData =
 {
 	charCodes:ArrayList<Int>, charRects:ArrayList<Float>, //[x0,y0,w0,h0, x1,y1,w1,h1, ...]
@@ -59,6 +53,25 @@ interface TextLayoutStrategy
 {
 	function layout(charSet:BitmapCharSet, def:SpriteTextDef, output:TextLayoutData):Void;
 	function free():Void;
+}
+
+@:publicFields
+private class SpriteTextDef
+{
+	var text = "";
+	var size = 10;
+	var align = TextAlign.Left;
+	var width = 100.;
+	var height = 100.;
+	var kerning = true;
+	var multiline = false;
+	var tracking = 0.;
+	var leading = 0.;
+	var ligatures = -1;
+	
+	function new()
+	{
+	}
 }
 
 @:access(de.polygonal.zz.scene.Spatial)
@@ -92,11 +105,7 @@ class SpriteText extends SpriteBase
 	var mTextureChanged = false;
 	var mHasSleepingQuads = false;
 	
-	var mDef:SpriteTextDef =
-	{
-		text: "", size: 10, align: TextAlign.Left, width: 100., height: 100.,
-		kerning: true, multiline: false, tracking: 0., leading: 0., ligatures: -1
-	}
+	var mDef = new SpriteTextDef();
 	
 	var mTextLayoutResult:TextLayoutData =
 	{
@@ -593,7 +602,7 @@ private class Glyph extends Quad
 /**
 	Simple & fast single line text layout.
 **/
-class SingleLineTextLayout implements TextLayoutStrategy
+private class SingleLineTextLayout implements TextLayoutStrategy
 {
 	var mBitmapChars = new ArrayList<BitmapChar>(32);
 	var mCharCodes = new ArrayList<Int>(32);
@@ -765,7 +774,7 @@ private typedef Break = { string:String, position:Int, required:Bool };
 /**
 	Multi-line text layout using UAX #14 line break algorithm.
 **/
-class MultiLineTextLayout implements TextLayoutStrategy
+private class MultiLineTextLayout implements TextLayoutStrategy
 {
 	static var _breaker:LineBreaker = null;
 	

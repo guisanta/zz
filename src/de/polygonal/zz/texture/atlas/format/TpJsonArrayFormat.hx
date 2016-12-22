@@ -19,6 +19,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.texture.atlas.format;
 
 import de.polygonal.zz.controller.SpriteSheetController.SheetAnimation;
+import de.polygonal.zz.data.Animation.AnimationFrame;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat;
 import haxe.Json;
 
@@ -55,7 +56,7 @@ class TpJsonArrayFormat implements TextureAtlasFormat
 					output.push(currentAni);
 				currentName = name;
 				frame = Std.parseInt(ereg.matched(2));
-				currentAni = {name: name, loop: false, frames: []};
+				currentAni = new SheetAnimation(name, false, []);
 			}
 			else
 			{
@@ -63,7 +64,7 @@ class TpJsonArrayFormat implements TextureAtlasFormat
 				assert(frame == Std.parseInt(ereg.matched(2)));
 			}
 			
-			currentAni.frames.push({value: i, holdTime: holdTime});
+			currentAni.frames.push(new AnimationFrame<String>(i, holdTime));
 			index++;
 		}
 		

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 Michael Baczynski, http://www.polygonal.de
+Copyright (c) 2016 Michael Baczynski, http://www.polygonal.de
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,18 +21,33 @@ package de.polygonal.zz.data;
 /**
 	The data (e.g. an image) to be displayed (identified by `value`) and how long the data is to be displayed (`holdTime`).
 **/
-typedef AnimationFrame<V> =
+@:structInit
+class AnimationFrame<V>
 {
-	value:V,
-	holdTime:Float
+	public var value:V;
+	public var holdTime:Float;
+	
+	public function new(value:V, holdTime:Float)
+	{
+		this.value = value;
+		this.holdTime = holdTime;
+	}
 }
 
 /**
 	A sequence of frames makes an animation.
 **/
-typedef Animation<V> =
+@:structInit
+class Animation<V>
 {
-	name:String,
-	loop:Bool,
-	frames:Array<AnimationFrame<V>>
+	public var name:String;
+	public var loop:Bool;
+	public var frames:Array<AnimationFrame<V>>;
+	
+	public function new(name:String, loop:Bool, frames:Array<AnimationFrame<V>>)
+	{
+		this.name = name;
+		this.loop = loop;
+		this.frames = frames;
+	}
 }

@@ -21,6 +21,7 @@ package de.polygonal.zz.sprite;
 import de.polygonal.core.math.random.Random;
 import de.polygonal.zz.controller.SpriteSheetController;
 import de.polygonal.zz.controller.SpriteSheetController.SpriteSheetControllerListener;
+import de.polygonal.zz.data.Animation.AnimationFrame;
 
 class SpriteSheetAni implements SpriteSheetControllerListener
 {
@@ -44,21 +45,8 @@ class SpriteSheetAni implements SpriteSheetControllerListener
 	
 	public static function createAnimation(name:String, frames:Array<String>, holdTime:Float, loop:Bool):SheetAnimation
 	{
-		var a = [];
-		for (i in 0...frames.length)
-		{
-			var frame = {};
-			Reflect.setField(frame, "value", frames[i]);
-			Reflect.setField(frame, "holdTime", holdTime);
-			Reflect.setField(frame, "loop", loop);
-			a.push(frame);
-		}
-		
-		var output = {};
-		Reflect.setField(output, "name", name);
-		Reflect.setField(output, "frames", a);
-		Reflect.setField(output, "loop", loop);
-		return cast output;
+		var frames = [for (i in 0...frames.length) new AnimationFrame(frames[i], holdTime)];
+		return new SheetAnimation(name, loop, frames);
 	}
 	
 	/**
