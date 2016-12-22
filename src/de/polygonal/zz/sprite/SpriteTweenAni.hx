@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.sprite;
 
-import de.polygonal.core.tween.ease.Ease;
+import de.polygonal.core.math.ease.Ease;
 import de.polygonal.zz.controller.RepeatType;
 import de.polygonal.zz.controller.TweenController;
 import de.polygonal.zz.controller.TweenController.TweenControllerListener;

@@ -19,8 +19,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 package de.polygonal.zz.controller;
 
 import de.polygonal.core.math.Interpolation;
-import de.polygonal.core.tween.ease.Ease;
-import de.polygonal.core.tween.ease.EaseFactory;
+import de.polygonal.core.math.ease.Ease;
+import de.polygonal.core.math.ease.EaseFactory;
 import de.polygonal.zz.data.Animation;
 import de.polygonal.zz.scene.Spatial;
 import haxe.ds.StringMap;

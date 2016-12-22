@@ -20,8 +20,8 @@ package de.polygonal.zz.controller;
 
 import de.polygonal.core.math.Interpolation;
 import de.polygonal.core.math.Mathematics;
-import de.polygonal.core.tween.ease.Ease;
-import de.polygonal.core.tween.ease.EaseFactory;
+import de.polygonal.core.math.ease.Ease;
+import de.polygonal.core.math.ease.EaseFactory;
 import de.polygonal.zz.controller.Controller;
 import de.polygonal.zz.controller.RepeatType;
 
