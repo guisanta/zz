@@ -169,7 +169,11 @@ class Stage3dRenderer extends Renderer
 			if (currentAlphaBlending != null)
 				setAlphaBlendState(currentAlphaBlending.alphaBlendMode);
 			else
+			{
+				mSrcFactor = null;
+				mDstFactor = null;
 				setAlphaBlendState(AlphaBlendMode.Normal);
+			}
 		}
 		
 		super.drawScene(scene);
