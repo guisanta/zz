@@ -22,6 +22,7 @@ import de.polygonal.core.math.Mathematics;
 import de.polygonal.zz.render.RenderWindowListener;
 import de.polygonal.zz.render.platform.flash.legacy.DisplayListUtil;
 import flash.Lib;
+import flash.Vector;
 import flash.display.*;
 import flash.display3D.*;
 import flash.events.*;
@@ -106,6 +107,11 @@ class FlashWindow extends RenderWindow
 		}
 	}
 	
+	public function getContext3dProfile():Context3DProfile
+	{
+		return cast mStage3d.context3D.profile;
+	}
+	
 	public function initLegacyContext(canvas:DisplayObject, drawBoxing = true):FlashWindow
 	{
 		mDrawBoxing = drawBoxing;
@@ -146,10 +152,8 @@ class FlashWindow extends RenderWindow
 		return this;
 	}
 	
-	public function initStage3dContext(?renderMode:Context3DRenderMode, ?profile:Context3DProfile):FlashWindow
+	public function initStage3dContext(?profile:Context3DProfile):FlashWindow
 	{
-		if (renderMode == null) renderMode = Context3DRenderMode.AUTO;
-		
 		mStage3d = stage.stage3Ds[0];
 		mStage3d.addEventListener(Event.CONTEXT3D_CREATE, onContext3dCreate);
 		mStage3d.addEventListener(ErrorEvent.ERROR, onError);
@@ -157,9 +161,25 @@ class FlashWindow extends RenderWindow
 		
 		try
 		{
-			if (profile == null) profile = flash.display3D.Context3DProfile.BASELINE;
-			L.d('requesting context (profile=$profile)', "stage3d");
-			mStage3d.requestContext3D(cast renderMode, profile);
+			if (profile == null)
+			{
+				var profiles:Array<String> =
+				[
+					cast Context3DProfile.STANDARD_EXTENDED,
+					cast Context3DProfile.STANDARD,
+					cast Context3DProfile.STANDARD_CONSTRAINED,
+					cast Context3DProfile.BASELINE_EXTENDED,
+					cast Context3DProfile.BASELINE,
+					cast Context3DProfile.BASELINE_CONSTRAINED
+				];
+				mStage3d.requestContext3DMatchingProfiles(Vector.ofArray(profiles));
+			}
+			else
+			{
+				profile = flash.display3D.Context3DProfile.BASELINE;
+				L.d('requesting context ($profile, AUTO)', "stage3d");
+				mStage3d.requestContext3D(cast Context3DRenderMode.AUTO, profile);
+			}
 		}
 		catch(error:Dynamic)
 		{
