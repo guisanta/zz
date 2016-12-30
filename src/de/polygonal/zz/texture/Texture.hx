@@ -94,6 +94,10 @@ class Texture implements Hashable
 			canvas.getContext("2d").drawImage(data, 0, 0);
 			imageData = js.Browser.document.createImageElement();
 			imageData.src = canvas.toDataURL("image/png");
+			#elseif nme
+			var data = new nme.display.BitmapData(paddedSize.x, paddedSize.y, true, 0);
+			data.copyPixels(imageData, imageData.rect, new nme.geom.Point());
+			imageData = data;
 			#end
 		}
 		
