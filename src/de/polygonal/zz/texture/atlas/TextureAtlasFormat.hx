@@ -25,7 +25,7 @@ import de.polygonal.zz.data.Size.Sizei;
 @:publicFields
 class TextureAtlasFrameDef
 {
-	var index:Int;
+	var id:Int;
 	var name:String;
 	var cropRect = new Recti();
 	var trimFlag = false;

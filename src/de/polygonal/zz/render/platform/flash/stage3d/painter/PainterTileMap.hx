@@ -125,7 +125,7 @@ class PainterTileMap extends Painter
 				//uv
 				if (gid != -1)
 				{
-					uv = atlas.getFrameAtIndex(gid).texCoordUv;
+					uv = atlas.getFrameById(gid).texCoordUv;
 					vb.setFloat2f(addr, uv.x       , uv.y       ); addr += stride;
 					vb.setFloat2f(addr, uv.x + uv.w, uv.y       ); addr += stride;
 					vb.setFloat2f(addr, uv.x + uv.w, uv.y + uv.h); addr += stride;

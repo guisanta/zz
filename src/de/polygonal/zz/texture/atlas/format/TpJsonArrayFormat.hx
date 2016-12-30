@@ -97,7 +97,7 @@ class TpJsonArrayFormat implements TextureAtlasFormat
 			var f = new TextureAtlasFrameDef();
 			data.frames.push(f);
 			
-			f.index = index++;
+			f.id = index++;
 			f.name = i.field("filename");
 			f.cropRect.x = i.field("frame").field("x");
 			f.cropRect.y = i.field("frame").field("y");

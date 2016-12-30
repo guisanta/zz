@@ -322,7 +322,7 @@ class Sprite extends SpriteBase
 			mCurrentFrameName = name;
 			var effect = mVisual.effect.as(TextureEffect);
 			var frame = effect.atlas.getFrameByName(name);
-			setFrameIndex(frame.index);
+			setFrameIndex(frame.id);
 		}
 		return name;
 	}
@@ -728,7 +728,7 @@ class Sprite extends SpriteBase
 		var effect = mVisual.effect.as(TextureEffect);
 		effect.setFrameIndex(index); //change uv coordinates
 		
-		var frame = effect.atlas.getFrameAtIndex(index);
+		var frame = effect.atlas.getFrameById(index);
 		mSizeX = frame.sourceSize.x;
 		mSizeY = frame.sourceSize.y;
 		

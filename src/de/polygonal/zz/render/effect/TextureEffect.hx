@@ -122,8 +122,8 @@ class TextureEffect extends Effect
 	function updateFrame(frame:Int)
 	{
 		mFrameIndex = frame;
-		cropRectUv = atlas.getFrameAtIndex(frame).texCoordUv;
-		cropRectPx = atlas.getFrameAtIndex(frame).texCoordPx;
+		cropRectUv = atlas.getFrameById(frame).texCoordUv;
+		cropRectPx = atlas.getFrameById(frame).texCoordPx;
 	}
 	
 	override public function draw(renderer:Renderer)

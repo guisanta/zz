@@ -248,7 +248,7 @@ class BitmapDataRenderer extends Renderer
 					var gid = t.get(x, y);
 					if (gid > 0)
 					{
-						var uv = atlas.getFrameAtIndex(gid).texCoordPx;
+						var uv = atlas.getFrameById(gid).texCoordPx;
 						r.x = uv.x;
 						r.y = uv.y;
 						r.width = uv.w;

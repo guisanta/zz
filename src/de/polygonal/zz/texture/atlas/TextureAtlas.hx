@@ -23,6 +23,7 @@ import de.polygonal.core.math.Mathematics;
 import de.polygonal.core.math.Rectf;
 import de.polygonal.core.math.Recti;
 import de.polygonal.ds.ArrayList;
+import de.polygonal.ds.IntHashTable;
 import de.polygonal.zz.data.Size.Sizei;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasDef;
 import de.polygonal.zz.texture.atlas.TextureAtlasFormat.TextureAtlasFrameDef;
@@ -35,55 +36,107 @@ class TextureAtlas
 	public var texture(default, null):Texture;
 	public var userData(default, null):Dynamic;
 	
-	var mFrameList:ArrayList<TextureAtlasFrame>;
-	var mFrameMap:StringMap<TextureAtlasFrame>;
+	var mFrameLut:ArrayList<TextureAtlasFrame>;
+	var mFrameMap:IntHashTable<TextureAtlasFrame>;
+	var mFrameByName:StringMap<TextureAtlasFrame>;
+	var mDense:Bool;
 	
 	public function new(texture:Texture, data:TextureAtlasDef)
 	{
 		this.texture = texture;
 		
-		userData = data.userData;
-		
 		scale = data.scale;
+		userData = data.userData;
+		numFrames = data.frames.length;
 		
-		var max = 0;
-		for (i in data.frames) max = Mathematics.max(max, i.index);
+		mFrameByName = new StringMap(); //TODO use linear array small lists
 		
-		mFrameList = new ArrayList<TextureAtlasFrame>().init(max + 1, null);
-		mFrameMap = new StringMap();
-		
-		numFrames = 0;
+		var ids = new ArrayList<Int>(numFrames);
+		var maxId = 0;
 		for (i in data.frames)
 		{
-			assert(i != null);
-			
-			var frame = new TextureAtlasFrame(this, i);
-			mFrameList.set(frame.index, frame);
-			mFrameMap.set(i.name, frame);
-			numFrames++;
+			ids.add(i.id);
+			maxId = Mathematics.max(maxId, i.id);
 		}
+		
+		mDense = true;
+		
+		ids.sort(function(a, b) return a - b, true);
+		var c = ids.get(0);
+		if (c != 0)
+			mDense = false;
+		else
+		{
+			for (i in 1...numFrames)
+			{
+				if (c + 1 != ids.get(i))
+				{
+					mDense = false;
+					break;
+				}
+				c++;
+			}
+		}
+		
+		if (mDense)
+		{
+			mDense = true;
+			mFrameLut = new ArrayList<TextureAtlasFrame>().init(maxId + 1, null);
+			for (def in data.frames)
+			{
+				assert(def != null);
+				var frame = new TextureAtlasFrame(this, def);
+				mFrameLut.set(frame.id, frame);
+				mFrameByName.set(def.name, frame);
+			}
+		}
+		else
+		{
+			mDense = false;
+			mFrameMap = new IntHashTable<TextureAtlasFrame>(Mathematics.nextPow2(numFrames));
+			for (def in data.frames)
+			{
+				assert(def != null);
+				var frame = new TextureAtlasFrame(this, def);
+				mFrameMap.set(frame.id, frame);
+				mFrameByName.set(def.name, frame);
+			}
+		}
+		
+		#if debug
+		for (frame in getFrames()) assert(frame != null);
+		#end
 	}
 	
-	inline public function getFrameAtIndex(index:Int):TextureAtlasFrame
+	public function getFrames():Array<TextureAtlasFrame>
 	{
-		return mFrameList.get(index);
+		return
+		if (mDense)
+			mFrameLut.toArray();
+		else
+			[for (key in mFrameMap.keys()) mFrameMap.get(key)];
+	}
+	
+	inline public function getFrameById(id:Int):TextureAtlasFrame
+	{
+		return mDense ? mFrameLut.get(id) : mFrameMap.get(id);
 	}
 	
 	inline public function getFrameByName(name:String):TextureAtlasFrame
 	{
 		#if debug
-		var f = mFrameMap.get(name);
+		var f = mFrameByName.get(name);
 		assert(f != null, 'frame "$name" not found');
 		return f;
 		#else
-		return mFrameMap.get(name);
+		return mFrameByName.get(name);
 		#end
 	}
 }
 
 class TextureAtlasFrame
 {
-	public var index(default, null):Int;
+	public var id(default, null):Int;
 	
 	public var name(default, null):String;
 	
@@ -101,7 +154,7 @@ class TextureAtlasFrame
 	
 	public function new(atlas:TextureAtlas, data:TextureAtlasFrameDef)
 	{
-		index = data.index;
+		id = data.id;
 		name = data.name;
 		
 		var texture = atlas.texture;
