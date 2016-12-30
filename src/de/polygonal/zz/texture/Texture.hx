@@ -57,6 +57,9 @@ class Texture implements Hashable
 	public function new()
 	{
 		key = ++counter;
+		
+		assert(key <= 0xff);
+		
 		paddedSize = sourceSize;
 	}
 	

@@ -500,7 +500,7 @@ class SpriteText extends SpriteBase
 			//set position and frame
 			glyph.local.setTranslate2(x, y);
 			glyph.local.setScale2(w, h);
-			glyph.effect.as(TextureEffect).setFrameIndex(c);
+			glyph.effect.as(TextureEffect).setFrameId(c);
 		}
 		
 		mNode.mFlags |= IS_WORLD_XFORM_DIRTY;

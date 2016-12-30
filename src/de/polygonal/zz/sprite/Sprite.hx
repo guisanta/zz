@@ -726,7 +726,7 @@ class Sprite extends SpriteBase
 		assert(TextureLib.getTexture(mCurrentTexture).atlas != null, "current texture has no texture atlas definition");
 		
 		var effect = mVisual.effect.as(TextureEffect);
-		effect.setFrameIndex(index); //change uv coordinates
+		effect.setFrameId(index);//change uv coordinates
 		
 		var frame = effect.atlas.getFrameById(index);
 		mSizeX = frame.sourceSize.x;

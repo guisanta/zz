@@ -47,7 +47,7 @@ class TextureEffect extends Effect
 	public var uvScaleX:Float = 1;
 	public var uvScaleY:Float = 1;
 	
-	var mFrameIndex:Int = -1;
+	var mFrameId:Int = -1;
 	
 	var mCropRectPx:Recti;
 	var mCropRectUv:Rectf;
@@ -109,19 +109,19 @@ class TextureEffect extends Effect
 		cropRectPx = null;
 	}
 	
-	inline public function getFrameIndex():Int
+	inline public function getFrameId():Int
 	{
-		return mFrameIndex;
+		return mFrameId;
 	}
 	
-	inline public function setFrameIndex(value:Int)
+	inline public function setFrameId(value:Int)
 	{
-		if (mFrameIndex != value) updateFrame(value);
+		if (mFrameId != value) updateFrame(value);
 	}
 	
 	function updateFrame(frame:Int)
 	{
-		mFrameIndex = frame;
+		mFrameId = frame;
 		cropRectUv = atlas.getFrameById(frame).texCoordUv;
 		cropRectPx = atlas.getFrameById(frame).texCoordPx;
 	}
