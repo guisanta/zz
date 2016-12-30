@@ -315,10 +315,9 @@ class Stage3dRenderer extends Renderer
 		
 		var a = itr.next(), b;
 		
-		//find first visual pointing to a valid effect instance
+		//find first visual with an effect attached
 		while (a.effect == null && itr.hasNext()) a = itr.next();
 		
-		//quit: none of the visuals have a valid effect assigned
 		if (a.effect == null) return;
 		
 		var min = 0;

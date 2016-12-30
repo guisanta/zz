@@ -176,7 +176,7 @@ class BitmapDataRenderer extends Renderer
 		var w = uv.w;
 		var h = uv.h;
 		
-		var key = effect.getFrameIndex() << 16 | effect.texture.key;
+		var key = effect.getFrameId() << 16 | effect.texture.key;
 		var tile = mTileLookup.get(key);
 		if (tile == null)
 		{

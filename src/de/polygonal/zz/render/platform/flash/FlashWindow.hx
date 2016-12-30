@@ -55,6 +55,7 @@ class FlashWindow extends RenderWindow
 		super(listener);
 		stage = Lib.current.stage;
 		stage.frameRate = 60;
+		stage.align = StageAlign.TOP_LEFT;
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.stageFocusRect = false;
 		stage.doubleClickEnabled = true;
