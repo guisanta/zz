@@ -103,7 +103,7 @@ class BmFontFormat implements TextureAtlasFormat
 			data.frames.push(f);
 			
 			f.index = code;
-			f.name = String.fromCharCode(code);
+			f.name = de.polygonal.core.fmt.StringTools.fromCharCode(code);
 			f.cropRect.x = bc.x;
 			f.cropRect.y = bc.y;
 			f.cropRect.w = bc.w;

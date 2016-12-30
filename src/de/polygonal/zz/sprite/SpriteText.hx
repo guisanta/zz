@@ -38,6 +38,7 @@ import de.polygonal.zz.texture.atlas.TextureAtlas;
 import de.polygonal.zz.texture.Texture;
 import de.polygonal.zz.texture.TextureLib;
 import de.polygonal.zz.tools.uax14.LineBreaker;
+import haxe.Utf8;
 import haxe.ds.IntMap;
 import de.polygonal.zz.scene.SpatialFlags.*;
 
@@ -84,11 +85,11 @@ class SpriteText extends SpriteBase
 	
 	public static function registerLigature(id:Int, first:String, second:String, ligatureCharCode:Int)
 	{
-		assert(first.charCodeAt(0) <= 0xffff && second.charCodeAt(0) <= 0xffff);
+		assert(Utf8.charCodeAt(first, 0) <= 0xffff && Utf8.charCodeAt(second, 0) <= 0xffff);
 		
 		if (_ligatureLut == null) _ligatureLut = new IntMap();
 		if (!_ligatureLut.exists(id)) _ligatureLut.set(id, new IntIntHashTable(16));
-		_ligatureLut.get(id).set(second.charCodeAt(0) << 16 | first.charCodeAt(0), ligatureCharCode);
+		_ligatureLut.get(id).set(Utf8.charCodeAt(second, 0) << 16 | Utf8.charCodeAt(first, 0), ligatureCharCode);
 	}
 	
 	/**
@@ -175,10 +176,10 @@ class SpriteText extends SpriteBase
 	{
 		return mDef.text;
 	}
-	public function setText(value:Dynamic):SpriteText
+	public function setText(value:String):SpriteText
 	{
-		mChanged = mChanged || (mDef.text != Std.string(value));
-		mDef.text = Std.string(value);
+		mChanged = mChanged || (mDef.text != value);
+		mDef.text = value;
 		return this;
 	}
 	
@@ -476,11 +477,13 @@ class SpriteText extends SpriteBase
 			w = rects.get(j + 2);
 			h = rects.get(j + 3);
 			
+			var name = de.polygonal.core.fmt.StringTools.fromCharCode(c);
+			
 			if (v != null)
 			{
 				//reuse existing visual
 				glyph = as(v, Glyph);
-				glyph.name = String.fromCharCode(c);
+				glyph.name = name;
 				glyph.cullingMode = CullingMode.CullDynamic;
 				mNode.setChildIndex(glyph, z++);
 				v = v.mSibling;
@@ -488,7 +491,7 @@ class SpriteText extends SpriteBase
 			else
 			{
 				//create new visual
-				glyph = new Glyph(String.fromCharCode(c));
+				glyph = new Glyph(name);
 				effect = new TextureEffect().setTexture(mTexture, mAtlas);
 				glyph.effect = effect;
 				mNode.addChildAt(glyph, z++);
@@ -643,7 +646,7 @@ private class SingleLineTextLayout implements TextLayoutStrategy
 		var codes = mCharCodes;
 		codes.clear();
 		codes.reserve(len);
-		for (i in 0...len) codes.unsafePushBack(s.charCodeAt(i));
+		for (i in 0...len) codes.unsafePushBack(Utf8.charCodeAt(s, i));
 		
 		//test for ligatures
 		if (def.ligatures > -1)
@@ -830,7 +833,7 @@ private class MultiLineTextLayout implements TextLayoutStrategy
 		bitmapChars.reserve(len);
 		for (i in 0...len)
 		{
-			code = s.charCodeAt(i);
+			code = Utf8.charCodeAt(s, i);
 			if (bmpCharLut.hasKey(code))
 				bitmapChars.unsafePushBack(bmpCharLut.get(code));
 			else
