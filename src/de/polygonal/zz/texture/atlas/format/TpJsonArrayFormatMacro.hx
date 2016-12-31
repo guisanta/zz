@@ -69,7 +69,7 @@ class TpJsonArrayFormatMacro
 		var ereg = new EReg(path.file, "");
 		for (file in FileSystem.readDirectory(path.dir))
 		{
-			if (!~/\.json$/.match(file)) continue;
+			if (!~/\.(?:(json|bin)$/.match(file)) continue;
 			if (!ereg.match(file)) continue;
 			urls.push('${path.dir}/$file');
 		}
@@ -91,7 +91,15 @@ class TpJsonArrayFormatMacro
 		{
 			try 
 			{
-				var str = sys.io.File.getContent(url);
+				var str:String;
+				if (~/\.bin$/.match(url))
+				{
+					var bytes = sys.io.File.getBytes(url);
+					str = de.polygonal.zz.texture.atlas.format.TpJsonArrayPacker.unpack(bytes);
+				}
+				else
+					str = sys.io.File.getContent(url);
+				
 				var o:Dynamic = Json.parse(str);
 				frames = frames.concat(Reflect.field(o, "frames"));
 			}
