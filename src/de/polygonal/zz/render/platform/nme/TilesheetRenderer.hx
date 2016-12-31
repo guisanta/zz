@@ -91,8 +91,6 @@ class TilesheetRenderer extends Renderer
 	{
 		mContext.clear();
 		numCallsToDrawTiles = 0;
-		
-		trace(mTileIndexMap.loadFactor);
 	}
 	
 	override public function drawVisibleSet(visibleSet:ArrayList<Visual>)
