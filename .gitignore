@@ -1,2 +1,9 @@
-/*
-!src/
+/artwork/
+/bin/
+/res/
+/tmp/
+/sandbox/
+/.root
+/application.xml
+/TODO.txt
+/zz.hxproj
