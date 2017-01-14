@@ -94,8 +94,9 @@ class TweenController extends Controller
 			
 			if (onFinish != null)
 			{
-				onFinish();
+				var f = onFinish;
 				onFinish = null;
+				f();
 			}
 			
 			return false;
