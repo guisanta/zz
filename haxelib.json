@@ -3,14 +3,15 @@
 	"license": "MIT",
 	"description": "2d rendering library",
 	"url": "https://github.com/polygonal/zz",
-	"tags": ["game", "cross"],
-	"contributors" : ["mbaczynski"],
+	"classPath": "src",
+	"tags": ["cross", "utility"],
 	"version": "0.1.0",
+	"contributors" : ["mbaczynski"],
 	"releasenote": "See README",
 	"dependencies":
 	{
 		"polygonal-core":"",
-		"polygonal-motor":"",
-		"polygonal-native":""
+		"polygonal-ds":"",
+		"polygonal-motor":""
 	}
 }
