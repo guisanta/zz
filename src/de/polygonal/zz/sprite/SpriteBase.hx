@@ -522,9 +522,10 @@ class SpriteBase
 		if (mFlags & HINT_LOCAL_DIRTY > 0) updateLocalTransform();
 		if (mFlags & HINT_VISIBILITY_DIRTY > 0)
 		{
-			if (mAlpha == 0)
-				mSpatial.cullingMode = CullingMode.CullAlways; //always skip rendering
-			else
+			//TODO cull away if alpha is zero?
+			//if (mAlpha == 0)
+				//mSpatial.cullingMode = CullingMode.CullAlways; //always skip rendering
+			//else
 				mSpatial.cullingMode = mVisible ? CullingMode.CullDynamic : CullingMode.CullAlways;
 			mFlags &= ~HINT_VISIBILITY_DIRTY;
 		}
@@ -536,16 +537,10 @@ class SpriteBase
 				if (state == null) //create new state
 					mSpatial.setGlobalState(new AlphaMultiplierState(mAlpha));
 				else
-				{
-					//update existing state
-					state.as(AlphaMultiplierState).value = mAlpha;
-				}
+					state.as(AlphaMultiplierState).value = mAlpha; //update existing state
 			}
 			else
-			{
-				//remove state
-				mSpatial.removeGlobalState(GlobalStateType.AlphaMultiplier);
-			}
+				mSpatial.removeGlobalState(GlobalStateType.AlphaMultiplier); //remove state
 			
 			mFlags &= ~HINT_ALPHA_DIRTY;
 			mSpatial.mFlags |= IS_RS_DIRTY;

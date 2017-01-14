@@ -7,7 +7,7 @@ import flash.display.MovieClip;
 /**
 	Helper methods for working with the flash display list.
 **/
-class DisplayListUtil
+class DisplayListTools
 {
 	/**
 		Adds `x` to `parent`.

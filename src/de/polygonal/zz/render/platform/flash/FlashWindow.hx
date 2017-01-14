@@ -20,7 +20,7 @@ package de.polygonal.zz.render.platform.flash;
 
 import de.polygonal.core.math.Mathematics;
 import de.polygonal.zz.render.RenderWindowListener;
-import de.polygonal.zz.render.platform.flash.legacy.DisplayListUtil;
+import de.polygonal.zz.render.platform.flash.legacy.DisplayListTools;
 import flash.Lib;
 import flash.Vector;
 import flash.display.*;
@@ -76,7 +76,7 @@ class FlashWindow extends RenderWindow
 		if (mCanvas != null)
 		{
 			if (Std.is(mCanvas, DisplayObjectContainer))
-				DisplayListUtil.removeAll(cast mCanvas);
+				DisplayListTools.removeAll(cast mCanvas);
 			else
 			if (Std.is(mCanvas, Bitmap))
 				cast(mCanvas, Bitmap).bitmapData.dispose();
@@ -84,7 +84,7 @@ class FlashWindow extends RenderWindow
 			if (Std.is(mCanvas, Shape))
 				cast(mCanvas, Shape).graphics.clear();
 			
-			DisplayListUtil.remove(mCanvas);
+			DisplayListTools.remove(mCanvas);
 			mCanvas = null;
 		}
 		
@@ -98,6 +98,8 @@ class FlashWindow extends RenderWindow
 		
 		if (mStage3d != null)
 		{
+			mStage3d.removeEventListener(Event.CONTEXT3D_CREATE, onContext3dCreate);
+			mStage3d.removeEventListener(ErrorEvent.ERROR, onError);
 			if (mStage3dContext != null)
 			{
 				mStage3dContext.dispose();

@@ -80,6 +80,10 @@ class CanvasWindow extends RenderWindow
 			doc.body.appendChild(canvas);
 		}
 		
+		canvas.style.setProperty("touch-action", "none");
+		canvas.addEventListener("touchstart", function(e) e.preventDefault(), false);
+		canvas.addEventListener("touchmove", function(e) e.preventDefault(), false);
+		
 		if (isFullscreenSupported())
 		{
 			addPrefixListener(doc, "fullscreenchange", onFullscreenChange);
@@ -257,9 +261,6 @@ class CanvasWindow extends RenderWindow
 	
 	function onResize(_)
 	{
-		var viewport:Dynamic = Browser.document.querySelector("meta[name=viewport]");
-		untyped __js__("viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0')");
-		
 		var win = Browser.window;
 		var w = win.innerWidth;
 		var h = win.innerHeight;

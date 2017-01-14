@@ -248,11 +248,18 @@ class Camera
 		mInvTransformChanged = true;
 	}
 	
+	public var customView:Mat44 = null;
+	
 	/**
 		Transform vertices from world-space to camera-space.
 	**/
 	public function getViewMatrix():Mat44
 	{
+		if (customView != null)
+		{
+			return customView;
+		}
+		
 		if (mTransformChanged)
 		{
 			mTransformChanged = false;
@@ -279,6 +286,13 @@ class Camera
 	**/
 	public function getInvViewMatrix():Mat44
 	{
+		if (customView != null)
+		{
+			customView.inverseConst(mInvViewMatrix);
+			
+			return mInvViewMatrix;
+		}
+		
 		if (mInvTransformChanged)
 		{
 			mInvTransformChanged = false;
@@ -292,6 +306,6 @@ class Camera
 	{
 		mTransformChanged = true;
 		mInvTransformChanged = true;
-		mRenderer.onCameraChanged();
+		mRenderer.onCameraChanged(); //TODO unused
 	}
 }
