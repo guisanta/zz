@@ -339,7 +339,7 @@ class Sprite extends SpriteBase
 		return e.color;
 	}
 	
-	public function setColor(value:Int, contentSize:Coord2f):Sprite
+	public function setColor(value:Int, contentSize:Sizef):Sprite
 	{
 		mSizeX = contentSize.x;
 		mSizeY = contentSize.y;
