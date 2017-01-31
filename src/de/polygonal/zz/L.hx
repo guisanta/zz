@@ -1,16 +1,14 @@
 package de.polygonal.zz;
 
 #if log
-import de.polygonal.core.log.Log;
-import de.polygonal.sys.LogSystem;
-import de.polygonal.core.log.LogLevel;
+import de.polygonal.core.log.*;
 class L
 {
 	static var _log:Log;
 	public static var log(get, never):Log;
 	static function get_log():Log
 	{
-		if (_log == null) _log = LogSystem.getLog("zz", true);
+		if (_log == null) _log = LogSystem.getLog("zz");
 		return _log;
 	}
 	
