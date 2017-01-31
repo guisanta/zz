@@ -62,7 +62,7 @@ class TextureEffect extends Effect
 	
 	public function setTexture(texture:Texture, ?atlas:TextureAtlas):TextureEffect
 	{
-		if (atlas == null) mFrameId = 0;
+		mFrameId = -1;
 		
 		this.texture = texture;
 		this.atlas = atlas;
