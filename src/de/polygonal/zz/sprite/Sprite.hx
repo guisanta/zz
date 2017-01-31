@@ -266,7 +266,11 @@ class Sprite extends SpriteBase
 	**/
 	public function setTexture(textureId:Int, ?frame:String):Sprite
 	{
-		if (mCurrentTexture == textureId) return this;
+		if (mCurrentTexture == textureId)
+		{
+			if (frame != null) set_frame(frame);
+			return this;
+		}
 		
 		mCurrentTexture = textureId;
 		
