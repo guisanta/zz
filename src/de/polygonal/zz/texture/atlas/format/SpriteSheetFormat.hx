@@ -35,25 +35,33 @@ class SpriteSheetFormat implements TextureAtlasFormat
 		assert(width % cols == 0);
 		assert(height % rows == 0);
 		
-		mData = {size: new Sizei(width, height), scale: 1., frames: []};
+		mData = new TextureAtlasDef();
+		mData.size.set(width, height);
 		
 		var frameW = Std.int(width / cols);
 		var frameH = Std.int(height / rows);
+		
+		inline function pad(index:Int):String
+		{
+			var s = "";
+			if (index <   10) s += "0";
+			if (index <  100) s += "0";
+			if (index < 1000) s += "0";
+			return s + index;
+		}
 		
 		var index = 0;
 		for (y in 0...rows)
 		{
 			for (x in 0...cols)
 			{
-				mData.frames.push
-				({
-					index: index,
-					name: '$name$index',
-					cropRect: new Recti(x * frameW, y * frameH, frameW, frameH),
-					trimFlag: false,
-					untrimmedSize: new Sizei(frameW, frameH),
-					trimOffset: new Coord2i(0, 0)
-				});
+				var frame = new TextureAtlasFrameDef();
+				
+				frame.id = index;
+				frame.name = name + pad(index);
+				frame.cropRect = new Recti(x * frameW, y * frameH, frameW, frameH);
+				frame.sourceSize.set(frameW, frameH);
+				mData.frames.push(frame);
 				index++;
 			}
 		}
