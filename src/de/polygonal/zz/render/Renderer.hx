@@ -56,12 +56,12 @@ class Renderer
 	/**
 		If true, this renderer supports NPOT (non-power-of-two) textures. Default is false.
 	**/
-	public var supportsNonPowerOfTwoTextures(default, null):Bool = false;
+	public var supportsNonPowerOfTwoTextures(default, null) = false;
 	
 	/**
 		If true, culling is disabled. Default is false.
 	**/
-	public var noCull:Bool;
+	public var noCull = false;
 	
 	public var allowTextures = true;
 	
@@ -317,17 +317,14 @@ class Renderer
 	
 	function drawColorEffect(effect:ColorEffect)
 	{
-		throw "override for implementation";
 	}
 	
 	function drawTextureEffect(effect:TextureEffect)
 	{
-		throw "override for implementation";
 	}
 	
 	function drawTileMapEffect(effect:TileMapEffect)
 	{
-		throw "override for implementation";
 	}
 	
 	function onInitRenderContext(handle:Dynamic)
@@ -347,7 +344,6 @@ class Renderer
 	{
 	}
 	
-	//TODO initial values for new batch?
 	public function setGlobalState(visual:Visual)
 	{
 		if (allowedGlobalStates.toInt() == 0) return;
