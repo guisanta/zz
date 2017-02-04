@@ -120,6 +120,10 @@ class TpJsonArrayPacker
 		var h = size.field("h");
 		var scale = meta.field("scale");
 		
+		out.writeByte("T".code);
+		out.writeByte("P".code);
+		out.writeByte("J".code);
+		
 		out.writeInt16(w);
 		out.writeInt16(h);
 		out.writeDouble(scale);
@@ -149,6 +153,13 @@ class TpJsonArrayPacker
 	public static function unpack(bytes:Bytes):String
 	{
 		var inp = new haxe.io.BytesInput(bytes);
+		
+		var a = inp.readByte();
+		var b = inp.readByte();
+		var c = inp.readByte();
+		
+		if (String.fromCharCode(a) + String.fromCharCode(b) + String.fromCharCode(c) != "TPJ")
+			throw "invalid tp json array file";
 		
 		function readFrame():Dynamic
 		{
