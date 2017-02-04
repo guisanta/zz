@@ -49,7 +49,7 @@ class TextureAtlas
 		userData = data.userData;
 		numFrames = data.frames.length;
 		
-		mFrameByName = new StringMap(); //TODO use linear array small lists
+		mFrameByName = new StringMap();
 		
 		var ids = new ArrayList<Int>(numFrames);
 		var maxId = 0;

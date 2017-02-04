@@ -56,13 +56,9 @@ class Sprite extends SpriteBase
 	public static function get(?parent:SpriteGroup, ?textureId:Null<Int>, ?frame:String):Sprite
 	{
 		if (_pool == null) _pool = new ArrayList<Sprite>(64);
-		
 		var sprite = _pool.size > 0 ? _pool.popBack() : new Sprite();
-		
 		if (parent != null) parent.addChild(sprite);
-		
-		if (textureId != null)
-			sprite.setTexture(textureId, frame);
+		if (textureId != null) sprite.setTexture(textureId, frame);
 		return sprite;
 	}
 	

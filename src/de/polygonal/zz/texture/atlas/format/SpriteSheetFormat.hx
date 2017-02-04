@@ -30,7 +30,7 @@ class SpriteSheetFormat implements TextureAtlasFormat
 {
 	var mData:TextureAtlasDef;
 	
-	public function new(width:Int, height:Int, rows:Int, cols:Int, name:String)
+	public function new(width:Int, height:Int, rows:Int, cols:Int, frameName:String)
 	{
 		assert(width % cols == 0);
 		assert(height % rows == 0);
@@ -58,7 +58,7 @@ class SpriteSheetFormat implements TextureAtlasFormat
 				var frame = new TextureAtlasFrameDef();
 				
 				frame.id = index;
-				frame.name = name + pad(index);
+				frame.name = frameName + pad(index);
 				frame.cropRect = new Recti(x * frameW, y * frameH, frameW, frameH);
 				frame.sourceSize.set(frameW, frameH);
 				mData.frames.push(frame);
