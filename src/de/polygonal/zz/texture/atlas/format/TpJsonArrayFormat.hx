@@ -94,20 +94,26 @@ class TpJsonArrayFormat implements TextureAtlasFormat
 		var frames:Array<Dynamic> = o.field("frames");
 		for (i in frames)
 		{
-			var f = new TextureAtlasFrameDef();
+			var f = new TextureAtlasFrameDef(), t:Dynamic;
 			data.frames.push(f);
 			
 			f.id = index++;
 			f.name = i.field("filename");
-			f.cropRect.x = i.field("frame").field("x");
-			f.cropRect.y = i.field("frame").field("y");
-			f.cropRect.w = i.field("frame").field("w");
-			f.cropRect.h = i.field("frame").field("h");
+			
+			t = i.field("frame");
+			f.cropRect.x = t.field("x");
+			f.cropRect.y = t.field("y");
+			f.cropRect.w = t.field("w");
+			f.cropRect.h = t.field("h");
 			f.trimFlag = i.field("trimmed");
-			f.sourceSize.x = i.field("sourceSize").field("w");
-			f.sourceSize.y = i.field("sourceSize").field("h");
-			f.trimOffset.x = i.field("spriteSourceSize").field("x");
-			f.trimOffset.y = i.field("spriteSourceSize").field("y");
+			
+			t = i.field("sourceSize");
+			f.sourceSize.x = t.field("w");
+			f.sourceSize.y = t.field("h");
+			
+			t = i.field("spriteSourceSize");
+			f.trimOffset.x = t.field("x");
+			f.trimOffset.y = t.field("y");
 		}
 		
 		return data;
