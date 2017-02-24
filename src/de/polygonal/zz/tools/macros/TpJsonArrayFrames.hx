@@ -16,7 +16,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-package de.polygonal.zz.texture.atlas.format;
+package de.polygonal.zz.tools.macros;
 
 import de.polygonal.core.tools.FileSequence;
 import haxe.ds.StringMap;
@@ -28,7 +28,7 @@ import sys.FileSystem;
 
 using Lambda;
 
-class TpJsonArrayFormatMacro
+class TpJsonArrayFrames
 {
 	macro public static function ofFileList(urls:Array<String>):Array<Field>
 	{
