@@ -18,7 +18,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 */
 package de.polygonal.zz.tiled;
 
-import de.polygonal.ds.ArrayConvert;
+import de.polygonal.ds.Array2;
 import de.polygonal.zz.render.effect.TileMapEffect;
 import de.polygonal.zz.scene.CullingMode;
 import de.polygonal.zz.scene.Quad;
@@ -27,15 +27,12 @@ import de.polygonal.zz.tiled.TmxFile.TmxData;
 
 class TmxTileMap
 {
-	public var visual(default, null):Quad;
+	public var visual(default, null) = new Quad();
 	
 	public function new(textureId:Int, tmxData:TmxData, layerName:String)
 	{
-		visual = new Quad();
-		
-		//TODO support multiple tilesets
 		var layer = null;
-		for (i in tmxData.tilesets[0].layers)
+		for (i in tmxData.layers)
 		{
 			if (i.name == layerName)
 			{
@@ -43,14 +40,14 @@ class TmxTileMap
 				break;
 			}
 		}
-		
 		assert(layer != null);
 		
-		var tiles = ArrayConvert.toArray2(layer.data, tmxData.width, tmxData.height);
+		var tiles = new Array2<Int>(tmxData.width, tmxData.height, layer.data);
 		var tileSize = tmxData.tileWidth;
 		
-		var tilesetTexture = TextureLib.getTexture(textureId);
+		assert(tmxData.tileWidth == tmxData.tileHeight);
 		
+		var tilesetTexture = TextureLib.getTexture(textureId);
 		visual.effect = new TileMapEffect(tiles, tileSize, tilesetTexture, tilesetTexture.atlas);
 	}
 	
