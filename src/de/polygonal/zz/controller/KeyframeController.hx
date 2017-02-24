@@ -28,9 +28,19 @@ import haxe.ds.Vector;
 import haxe.EnumFlags;
 import de.polygonal.core.math.Mathematics;
 
-using Reflect;
-
-typedef KeyableParameters = { ?sx:Float, ?sy:Float, ?x:Float, ?y:Float, ?r:Float, ?a:Float, ?easing:Ease }
+@:publicFields
+class KeyableParameters
+{
+	var sx:Null<Float>;
+	var sy:Null<Float>;
+	var r:Null<Float>;
+	var x:Null<Float>;
+	var y:Null<Float>;
+	var a:Null<Float>;
+	var easing:Ease;
+	
+	function new() {}
+}
 
 /**
 	The "important" frames of an animation, such as the starting and ending position of an object.
@@ -263,26 +273,25 @@ private class Data
 		inline function set(pos:Int, chnl:KeyValue, val:Float) parameters[pos * 6 + chnl.getIndex()] = val;
 		
 		var sx = 1., sy = 1., r = 0., x = 0., y = 0., a = 1.;
-		var i = 0, v:Dynamic;
+		var i = 0, v;
 		
-		var frames:Array<Dynamic> = def.field("frames");
-		for (frame in frames)
+		for (frame in def.frames)
 		{
 			times[i] = length;
-			length += frame.field("holdTime");
+			length += frame.holdTime;
 			
-			v = frame.field("value");
+			v = frame.value;
 			
-			set(i, ScaleX, sx = v.hasField("sx") ? v.field("sx") : sx);
-			set(i, ScaleY, sy = v.hasField("sy") ? v.field("sy") : sy);
-			set(i, Rotate, r = v.hasField("r") ? v.field("r") : r);
-			set(i, TranslateX, x = v.hasField("x") ? v.field("x") : x);
-			set(i, TranslateY, y = v.hasField("y") ? v.field("y") : y);
-			set(i, Alpha, a = v.hasField("a") ? v.field("a") : a);
+			set(i, ScaleX, sx = v.sx != null ? v.sx : sx);
+			set(i, ScaleY, sy = v.sy != null ? v.sy : sy);
+			set(i, Rotate, r = v.r != null ? v.r : r);
+			set(i, TranslateX, x = v.x != null ? v.x : x);
+			set(i, TranslateY, y = v.y != null ? v.y : y);
+			set(i, Alpha, a = v.a != null ? v.a : a);
 			
 			easing[i] =
-			if (v.hasField("easing"))
-				EaseFactory.create(cast v.field("easing"));
+			if (v.easing != null)
+				EaseFactory.create(cast v.easing);
 			else
 				linear;
 			i++;
