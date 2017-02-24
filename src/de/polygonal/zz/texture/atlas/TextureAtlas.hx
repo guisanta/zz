@@ -40,6 +40,7 @@ class TextureAtlas
 	var mFrameMap:IntHashTable<TextureAtlasFrame>;
 	var mFrameByName:StringMap<TextureAtlasFrame>;
 	var mDense:Bool;
+	var mFirst:Int;
 	
 	public function new(texture:Texture, data:TextureAtlasDef)
 	{
@@ -52,36 +53,24 @@ class TextureAtlas
 		mFrameByName = new StringMap();
 		
 		var ids = new ArrayList<Int>(numFrames);
-		var maxId = 0;
-		for (i in data.frames)
-		{
-			ids.add(i.id);
-			maxId = Mathematics.max(maxId, i.id);
-		}
-		
-		mDense = true;
-		
+		for (i in data.frames) ids.add(i.id);
 		ids.sort(function(a, b) return a - b, true);
+		mDense = true;
 		var c = ids.get(0);
-		if (c != 0)
-			mDense = false;
-		else
+		for (i in 1...numFrames)
 		{
-			for (i in 1...numFrames)
+			if (c + 1 != ids.get(i))
 			{
-				if (c + 1 != ids.get(i))
-				{
-					mDense = false;
-					break;
-				}
-				c++;
+				mDense = false;
+				break;
 			}
+			c++;
 		}
-		
+		if (mDense && ids.back() > 0x4000) mDense = false;
 		if (mDense)
 		{
-			mDense = true;
-			mFrameLut = new ArrayList<TextureAtlasFrame>().init(maxId + 1, null);
+			mFirst = ids.front();
+			mFrameLut = new ArrayList<TextureAtlasFrame>().init((ids.back() + 1) , null);
 			for (def in data.frames)
 			{
 				assert(def != null);
@@ -92,7 +81,6 @@ class TextureAtlas
 		}
 		else
 		{
-			mDense = false;
 			mFrameMap = new IntHashTable<TextureAtlasFrame>(Mathematics.nextPow2(numFrames));
 			for (def in data.frames)
 			{
@@ -102,23 +90,35 @@ class TextureAtlas
 				mFrameByName.set(def.name, frame);
 			}
 		}
-		
-		#if debug
-		for (frame in getFrames()) assert(frame != null);
-		#end
 	}
 	
 	public function getFrames():Array<TextureAtlasFrame>
 	{
 		return
 		if (mDense)
-			mFrameLut.toArray();
+		{
+			if (mFirst == 0)
+				mFrameLut.toArray();
+			else
+			{
+				var out = [];
+				var i = mFirst;
+				var k = mFrameLut.size;
+				var j = 0;
+				while (i < k) out[j++] = mFrameLut.get(i++);
+				out;
+			}
+		}
 		else
 			[for (key in mFrameMap.keys()) mFrameMap.get(key)];
 	}
 	
 	inline public function getFrameById(id:Int):TextureAtlasFrame
 	{
+		#if debug
+		if (mDense) assert(id >= mFirst && id < mFrameLut.size);
+		#end
+		
 		return mDense ? mFrameLut.get(id) : mFrameMap.get(id);
 	}
 	
@@ -134,23 +134,24 @@ class TextureAtlas
 	}
 }
 
+@:build(de.polygonal.zz.tools.macros.MakePublicVarsReadOnly.build())
 class TextureAtlasFrame
 {
-	public var id(default, null):Int;
+	public var id:Int;
 	
-	public var name(default, null):String;
+	public var name:String;
 	
-	public var trimmed(default, null):Bool;
+	public var trimmed:Bool;
 	
-	public var trimOffset(default, null):Coord2i;
+	public var trimOffset:Coord2i;
 	
 	/**
 		The original size *before* trimming.
 	**/
-	public var sourceSize(default, null):Sizei;
+	public var sourceSize:Sizei;
 	
-	public var texCoordUv(default, null):Rectf;
-	public var texCoordPx(default, null):Recti;
+	public var texCoordUv:Rectf;
+	public var texCoordPx:Recti;
 	
 	public function new(atlas:TextureAtlas, data:TextureAtlasFrameDef)
 	{
