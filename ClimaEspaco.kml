@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>ClimaEspaço</name>
+    <Style id="icon-1502-FFD600-nodesc-normal">
+      <IconStyle>
+        <color>ff00d6ff</color>
+        <scale>1</scale>
+        <Icon>
+          <href>http://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="icon-1502-FFD600-nodesc-highlight">
+      <IconStyle>
+        <color>ff00d6ff</color>
+        <scale>1</scale>
+        <Icon>
+          <href>http://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="icon-1502-FFD600-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#icon-1502-FFD600-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#icon-1502-FFD600-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Placemark>
+      <name>CASINO LISBOA</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09631490000004,38.7644657,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Oceanário de Lisboa</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09374149999996,38.7635435,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Pavilhão do conhecimento</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09558040000002,38.762284,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Pabellón Portugués</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09491819999994,38.7657287,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Feira Internacional de Lisboa</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09392100000002,38.770853,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Torre Vasco da Gama</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09175860000005,38.7747796,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Estação do Oriente</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09934490000001,38.7678423,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Sony Portugal</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0974046,38.7692818,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Altice Arena</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09402969999996,38.7685312,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Fitness Hut Parque das Nações</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09283019999998,38.7700574,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Lago das Tágides</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09230070000001,38.7683924,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>NOS</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09720540000001,38.7702636,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Algarve Portugal Holidays</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09789499999999,38.77014,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>TRYP Lisboa Oriente Hotel</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09787359999996,38.7692658,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Feedzai - Lisbon Office</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09816969999997,38.7688498,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Shop CTT - Gare do Oriente</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09845199999995,38.768082,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Gestifute - Gestão de Carreiras de Profissionais Desportivos SA.</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09575599999994,38.770006,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Justice Campus of Lisbon</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09559509999997,38.7733308,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Telecabine Lisbon - North Station</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0914246,38.7734469,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Lidl</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.10385300000007,38.7811155,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Climaespaço, SA</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09653860000003,38.771021,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>CUF Descobertas Hospital</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09926500000006,38.75804,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Pavilhão do conhecimento</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09558040000002,38.762284,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Tabela Periódica</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09533120000003,38.7628859,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Teleférico de Lisboa</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09270930000002,38.762253,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>School of Health Technology Lisbon</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09804559999998,38.7758918,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Expofor - Comércio e Reparação de Automóveis, Lda</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09949299999994,38.784635,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Cemitério dos Olivais</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.10706419999997,38.7648614,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Quinta Pedagógica dos Olivais</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.11281359999998,38.7631445,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Instituto Superior de Engenharia de Lisboa</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.11666719999994,38.7567556,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Empresa 1</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0963467,38.7771604,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 32</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0980419,38.7740656,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 33</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0968188,38.7747515,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 34</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0979131,38.7731622,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 35</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0966257,38.772744,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 36</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.097956,38.7723927,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 37</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0968402,38.7718071,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 38</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0926775,38.7788666,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 39</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0971192,38.779335,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 40</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0971407,38.781727,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 41</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.1023549,38.7814928,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 42</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.1011318,38.7811415,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 43</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0953811,38.7818943,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 44</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0992221,38.7835,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 45</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.1012176,38.7726603,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 46</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0922483,38.7785488,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 47</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0936645,38.7815263,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 48</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0932997,38.7807234,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 49</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0989002,38.7816601,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 50</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0955957,38.7845204,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Igreja de Nossa Senhora dos Navegantes</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.09603130000005,38.7849565,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 51</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0975698,38.7775786,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 52</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0981277,38.7808404,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 53</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0931066,38.7763239,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 54</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0943297,38.7770934,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 55</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0923771,38.7771938,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 56</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0923556,38.7781138,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 57</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.092656,38.7797699,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 58</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0930637,38.7802383,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 59</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.1011103,38.7807066,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 60</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0965828,38.7803219,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 61</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0963896,38.7799539,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 62</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0966257,38.7798368,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 63</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0968402,38.7798033,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 64</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0979131,38.7800208,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 65</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.093085,38.7953247,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 66</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0963895,38.7947896,0
+        </coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Point 67</name>
+      <styleUrl>#icon-1502-FFD600-nodesc</styleUrl>
+      <Point>
+        <coordinates>
+          -9.0987498,38.788568,0
+        </coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>
